@@ -1,0 +1,12 @@
+config:
+
+  # Render Setting
+  render: true
+  
+  # Simulation Parameters
+  time-period: 0.1
+  cell-size: 1
+  view-size: 10
+  fps: 60
+
+  
