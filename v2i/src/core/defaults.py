@@ -5,5 +5,6 @@ DEFAULT_DICT = {
     'seed' : 0,
 
     # UI
-    'render': True
+    'render': True,
+    'fps': 30
 }

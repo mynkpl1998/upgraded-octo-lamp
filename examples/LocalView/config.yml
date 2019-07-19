@@ -5,6 +5,7 @@ config:
 
   # UI 
   render: true
+  fps: 30
 
 
   

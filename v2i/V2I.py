@@ -31,11 +31,9 @@ class V2I(gym.Env):
         Function : All common variables initialization goes here.
         '''
         if self.simArgs.getValue("render"):
-            uiHandler = ui()
-            print(uiHandler)
+            self.uiHandler = ui(self.simArgs.getValue('fps'))
+            self.ui_data = {}
         
-        
-    
     def buildlaneMap(self, trajec, numCars):
         laneMap = {}
         '''
@@ -55,6 +53,15 @@ class V2I(gym.Env):
         randomID = np.random.randint(0, numCars)
         laneMap[0][randomID]['agent'] = 1
         return laneMap
+    
+    def packRenderData(self, laneMap, timeElapsed):
+        data = {}
+        agentID = np.where(self.lane_map[0]['agent'] == 1)[0]
+
+        data["allData"] = laneMap
+        data["agentSpeed"] = laneMap[0][agentID]['speed'][0]
+        data["timeElapsed"] = timeElapsed
+        return data
 
     def reset(self, density=None):
         
@@ -76,7 +83,8 @@ class V2I(gym.Env):
         self.lane_map = self.buildlaneMap(self.trajecDict[epsiodeDensity][self.trajecIndex], self.num_cars)
         # ---- Init variables ----#
 
+        if self.simArgs.getValue("render"):
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed))
 
     def seed(self, value=0):
         np.random.seed(value)
-     
