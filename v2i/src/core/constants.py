@@ -19,3 +19,7 @@ MIN_DISTANCE = MIN_CAR_DISTANCE + 2 * (CAR_LENGTH/2)
 
 # All in pixels goes here
 LANE_RADIUS = 233
+
+# UI Constants
+RADIUS = 250
+CENTRE = (RADIUS, RADIUS)

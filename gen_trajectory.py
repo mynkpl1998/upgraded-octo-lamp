@@ -23,14 +23,10 @@ def calMinAngle():
     return np.rad2deg(((constants.MIN_DISTANCE * constants.SCALE)/constants.LANE_RADIUS))
 
 def loop(density, numcars, minAngle):
-    
     if numcars < 2:
         raise ValueError("At least two cars are required, Failed for %d density with %d cars"%(density, numcars))
-    
     trajecs = []
-
     for iter in range(0, numcars):
-        
         if(len(trajecs) < 1):
             loc = np.random.uniform(0, 352)
             trajecs.append(loc)
@@ -39,22 +35,17 @@ def loop(density, numcars, minAngle):
             generated = False
             count = 0
             while (generated != True):
-
                 count += 1
                 res = True
                 generated = False
-
                 for trajec in trajecs:
                     max_angle = max(loc, trajec)
                     min_angle = min(loc, trajec)
-
                     diff = max_angle - min_angle
-
                     if diff > minAngle:
                         pass
                     else:
                         res = res and False
-                
                 if res:
                     generated = True
                     trajecs.append(loc)
@@ -66,8 +57,6 @@ def loop(density, numcars, minAngle):
                     break
     return trajecs
 
-    
-
 def generate(densities, numcars, minAngle, numTrajec=1):
     trajecDict = {}
     for index, density in enumerate(densities):
@@ -76,11 +65,7 @@ def generate(densities, numcars, minAngle, numTrajec=1):
             trajecDict[density].append(loop(density, numcars[index], minAngle))   
     return trajecDict
     
-
-
-
 if __name__ == "__main__":
-
     # Parse Arguments
     args = parser.parse_args()
 

@@ -4,7 +4,7 @@ config:
   t-period: 0.1
 
   # UI 
-  render: false
+  render: true
 
 
   
