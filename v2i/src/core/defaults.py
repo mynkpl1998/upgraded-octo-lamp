@@ -4,7 +4,7 @@ DEFAULT_DICT = {
     't-period': 0.1,
     'seed' : 0,
 
-    # UI
+    # UI settings
     'render': True,
     'fps': 30
 }

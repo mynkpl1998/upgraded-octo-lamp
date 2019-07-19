@@ -3,7 +3,7 @@ config:
   # Simulation Parameters
   t-period: 0.1
 
-  # UI 
+  # UI settings
   render: true
   fps: 30
 
