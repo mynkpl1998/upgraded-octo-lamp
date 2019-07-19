@@ -1,5 +1,7 @@
 import os
 import yaml
+import pickle
+from huepy import bad, bold, red
 
 def checkFileExists(file):
     return os.path.isfile(file)
@@ -8,3 +10,46 @@ def readYaml(file):
     with open(file, "r") as handle:
         configDict = yaml.load(handle, Loader=yaml.FullLoader)
     return configDict
+
+def raiseValueError(msg):
+    raise ValueError(bad(bold(red(msg))))
+
+def savePKL(data, filenamePath):
+    '''
+
+    Function : saves the data object in a serialized format at the given path
+    
+    Input Args : 
+        1. data - the data object which needs to be serialized.
+        2. filenamePath - the complete path to the location to save including file name
+
+    Return Args:
+        returns True if successfully saved else return False
+    
+    '''
+    
+    with open(filenamePath, 'wb') as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        return True
+    return False
+
+def loadPKL(filenamePath):
+    
+    '''
+
+    Function : load the serialized object from the given file.
+    
+    Input Args : 
+        1. filenamePath - absolute path of the file to load
+
+    Return Args:
+        returns the loaded object if successfully loaded else return None
+    
+    '''
+
+    try:
+        with open(filenamePath, "rb") as handle:
+            trajecDict = pickle.load(handle)
+        return trajecDict
+    except:
+        return None

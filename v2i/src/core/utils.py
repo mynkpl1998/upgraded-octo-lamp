@@ -1,6 +1,6 @@
 import yaml
 from copy import deepcopy
-from v2i.src.core.common import checkFileExists, readYaml
+from v2i.src.core.common import checkFileExists, readYaml, raiseValueError
 from v2i.src.core.defaults import DEFAULT_DICT
 
 class configParser:
@@ -11,7 +11,7 @@ class configParser:
 
         # Check if configFile exists or not
         if not (checkFileExists(self.configPath)):
-            raise ValueError("Config file \"%s\" not found !")
+            raiseValueError("Config file \"%s\" not found !")
             
         # read Config yaml file
         self.configDict = readYaml(self.configPath)["config"]
@@ -23,13 +23,13 @@ class configParser:
     def mergeDict(self):
         for key in self.configDict.keys():
             if key not in self.defautDict.keys():
-                raise ValueError("Invalid configuration key -> %s "%(key))
+                raiseValueError("Invalid configuration key -> %s "%(key))
             self.defautDict[key] = self.configDict[key]
     
     
     def getValue(self, key):
         if key not in self.defautDict:
-            raise ValueError("Trying to access invalid key -> %s"%(key))
+            raiseValueError("Trying to access invalid key -> %s"%(key))
         else:
             return self.defautDict[key]
     
