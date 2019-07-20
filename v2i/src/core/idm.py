@@ -51,6 +51,9 @@ class idm:
     def idmAcc(self, sAlpha, speedDiff, speed):
         '''
         IDM Equation : https://en.wikipedia.org/wiki/Intelligent_driver_model
+        
+        Modified IDM Equation includes the sense of local view to non-Ego vehicles
+        Modified IDM Details : https://github.com/mynkpl1998/single-ring-road-with-light/blob/master/SingleLaneIDM/Results%20Analysis.ipynb
         '''
         sStar = IDM_CONSTS['MIN_SPACING'] + (speed * IDM_CONSTS['HEADWAY_TIME']) + ((speed * speedDiff)/(2 * np.sqrt(IDM_CONSTS['MAX_ACC'] * IDM_CONSTS['DECELERATION_RATE'])))
         acc = IDM_CONSTS['MAX_ACC'] * (1 - ((speed / self.maxVel)**IDM_CONSTS['DELTA']) - ((sStar/sAlpha)**2))
