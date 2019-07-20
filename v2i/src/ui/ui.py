@@ -61,7 +61,7 @@ class ui:
         self.infoBoardCurY = self.infoBoardY + 10
     
     def initFonts(self):
-        self.font = pygame.font.SysFont('Comic Sans MS', 30)
+        self.font = pygame.font.SysFont('Comic Sans MS', constants.FONT_SIZE)
     
     def initClock(self):
         self.clock = pygame.time.Clock()
@@ -95,23 +95,30 @@ class ui:
     def str2font(self, msgStr):
         return self.font.render(msgStr, False, (0, 0, 0))
 
-    def updateInfoBoard(self, screen, agentSpeed, timeElapsed):
+    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed):
         self.resetInfoBoardLoc()
         screen.blit(self.infoBoard, self.infoBoardDim)
         
         # ---- Time Elapsed ---- #
-        timeString = 'Time Elapsed : %d secs'%(agentSpeed)
+        timeString = 'Time Elapsed : %d secs'%(timeElapsed)
         timeStringText = self.str2font(timeString)
         screen.blit(timeStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += 30
         # ---- Time Elapsed ---- #
 
         # ---- Agent Speed ---- #
-        speedString = 'Agent Speed : %d'%(int(round((18/5.0)*agentSpeed, 2)))
+        speedString = 'Agent Speed : %.2f km/hr'%(round((18/5.0)*agentSpeed, 2))
         speedStringText = self.str2font(speedString)
         screen.blit(speedStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += 30
         # ---- Agent Speed ---- #
+
+        # ---- Max Speed ---- #
+        maxSpeedString = 'Max Speed : %.2f km/hr'%(round((18/5.0)*maxSpeed, 2))
+        maxspeedStringText = self.str2font(maxSpeedString)
+        screen.blit(maxspeedStringText, (self.infoBoardCurX, self.infoBoardCurY))
+        self.infoBoardCurY += 30
+        # ---- Max Speed ---- #
                 
     def updateScreen(self, data):
         self.screen.fill(self.colorBG)
@@ -127,8 +134,13 @@ class ui:
         self.drawAllCars(data["allData"])
         
         # Update Information Board data
-        self.updateInfoBoard(self.screen, data["agentSpeed"], data["timeElapsed"])
+        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"])
         
+        # Update pygame screen
         pygame.display.flip()
+
+        # FPS clock
         self.clock.tick(self.fps)
+    
+    
 

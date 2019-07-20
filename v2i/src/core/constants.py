@@ -1,9 +1,11 @@
 '''
 
-This file defines the constants which are used int the simulation.
+This file defines the constants which are used in the simulation.
 It is recomended not to change these as the simulation environement is set up according to these.
 
 '''
+
+from v2i.src.core.defaults import DEFAULT_DICT
 
 MAX_CARS_IN_LANE = 31
 
@@ -25,4 +27,14 @@ RADIUS = 250
 CENTRE = (RADIUS, RADIUS)
 BOUNDARY_THICKNESS = 2
 LANE_WIDTH = 30
-INFO_BOARD_DIM = (250, 250)
+INFO_BOARD_DIM = (250, 200)
+FONT_SIZE = 25
+
+# Intelligent Driver Model constants
+IDM_CONSTS = {
+    'MAX_ACC': 0.73,
+    'HEADWAY_TIME': 1.5,
+    'DECELERATION_RATE': 1.67,
+    'MIN_SPACING': 2,
+    'DELTA': 4 
+}

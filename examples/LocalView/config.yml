@@ -1,7 +1,10 @@
 config:
 
   # Simulation Parameters
-  t-period: 0.1
+  t-period: 0.1 # in secs
+
+  # IDM settings
+  max-speed: 10 # in m/s
 
   # UI settings
   render: true

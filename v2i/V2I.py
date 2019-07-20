@@ -5,6 +5,7 @@ import v2i.src.core.constants as constants
 from v2i.src.core.utils import configParser
 from v2i.src.core.common import loadPKL, raiseValueError
 from v2i.src.ui.ui import ui
+from v2i.src.core.idm import idm
 
 class V2I(gym.Env):
 
@@ -25,14 +26,22 @@ class V2I(gym.Env):
 
         # Initializes the required variables
         self.init()
-        
+    
+    def seed(self, value=0):
+        np.random.seed(value)
+    
     def init(self):
         '''
         Function : All common variables initialization goes here.
         '''
+        # Inititalize UI Handler here
         if self.simArgs.getValue("render"):
             self.uiHandler = ui(self.simArgs.getValue('fps'))
             self.ui_data = {}
+        
+        # Initialize IDM Handler here
+        self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"))
+        
         
     def buildlaneMap(self, trajec, numCars):
         laneMap = {}
@@ -54,13 +63,14 @@ class V2I(gym.Env):
         laneMap[0][randomID]['agent'] = 1
         return laneMap
     
-    def packRenderData(self, laneMap, timeElapsed):
+    def packRenderData(self, laneMap, timeElapsed, maxSpeed):
         data = {}
         agentID = np.where(self.lane_map[0]['agent'] == 1)[0]
 
         data["allData"] = laneMap
         data["agentSpeed"] = laneMap[0][agentID]['speed'][0]
         data["timeElapsed"] = timeElapsed
+        data["maxSpeed"] = maxSpeed
         return data
 
     def reset(self, density=None):
@@ -84,7 +94,17 @@ class V2I(gym.Env):
         # ---- Init variables ----#
 
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.simArgs.getValue("max-speed")))
+    
+    def step(self):
 
-    def seed(self, value=0):
-        np.random.seed(value)
+        # IDM Update Step
+        self.idmHandler.step(self.lane_map)
+
+        self.time_elapsed += self.simArgs.getValue("t-period")
+        
+        # Update Display if render is enabled
+        if self.simArgs.getValue("render"):
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.simArgs.getValue("max-speed")))
+        
+        print(self.time_elapsed)
