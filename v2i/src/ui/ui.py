@@ -95,7 +95,7 @@ class ui:
     def str2font(self, msgStr):
         return self.font.render(msgStr, False, (0, 0, 0))
 
-    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed):
+    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed, viewRange):
         self.resetInfoBoardLoc()
         screen.blit(self.infoBoard, self.infoBoardDim)
         
@@ -119,6 +119,13 @@ class ui:
         screen.blit(maxspeedStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += 30
         # ---- Max Speed ---- #
+
+        #---- Local Visiblity ----#
+        localVisiblityString = 'Local Visiblity : %.2f m'%(viewRange)
+        localVisibliyStringText = self.str2font(localVisiblityString)
+        screen.blit(localVisibliyStringText, (self.infoBoardCurX, self.infoBoardCurY))
+        self.infoBoardCurY += 30
+        #---- Local Visiblity ----#
                 
     def updateScreen(self, data):
         self.screen.fill(self.colorBG)
@@ -134,7 +141,7 @@ class ui:
         self.drawAllCars(data["allData"])
         
         # Update Information Board data
-        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"])
+        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"])
         
         # Update pygame screen
         pygame.display.flip()

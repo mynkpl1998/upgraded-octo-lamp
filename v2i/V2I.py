@@ -40,8 +40,7 @@ class V2I(gym.Env):
             self.ui_data = {}
         
         # Initialize IDM Handler here
-        self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"))
-        
+        self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"), self.simArgs.getValue("view-range"))
         
     def buildlaneMap(self, trajec, numCars):
         laneMap = {}
@@ -63,7 +62,7 @@ class V2I(gym.Env):
         laneMap[0][randomID]['agent'] = 1
         return laneMap
     
-    def packRenderData(self, laneMap, timeElapsed, maxSpeed):
+    def packRenderData(self, laneMap, timeElapsed, maxSpeed, viewRange):
         data = {}
         agentID = np.where(self.lane_map[0]['agent'] == 1)[0]
 
@@ -71,6 +70,7 @@ class V2I(gym.Env):
         data["agentSpeed"] = laneMap[0][agentID]['speed'][0]
         data["timeElapsed"] = timeElapsed
         data["maxSpeed"] = maxSpeed
+        data["viewRange"] = viewRange
         return data
 
     def reset(self, density=None):
@@ -94,7 +94,7 @@ class V2I(gym.Env):
         # ---- Init variables ----#
 
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.simArgs.getValue("max-speed")))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.simArgs.getValue("max-speed"), self.simArgs.getValue("view-range")))
     
     def step(self):
 
@@ -105,6 +105,6 @@ class V2I(gym.Env):
         
         # Update Display if render is enabled
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.simArgs.getValue("max-speed")))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.simArgs.getValue("max-speed"), self.simArgs.getValue("view-range")))
         
         print(self.time_elapsed)

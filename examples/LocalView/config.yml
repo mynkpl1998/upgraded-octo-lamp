@@ -5,6 +5,7 @@ config:
 
   # IDM settings
   max-speed: 10 # in m/s
+  view-range: 10 # in m
 
   # UI settings
   render: true

@@ -4,9 +4,11 @@ from v2i.src.core.constants import IDM_CONSTS, SCALE, LANE_RADIUS, CAR_LENGTH
 
 class idm:
 
-    def __init__(self, maxVel, tPeriod):
+    def __init__(self, maxVel, tPeriod, viewRange):
         self.maxVel = maxVel
         self.tPeriod = tPeriod
+        self.viewRange = viewRange
+        self.nonEgoMaxVel = self.maxSpeed(self.viewRange, IDM_CONSTS['DECELERATION_RATE'])
 
         #---- Vectoized Functions ----#
         self.vecBumpBumpDistance = np.vectorize(self.BumpBumpDist)
@@ -48,6 +50,10 @@ class idm:
         capGapInMetre = self.arcLength(LANE_RADIUS, diff)
         return capGapInMetre - CAR_LENGTH
     
+    def maxSpeed(self, distanceInMetre, decelerationRate):
+        return np.sqrt(2 * distanceInMetre * decelerationRate)
+
+    
     def idmAcc(self, sAlpha, speedDiff, speed):
         '''
         IDM Equation : https://en.wikipedia.org/wiki/Intelligent_driver_model
@@ -55,6 +61,9 @@ class idm:
         Modified IDM Equation includes the sense of local view to non-Ego vehicles
         Modified IDM Details : https://github.com/mynkpl1998/single-ring-road-with-light/blob/master/SingleLaneIDM/Results%20Analysis.ipynb
         '''
+        if sAlpha > self.viewRange:
+            sAlpha = np.clip(sAlpha, a_min=0, a_max=self.viewRange)
+            speedDiff = speed - 0
         sStar = IDM_CONSTS['MIN_SPACING'] + (speed * IDM_CONSTS['HEADWAY_TIME']) + ((speed * speedDiff)/(2 * np.sqrt(IDM_CONSTS['MAX_ACC'] * IDM_CONSTS['DECELERATION_RATE'])))
         acc = IDM_CONSTS['MAX_ACC'] * (1 - ((speed / self.maxVel)**IDM_CONSTS['DELTA']) - ((sStar/sAlpha)**2))
         return acc
