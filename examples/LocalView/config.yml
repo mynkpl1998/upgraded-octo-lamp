@@ -4,7 +4,7 @@ config:
   t-period: 0.1 # in secs
 
   # IDM settings
-  max-speed: 10 # in m/s
+  max-speed: 9 # in m/s
   view-range: 10 # in m
 
   # UI settings

@@ -1,6 +1,6 @@
 import numpy as np
 
-from v2i.src.core.constants import IDM_CONSTS, SCALE, LANE_RADIUS, CAR_LENGTH
+from v2i.src.core.constants import IDM_CONSTS, SCALE, LANE_RADIUS, CAR_LENGTH, LANES
 
 class idm:
 
@@ -25,16 +25,16 @@ class idm:
             a[i] = array[i][key]
         return a
     
-    def angleDiff(self, laneMap):
-        a = self.getAllElementbyKeys('pos', laneMap[0])
+    def angleDiff(self, laneMap, lane):
+        a = self.getAllElementbyKeys('pos', laneMap[lane])
         b = np.zeros(a.shape)
         b[0:-1] = a[1:]
         b[-1] = a[0]
         diff = b-a
         return diff % 360
     
-    def relativeSpeed(self, laneMap):
-        a = self.getAllElementbyKeys('speed', laneMap[0])
+    def relativeSpeed(self, laneMap, lane):
+        a = self.getAllElementbyKeys('speed', laneMap[lane])
         b = np.zeros(a.shape)
         b[0:-1] = a[1:]
         b[-1] = a[0]
@@ -46,8 +46,8 @@ class idm:
         lengthInMetre = (1.0/SCALE) * length
         return lengthInMetre
 
-    def BumpBumpDist(self, diff, carLength):
-        capGapInMetre = self.arcLength(LANE_RADIUS, diff)
+    def BumpBumpDist(self, diff, carLength, lane):
+        capGapInMetre = self.arcLength(LANE_RADIUS[lane], diff)
         return capGapInMetre - CAR_LENGTH
     
     def maxSpeed(self, distanceInMetre, decelerationRate):
@@ -63,7 +63,7 @@ class idm:
         '''
         if sAlpha > self.viewRange:
             sAlpha = np.clip(sAlpha, a_min=0, a_max=self.viewRange)
-            speedDiff = speed - 0
+            speedDiff = speed - self.nonEgoMaxVel
         sStar = IDM_CONSTS['MIN_SPACING'] + (speed * IDM_CONSTS['HEADWAY_TIME']) + ((speed * speedDiff)/(2 * np.sqrt(IDM_CONSTS['MAX_ACC'] * IDM_CONSTS['DECELERATION_RATE'])))
         acc = IDM_CONSTS['MAX_ACC'] * (1 - ((speed / self.maxVel)**IDM_CONSTS['DELTA']) - ((sStar/sAlpha)**2))
         return acc
@@ -86,24 +86,58 @@ class idm:
         for i in range(laneMap.shape[0]):
             laneMap[i]['pos'] = pos[i]
             laneMap[i]['speed'] = speed[i]
-     
+    
+    def sortLaneMap(self, laneMap):
+        for lane in range(0, LANES):
+            laneMap[lane] = np.sort(laneMap[lane], order=['pos'])
+
     def step(self, laneMap):
-        laneMap[0] = np.sort(laneMap[0], order=['pos'])
-        oldPos = self.getAllElementbyKeys('pos', laneMap[0])
-        posDiff = self.angleDiff(laneMap)
-        speedDiff = self.relativeSpeed(laneMap)
-        speed = self.getAllElementbyKeys('speed', laneMap[0])
-        sAlpha = self.vecBumpBumpDistance(posDiff, CAR_LENGTH)
-        acc = self.vecidmAcc(sAlpha, speedDiff, speed)
-        dist = self.vecDistTravelled(speed, acc, self.tPeriod)
-        newSpeed = self.vecNewSpeed(speed, acc, self.tPeriod)
+        self.sortLaneMap(laneMap)
+        '''
+        Each lane has different number of cars. Hence, we need to do seperate function calls on each of them
+        '''
+
+        oldPosLane0 = self.getAllElementbyKeys('pos', laneMap[0])
+        oldPosLane1 = self.getAllElementbyKeys('pos', laneMap[1])
+        
+        posDiffLane0 = self.angleDiff(laneMap, 0)
+        posDiffLane1 = self.angleDiff(laneMap, 1)
+
+        speedDiffLane0 = self.relativeSpeed(laneMap, 0)
+        speedDiffLane1 = self.relativeSpeed(laneMap, 1)
+
+        speedLane0 = self.getAllElementbyKeys('speed', laneMap[0])
+        speedLane1 = self.getAllElementbyKeys('speed', laneMap[1])
+
+        sAlphaLane0 = self.vecBumpBumpDistance(posDiffLane0, CAR_LENGTH, 0)
+        sAlphaLane1 = self.vecBumpBumpDistance(posDiffLane1, CAR_LENGTH, 1)
+
+        accLane0 = self.vecidmAcc(sAlphaLane0, speedDiffLane0, speedLane0)
+        accLane1 = self.vecidmAcc(sAlphaLane1, speedDiffLane1, speedLane1)
+        
+        distLane0 = self.vecDistTravelled(speedLane0, accLane0, self.tPeriod)
+        distLane1 = self.vecDistTravelled(speedLane1, accLane1, self.tPeriod)
+        
+        newSpeedLane0 = self.vecNewSpeed(speedLane0, accLane0, self.tPeriod)
+        newSpeedLane1 = self.vecNewSpeed(speedLane1, accLane1, self.tPeriod)
 
         # --- Check for invalid distance and new Speed --- #
-        dist[dist < 0] = 0.0
-        newSpeed[newSpeed < 0] = 0.0
+        distLane0[distLane0 < 0] = 0.0
+        distLane1[distLane1 < 0] = 0.0
+        
+        newSpeedLane0[newSpeedLane0 < 0] = 0.0
+        newSpeedLane1[newSpeedLane1 < 0] = 0.0
         # --- Check for invalid distance and new Speed --- #
         
-        distInPixels = dist * SCALE
-        distInDeg = self.vecArc2Angle(LANE_RADIUS, distInPixels)
-        newPos = self.vecNewPos(oldPos, distInDeg)
-        self.updateLaneMap(newSpeed, newPos, laneMap[0])
+        distInPixelsLane0 = distLane0 * SCALE
+        distInPixelsLane1 = distLane1 * SCALE
+
+        distInDegLane0 = self.vecArc2Angle(LANE_RADIUS[0], distInPixelsLane0)
+        distInDegLane1 = self.vecArc2Angle(LANE_RADIUS[1], distInPixelsLane1)
+        
+        newPosLane0 = self.vecNewPos(oldPosLane0, distInDegLane0)
+        newPosLane1 = self.vecNewPos(oldPosLane1, distInDegLane1)
+
+        self.updateLaneMap(newSpeedLane0, newPosLane0, laneMap[0])
+        self.updateLaneMap(newSpeedLane1, newPosLane1, laneMap[1])
+        

@@ -86,7 +86,7 @@ class ui:
     def drawAllCars(self, carsData):
         for laneID in carsData.keys():
             for car in carsData[laneID]:
-                X, Y = self.getCoordinates(car['pos'], constants.LANE_RADIUS, constants.CENTRE)
+                X, Y = self.getCoordinates(car['pos'], constants.LANE_RADIUS[laneID], constants.CENTRE)
                 carColor = self.colorYellow
                 if car['agent'] == 1:
                     carColor = self.colorLime
@@ -95,7 +95,7 @@ class ui:
     def str2font(self, msgStr):
         return self.font.render(msgStr, False, (0, 0, 0))
 
-    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed, viewRange):
+    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed, viewRange, agentLane):
         self.resetInfoBoardLoc()
         screen.blit(self.infoBoard, self.infoBoardDim)
         
@@ -126,6 +126,13 @@ class ui:
         screen.blit(localVisibliyStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += 30
         #---- Local Visiblity ----#
+
+        #---- Agent Lane ----#
+        agentLaneString = 'Agent Lane : %d'%(agentLane)
+        agentLaneStringText = self.str2font(agentLaneString)
+        screen.blit(agentLaneStringText, (self.infoBoardCurX, self.infoBoardCurY))
+        self.infoBoardCurY += 30
+        #---- Agent Lane ----#
                 
     def updateScreen(self, data):
         self.screen.fill(self.colorBG)
@@ -134,20 +141,25 @@ class ui:
         self.drawRoadBoundary(self.screen, self.colorWhite, constants.RADIUS, constants.BOUNDARY_THICKNESS, constants.CENTRE)
         self.drawRoad(self.screen, self.roadColor, constants.RADIUS - constants.BOUNDARY_THICKNESS, 0, constants.CENTRE)
         self.drawRoadBoundary(self.screen, self.colorWhite, constants.RADIUS - constants.BOUNDARY_THICKNESS - constants.LANE_WIDTH, constants.BOUNDARY_THICKNESS, constants.CENTRE)
-        self.drawRoad(self.screen, self.colorBG, constants.RADIUS - (2*constants.BOUNDARY_THICKNESS) - constants.LANE_WIDTH, 0, constants.CENTRE)
         #---- lane 1----#
+
+        #---- lane 2 ----#
+        # 2 is subtracte because render was overlaping each other without it
+        self.drawRoad(self.screen, self.roadColor, constants.RADIUS - (2*constants.BOUNDARY_THICKNESS) - constants.LANE_WIDTH, 0, constants.CENTRE)
+        self.drawRoadBoundary(self.screen, self.colorWhite, constants.RADIUS - (2*constants.BOUNDARY_THICKNESS) - (2*constants.LANE_WIDTH), constants.BOUNDARY_THICKNESS, constants.CENTRE)
+        self.drawRoad(self.screen, self.colorBG, constants.RADIUS - (3*constants.BOUNDARY_THICKNESS) - (2*constants.LANE_WIDTH), 0, constants.CENTRE)
+        #---- lane 2 ----#
         
         # Draw Cars in the lane
         self.drawAllCars(data["allData"])
         
         # Update Information Board data
-        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"])
+        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["agentLane"])
         
         # Update pygame screen
         pygame.display.flip()
 
         # FPS clock
         self.clock.tick(self.fps)
-    
-    
+
 

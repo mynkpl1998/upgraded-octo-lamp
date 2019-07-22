@@ -22,11 +22,11 @@ class V2I(gym.Env):
         if self.trajecDict == None:
             raiseValueError("no or invalid trajectory file found at v2i/src/data/")
         
-        self.densities = list(self.trajecDict.keys())
+        self.densities = list(self.trajecDict[0].keys())
 
         # Initializes the required variables
         self.init()
-    
+
     def seed(self, value=0):
         np.random.seed(value)
     
@@ -42,39 +42,30 @@ class V2I(gym.Env):
         # Initialize IDM Handler here
         self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"), self.simArgs.getValue("view-range"))
         
-    def buildlaneMap(self, trajec, numCars):
+    def buildlaneMap(self, trajecDict, trajecIndex, epsiodeDensity, numCars):
         laneMap = {}
-        '''
-        Right now only single lane is there, but in future we may add more than one lane
-        '''
-        carsProperties = []
-        for carID in range(0, numCars):
-            # Pos, Speed, Lane, Agent, CarID
-            tup = (trajec[carID], 0.0, 0, 0, carID)
-            carsProperties.append(tup)
-        
-        laneMap[0] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
-        
-        '''
-        Randomly make one of the vehicle as Ego-Vehicle
-        '''
-        randomID = np.random.randint(0, numCars)
-        laneMap[0][randomID]['agent'] = 1
+        for lane in range(0, constants.LANES):
+            carsProperties = []
+            for carID in range(0, numCars[lane]):
+                # Pos, Speed, Lane, Agent, CarID
+                tup = (trajecDict[lane][epsiodeDensity][trajecIndex[lane]][carID], 0.0, 0, 0, carID)
+                carsProperties.append(tup)
+            #print(carsProperties)
+            laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
         return laneMap
     
-    def packRenderData(self, laneMap, timeElapsed, maxSpeed, viewRange):
+    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange):
         data = {}
-        agentID = np.where(self.lane_map[0]['agent'] == 1)[0]
-
+        agentID = np.where(self.lane_map[agentLane]['agent'] == 1)[0]
         data["allData"] = laneMap
-        data["agentSpeed"] = laneMap[0][agentID]['speed'][0]
+        data["agentSpeed"] = laneMap[agentLane][agentID]['speed'][0]
         data["timeElapsed"] = timeElapsed
         data["maxSpeed"] = maxSpeed
         data["viewRange"] = viewRange
+        data["agentLane"] = agentLane
         return data
 
     def reset(self, density=None):
-        
         # ---- Density Generation ----#
         epsiodeDensity = None
         if density == None:
@@ -82,20 +73,37 @@ class V2I(gym.Env):
             epsiodeDensity = self.densities[randomIndex]
         else:
             if density not in self.densities:
-                raiseValueError("invalid density -> %.1f"%(density))
+                raiseValueError("invalid density -> %f"%(density))
             epsiodeDensity = density
         # ---- Density Generation ----#
-    
+        
         # ---- Init variables ----#
         self.time_elapsed = 0
-        self.num_cars, self.num_trajec = len(self.trajecDict[epsiodeDensity][0]), len(self.trajecDict[epsiodeDensity])
-        self.trajecIndex = np.random.randint(0, self.num_trajec)
-        self.lane_map = self.buildlaneMap(self.trajecDict[epsiodeDensity][self.trajecIndex], self.num_cars)
-        # ---- Init variables ----#
-
+        self.num_cars = {}
+        self.num_trajec = {}
+        
+        for lane in range(0, constants.LANES):
+            self.num_trajec[lane] = len(self.trajecDict[lane][epsiodeDensity])            
+        
+        self.trajecIndex = {}
+        self.num_cars = {}
+        for lane in range(0, constants.LANES):
+            self.trajecIndex[lane] = np.random.randint(0, self.num_trajec[lane])
+            self.num_cars[lane] = len(self.trajecDict[lane][epsiodeDensity][self.trajecIndex[lane]])
+        
+        self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity, self.num_cars)
+        
+        ''' 
+        Randomly Choose Agent Lane and Agent Car ID
+        '''
+        self.agent_lane = np.random.randint(0, constants.LANES)
+        self.randomIDX = np.random.randint(0, self.num_cars[self.agent_lane])
+        self.lane_map[self.agent_lane][self.randomIDX]['agent'] = 1
+        
+        # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.simArgs.getValue("max-speed"), self.simArgs.getValue("view-range")))
-    
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("view-range")))
+
     def step(self):
 
         # IDM Update Step
@@ -105,6 +113,6 @@ class V2I(gym.Env):
         
         # Update Display if render is enabled
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.simArgs.getValue("max-speed"), self.simArgs.getValue("view-range")))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("view-range")))
         
         print(self.time_elapsed)

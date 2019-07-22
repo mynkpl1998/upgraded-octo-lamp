@@ -8,6 +8,7 @@ It is recomended not to change these as the simulation environement is set up ac
 from v2i.src.core.defaults import DEFAULT_DICT
 
 MAX_CARS_IN_LANE = 31
+LANES = 2 # Don't change this
 
 # x pixles = 1m, ex: 6 pixels makes up 1 metre
 SCALE = 6
@@ -20,7 +21,7 @@ MIN_CAR_DISTANCE = 2
 MIN_DISTANCE = MIN_CAR_DISTANCE + 2 * (CAR_LENGTH/2)
 
 # All constants with pixels units are here
-LANE_RADIUS = 233
+LANE_RADIUS = [233, 201]
 
 # UI related constants (all in pixels)
 RADIUS = 250

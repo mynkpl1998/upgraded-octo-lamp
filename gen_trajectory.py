@@ -3,6 +3,7 @@ import argparse
 import numpy as np
 
 import v2i.src.core.constants as constants
+from v2i.src.core.common import raiseValueError
 from v2i.src.core.common import savePKL
 
 MAX_ITERS = 1000
@@ -19,8 +20,8 @@ parser = argparse.ArgumentParser(description="generate starting trajectories for
 parser.add_argument("--file-name", default="v2i/src/data/trajec.pkl", type=str, help="output path with file name")
 parser.add_argument("--num-trajec", default=2, type=int, help="num of different trajectories to generate")
 
-def calMinAngle():
-    return np.rad2deg(((constants.MIN_DISTANCE * constants.SCALE)/constants.LANE_RADIUS))
+def calMinAngle(lane):
+    return np.rad2deg(((constants.MIN_DISTANCE * constants.SCALE)/constants.LANE_RADIUS[lane]))
 
 def loop(density, numcars, minAngle):
     if numcars < 2:
@@ -57,29 +58,37 @@ def loop(density, numcars, minAngle):
                     break
     return trajecs
 
-def generate(densities, numcars, minAngle, numTrajec=1):
+def generateForLane(densities, numcars, minAngle, numTrajec=1):
     trajecDict = {}
     for index, density in enumerate(densities):
         trajecDict[density] = []
         for num in range(0, numTrajec):
             trajecDict[density].append(loop(density, numcars[index], minAngle))   
     return trajecDict
+
+def generate(densities, numcars, numlanes, minAngles, numTrajec=1):
+    if numlanes != len(minAngles):
+        raiseValueError("size of minAngles should be equale to size of num of lanes")
+    laneMapDict = {}
+    for lane in range(0, numlanes):
+        laneMapDict[lane] = generateForLane(densities, numcars, minAngles[lane], numTrajec)
+    return laneMapDict
     
 if __name__ == "__main__":
     # Parse Arguments
     args = parser.parse_args()
 
     # Calculate min gap angle between two consecutive vehicles
-    minAngle = calMinAngle()
+    minAngleLane0 = calMinAngle(0)
+    minAngleLane1 = calMinAngle(1)
 
     # Discretized densities
     densities = np.linspace(0.1, 1, num=10)
-
     # Num of cars for each density
     numcars = densities * constants.MAX_CARS_IN_LANE
     numcars = numcars.astype('int')
 
-    trajecDict = generate(densities, numcars, minAngle, args.num_trajec)
-
+    trajecDict = generate(densities, numcars, 2, [minAngleLane0, minAngleLane1], args.num_trajec)
+    
     # Save the Data
     savePKL(trajecDict, args.file_name)
