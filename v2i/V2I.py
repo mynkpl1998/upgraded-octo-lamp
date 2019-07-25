@@ -7,6 +7,7 @@ from v2i.src.core.common import loadPKL, raiseValueError
 from v2i.src.core.occupancy import Grid
 from v2i.src.ui.ui import ui
 from v2i.src.core.idm import idm
+from v2i.src.core.controller import egoController
 
 class V2I(gym.Env):
 
@@ -45,6 +46,9 @@ class V2I(gym.Env):
         if self.simArgs.getValue("render"):
             self.uiHandler = ui(self.simArgs.getValue('fps'), self.gridHandler.extendedView, self.gridHandler.cellSize)
             self.ui_data = {}
+        
+        # Initialize Ego Vehicle controller here
+        self.egoControllerHandler = egoController(self.simArgs.getValue("t-period"))
         
     def buildlaneMap(self, trajecDict, trajecIndex, epsiodeDensity, numCars):
         laneMap = {}
@@ -114,6 +118,9 @@ class V2I(gym.Env):
             self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("local-view"), self.gridHandler.extendedView, occGrid))
 
     def step(self):
+
+        # Update Agent Location
+        self.egoControllerHandler.executeAction(0, laneMap, agentLane)
 
         # IDM Update Step
         self.idmHandler.step(self.lane_map)

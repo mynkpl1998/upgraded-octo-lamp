@@ -56,6 +56,18 @@ class Grid:
         agentID = getAgentID(laneMap, agentLane)
         agentPos = laneMap[agentLane][agentID]['pos']
         
+        '''
+        Manually handle the bug which prevents the detection of vehicles near ego vehicles in other lane.
+        '''
+        lowLimit = agentPos - 10
+        highLimit = agentPos + 10
+        allLanes = [0, 1]
+        allLanes.remove(agentLane)
+        lowLimit = agentPos - 2
+        lowLimit %= 360
+        highLimit = agentPos + 2
+        highLimit %= 360
+
         for lane in range(0, LANES):
             forward_done = False
             _next_ = None
@@ -197,13 +209,15 @@ class Grid:
         velGrid[agentLane][halfLen-1+1:halfLen-1+numIndexs+1] = laneMap[agentLane][agentID]['speed']
         velGrid[agentLane][halfLen-1-numIndexs:halfLen-1] = laneMap[agentLane][agentID]['speed']
 
+
+        '''
         lowRange = agentPos - self.shift[agentLane]
         highRange = agentPos = self.shift[agentLane]
         otherLanes = [0, 1]
         otherLanes.pop(agentLane)
+
         for otherLane in otherLanes:
             for car in range( laneMap[otherLane].shape[0]):
-
                 if(laneMap[otherLane][car]['pos'] >= lowRange and laneMap[otherLane][car]['pos'] <= highRange):
                     viewAngle = agentPos - self.halfExtendedViewInAngle[lane]
                     angleDiff = laneMap[otherLane][car]['pos'] - viewAngle
@@ -219,7 +233,9 @@ class Grid:
                     val = velGrid[otherLane][int(index)]
                     velGrid[otherLane][int(index)+1:int(index)+numIndexs+1] = val
                     velGrid[otherLane][int(index)-numIndexs:int(index)] = val
-    
+        '''
+
+        #print(velGrid)
         return occGrid
         
     def getGrids(self, laneMap, agentLane):

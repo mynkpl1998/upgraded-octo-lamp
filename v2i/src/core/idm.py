@@ -84,8 +84,11 @@ class idm:
     
     def updateLaneMap(self, speed, pos, laneMap):
         for i in range(laneMap.shape[0]):
-            laneMap[i]['pos'] = pos[i]
-            laneMap[i]['speed'] = speed[i]
+            if laneMap[i]['agent'] == 1:
+                pass
+            else:
+                laneMap[i]['pos'] = pos[i]
+                laneMap[i]['speed'] = speed[i]
     
     def sortLaneMap(self, laneMap):
         for lane in range(0, LANES):
