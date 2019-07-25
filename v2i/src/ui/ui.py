@@ -156,8 +156,6 @@ class ui:
         screen.blit(agentLaneStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += 30
         #---- Agent Lane ----#
-    
-    
 
     def drawGrids(self, screen, color, occGrid, agentID, extendedViewInMetre, laneMap, agentLane):
         agentPos = laneMap[agentLane][agentID]['pos']
@@ -198,7 +196,7 @@ class ui:
         #---- lane 1----#
 
         #---- lane 2 ----#
-        # 2 is subtracte because render was overlaping each other without it
+        # 2 is subtracted because rendering was overlaping each other without it
         self.drawRoad(self.screen, self.roadColor, constants.RADIUS - (2*constants.BOUNDARY_THICKNESS) - constants.LANE_WIDTH, 0, constants.CENTRE)
         self.drawRoadBoundary(self.screen, self.colorWhite, constants.RADIUS - (2*constants.BOUNDARY_THICKNESS) - (2*constants.LANE_WIDTH), constants.BOUNDARY_THICKNESS, constants.CENTRE)
         self.drawRoad(self.screen, self.colorBG, constants.RADIUS - (3*constants.BOUNDARY_THICKNESS) - (2*constants.LANE_WIDTH), 0, constants.CENTRE)
