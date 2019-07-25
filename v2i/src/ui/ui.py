@@ -3,12 +3,15 @@ import pygame
 import numpy as np
 
 import v2i.src.core.constants as constants
+from v2i.src.core.common import arcAngle, getAgentID
 
 class ui:
 
-    def __init__(self, fps):
+    def __init__(self, fps, extendedViewInMetre, cellSizeInMetre):
 
         self.fps = fps
+        self.extendedViewInMetre = extendedViewInMetre
+        self.cellSizeInMetre = cellSizeInMetre
 
         # Init Graphics Library - PyGame
         pygame.init()
@@ -25,6 +28,9 @@ class ui:
 
         # Init Information Board
         self.initInfoBoard()
+        
+        # Init occupancy Grids
+        self.initDrawGrid()
 
         # Init FPS Clock
         self.initClock()
@@ -38,6 +44,7 @@ class ui:
         self.colorGrey = (192, 192, 192, 80)
         self.colorLime = (128, 250, 0)
         self.colorDarkGreen = (0, 120, 0)
+        self.colorBlack = (0, 0, 0)
     
     def initScreen(self):
         extraSpace = 100
@@ -56,6 +63,15 @@ class ui:
         self.infoBoardCurX = self.infoBoardX + 10
         self.infoBoardCurY = self.infoBoardY + 10
     
+    def initDrawGrid(self):
+        # Calculate start position and cell size in Degrees for drawing grids
+        self.extendedViewInDeg = []
+        self.cellSizeInDeg = []
+
+        for lane in range(0, constants.LANES):
+            self.extendedViewInDeg.append(arcAngle(constants.LANE_RADIUS[lane], self.extendedViewInMetre * constants.SCALE))
+            self.cellSizeInDeg.append(arcAngle(constants.LANE_RADIUS[lane], self.cellSizeInMetre * constants.SCALE))
+
     def resetInfoBoardLoc(self):
         self.infoBoardCurX = self.infoBoardX + 10
         self.infoBoardCurY = self.infoBoardY + 10
@@ -95,7 +111,7 @@ class ui:
     def str2font(self, msgStr):
         return self.font.render(msgStr, False, (0, 0, 0))
 
-    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed, viewRange, agentLane):
+    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed, viewRange, extendedViewInMetre, agentLane):
         self.resetInfoBoardLoc()
         screen.blit(self.infoBoard, self.infoBoardDim)
         
@@ -127,12 +143,50 @@ class ui:
         self.infoBoardCurY += 30
         #---- Local Visiblity ----#
 
+        #---- Extended View  ----#
+        extendedVisiblityString = 'Extended Visiblity : %.2f m'%(extendedViewInMetre)
+        extendedVisibliyStringText = self.str2font(extendedVisiblityString)
+        screen.blit(extendedVisibliyStringText, (self.infoBoardCurX, self.infoBoardCurY))
+        self.infoBoardCurY += 30
+        #---- Extended View  ----#
+
         #---- Agent Lane ----#
         agentLaneString = 'Agent Lane : %d'%(agentLane)
         agentLaneStringText = self.str2font(agentLaneString)
         screen.blit(agentLaneStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += 30
         #---- Agent Lane ----#
+    
+    
+
+    def drawGrids(self, screen, color, occGrid, agentID, extendedViewInMetre, laneMap, agentLane):
+        agentPos = laneMap[agentLane][agentID]['pos']
+        self.startAngleDeg = []
+        for lane in range(0, constants.LANES):
+            startPos = (agentPos - (self.extendedViewInDeg[lane]/2)) % 360
+            self.startAngleDeg.append(startPos)
+        
+        for lane in range(0, constants.LANES):
+            for col in range(0, occGrid.shape[1]):
+                currLimit = self.startAngleDeg[lane]
+                nextLimit = self.startAngleDeg[lane] + self.cellSizeInDeg[lane]
+                p = []
+
+                points = list(np.linspace(currLimit, nextLimit, constants.POLYGON_POINTS))
+                for point in points:
+                    x, y = self.getCoordinates(point, constants.LANE_BOUNDARIES[lane][0], constants.CENTRE)
+                    p.append((x,y))
+
+                points.reverse()
+                for point in points:
+                    x, y = self.getCoordinates(point, constants.LANE_BOUNDARIES[lane][1], constants.CENTRE)
+                    p.append((x,y))
+
+                if occGrid[lane][col] == 1:
+                    pygame.draw.polygon(screen, self.colorBlack, p, 0)
+                else:
+                    pygame.draw.polygon(screen, color, p, 1)
+                self.startAngleDeg[lane] += self.cellSizeInDeg[lane]
                 
     def updateScreen(self, data):
         self.screen.fill(self.colorBG)
@@ -150,16 +204,21 @@ class ui:
         self.drawRoad(self.screen, self.colorBG, constants.RADIUS - (3*constants.BOUNDARY_THICKNESS) - (2*constants.LANE_WIDTH), 0, constants.CENTRE)
         #---- lane 2 ----#
         
+        # Draw Grids
+        agentID = getAgentID(data["allData"], data["agentLane"])
+        self.drawGrids(self.screen, self.colorWhite, data["occGrid"], agentID, data["extendedViewRange"], data["allData"], data["agentLane"])
+
         # Draw Cars in the lane
         self.drawAllCars(data["allData"])
         
         # Update Information Board data
-        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["agentLane"])
+        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["extendedViewRange"], data["agentLane"])
         
         # Update pygame screen
         pygame.display.flip()
 
         # FPS clock
         self.clock.tick(self.fps)
+        #time.sleep(100)
 
 

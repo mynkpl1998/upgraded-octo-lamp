@@ -30,6 +30,7 @@ BOUNDARY_THICKNESS = 2
 LANE_WIDTH = 30
 INFO_BOARD_DIM = (250, 200)
 FONT_SIZE = 25
+LANE_BOUNDARIES = [[248, 218], [216, 186]]
 
 # Intelligent Driver Model constants
 IDM_CONSTS = {

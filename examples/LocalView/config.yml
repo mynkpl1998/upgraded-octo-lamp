@@ -5,7 +5,9 @@ config:
 
   # IDM settings
   max-speed: 9 # in m/s
-  view-range: 10 # in m
+  local-view: 10 # in metres
+  extended-view: 20 # in metres
+  cell-size: 1 # in metres
 
   # UI settings
   render: true

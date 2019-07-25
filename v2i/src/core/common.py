@@ -1,6 +1,7 @@
 import os
 import yaml
 import pickle
+import numpy as np
 from huepy import bad, bold, red
 
 def checkFileExists(file):
@@ -53,3 +54,10 @@ def loadPKL(filenamePath):
         return trajecDict
     except:
         return None
+
+def arcAngle(radius, arcLength):
+    return np.rad2deg(arcLength/radius)
+
+def getAgentID(laneMap, agentLane):
+    agentID = np.where(laneMap[agentLane]['agent'] == 1)[0]
+    return agentID[0]

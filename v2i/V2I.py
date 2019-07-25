@@ -4,6 +4,7 @@ import v2i.src.core.constants as constants
 
 from v2i.src.core.utils import configParser
 from v2i.src.core.common import loadPKL, raiseValueError
+from v2i.src.core.occupancy import Grid
 from v2i.src.ui.ui import ui
 from v2i.src.core.idm import idm
 
@@ -34,13 +35,16 @@ class V2I(gym.Env):
         '''
         Function : All common variables initialization goes here.
         '''
+        # Initialize IDM Handler here
+        self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"), self.simArgs.getValue("local-view"))
+
+        # Intialize Grid Handler here
+        self.gridHandler = Grid(self.simArgs.getValue("local-view"), self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
+
         # Inititalize UI Handler here
         if self.simArgs.getValue("render"):
-            self.uiHandler = ui(self.simArgs.getValue('fps'))
+            self.uiHandler = ui(self.simArgs.getValue('fps'), self.gridHandler.extendedView, self.gridHandler.cellSize)
             self.ui_data = {}
-        
-        # Initialize IDM Handler here
-        self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"), self.simArgs.getValue("view-range"))
         
     def buildlaneMap(self, trajecDict, trajecIndex, epsiodeDensity, numCars):
         laneMap = {}
@@ -50,11 +54,10 @@ class V2I(gym.Env):
                 # Pos, Speed, Lane, Agent, CarID
                 tup = (trajecDict[lane][epsiodeDensity][trajecIndex[lane]][carID], 0.0, 0, 0, carID)
                 carsProperties.append(tup)
-            #print(carsProperties)
             laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
         return laneMap
     
-    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange):
+    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid):
         data = {}
         agentID = np.where(self.lane_map[agentLane]['agent'] == 1)[0]
         data["allData"] = laneMap
@@ -62,7 +65,9 @@ class V2I(gym.Env):
         data["timeElapsed"] = timeElapsed
         data["maxSpeed"] = maxSpeed
         data["viewRange"] = viewRange
+        data["extendedViewRange"] = extendedRange
         data["agentLane"] = agentLane
+        data["occGrid"] = occGrid
         return data
 
     def reset(self, density=None):
@@ -100,9 +105,14 @@ class V2I(gym.Env):
         self.randomIDX = np.random.randint(0, self.num_cars[self.agent_lane])
         self.lane_map[self.agent_lane][self.randomIDX]['agent'] = 1
         
+        #---- Get Occupancy & Velocity Grids ----#
+        occGrid = self.gridHandler.getGrids(self.lane_map)
+        occGrid[0][-1] = 1
+        #---- Get Occupancy & Velocity Grids ----#
+
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("view-range")))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("local-view"), self.gridHandler.extendedView, occGrid))
 
     def step(self):
 
@@ -110,9 +120,12 @@ class V2I(gym.Env):
         self.idmHandler.step(self.lane_map)
 
         self.time_elapsed += self.simArgs.getValue("t-period")
-        
-        # Update Display if render is enabled
+
+        #---- Get Occupancy & Velocity Grids ----#
+        occGrid = self.gridHandler.getGrids(self.lane_map)
+        occGrid[0][-1] = 1
+        #---- Get Occupancy & Velocity Grids ----#
+
+        # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("view-range")))
-        
-        print(self.time_elapsed)
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("local-view"), self.gridHandler.extendedView, occGrid))
