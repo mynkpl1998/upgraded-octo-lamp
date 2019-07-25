@@ -9,7 +9,7 @@ The simulator is under heavy development, new features are being added everyday.
 - [x] Occupancy Grids
 - [x] Velocity Grids
 - [x] Multi Lane
-- [] Muti Agent
+- [ ] Muti Agent
 
 ## Installation
 
