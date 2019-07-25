@@ -10,7 +10,7 @@ The simulator is under heavy development, new features are being added everyday.
 - [x] Velocity Grids
 - [x] Multi Lane
 - [x] Driving Model for Non-Autonomous Vehicles - Intelligent Driver Model
-- [ ] Muti Agent
+- [ ] Multi Agent
 
 ## Installation
 

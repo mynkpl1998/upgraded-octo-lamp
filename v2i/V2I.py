@@ -106,8 +106,7 @@ class V2I(gym.Env):
         self.lane_map[self.agent_lane][self.randomIDX]['agent'] = 1
         
         #---- Get Occupancy & Velocity Grids ----#
-        occGrid = self.gridHandler.getGrids(self.lane_map)
-        occGrid[0][-1] = 1
+        occGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane)
         #---- Get Occupancy & Velocity Grids ----#
 
         # ---- Init variables ----#    
@@ -122,8 +121,7 @@ class V2I(gym.Env):
         self.time_elapsed += self.simArgs.getValue("t-period")
 
         #---- Get Occupancy & Velocity Grids ----#
-        occGrid = self.gridHandler.getGrids(self.lane_map)
-        occGrid[0][-1] = 1
+        occGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane)
         #---- Get Occupancy & Velocity Grids ----#
 
         # ---- Init variables ----#    

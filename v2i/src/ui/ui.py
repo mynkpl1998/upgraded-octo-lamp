@@ -182,6 +182,8 @@ class ui:
 
                 if occGrid[lane][col] == 1:
                     pygame.draw.polygon(screen, self.colorBlack, p, 0)
+                elif occGrid[lane][col] == 2:
+                    pygame.draw.polygon(screen, self.colorBlack, p, 0)
                 else:
                     pygame.draw.polygon(screen, color, p, 1)
                 self.startAngleDeg[lane] += self.cellSizeInDeg[lane]
