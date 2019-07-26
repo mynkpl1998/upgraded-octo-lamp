@@ -8,6 +8,7 @@ from v2i.src.core.occupancy import Grid
 from v2i.src.ui.ui import ui
 from v2i.src.core.idm import idm
 from v2i.src.core.controller import egoController
+from v2i.src.core.common import getAgentID
 
 class V2I(gym.Env):
 
@@ -48,7 +49,7 @@ class V2I(gym.Env):
             self.ui_data = {}
         
         # Initialize Ego Vehicle controller here
-        self.egoControllerHandler = egoController(self.simArgs.getValue("t-period"))
+        self.egoControllerHandler = egoController(self.simArgs.getValue("t-period"), self.simArgs.getValue("max-speed"))
         
     def buildlaneMap(self, trajecDict, trajecIndex, epsiodeDensity, numCars):
         laneMap = {}
@@ -117,10 +118,13 @@ class V2I(gym.Env):
         if self.simArgs.getValue("render"):
             self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("local-view"), self.gridHandler.extendedView, occGrid))
 
-    def step(self):
+    def step(self, action):
 
-        # Update Agent Location
-        self.egoControllerHandler.executeAction(0, laneMap, agentLane)
+        # Update Agent Location and Speed
+        egodistTravelledInDeg, egoSpeed, collision = self.egoControllerHandler.executeAction(action, self.lane_map, self.agent_lane)
+        self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
+        self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
+        self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
 
         # IDM Update Step
         self.idmHandler.step(self.lane_map)
@@ -134,3 +138,5 @@ class V2I(gym.Env):
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
             self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("local-view"), self.gridHandler.extendedView, occGrid))
+        
+        return collision

@@ -5,13 +5,13 @@ config:
 
   # IDM settings
   max-speed: 9 # in m/s
-  local-view: 15 # in metres
-  extended-view: 30 # in metres
+  local-view: 20 # in metres
+  extended-view: 40 # in metres
   cell-size: 1 # in metres
 
   # UI settings
   render: true
-  fps: 30
+  fps: 5
 
 
   
