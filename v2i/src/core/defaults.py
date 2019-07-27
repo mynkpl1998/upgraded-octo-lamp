@@ -6,6 +6,7 @@ DEFAULT_DICT = {
     'local-view' : 10, # in metres
     'extended-view': 20, # in metres
     'cell-size' : 1, # in metres
+    'reg-size': 5, # size of 1 comm region in metres
 
     # IDM Settings
     'max-speed': 9, # in m/s

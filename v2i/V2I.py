@@ -41,11 +41,11 @@ class V2I(gym.Env):
         self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"), self.simArgs.getValue("local-view"))
 
         # Intialize Grid Handler here
-        self.gridHandler = Grid(self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
+        self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), 2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
 
         # Inititalize UI Handler here
         if self.simArgs.getValue("render"):
-            self.uiHandler = ui(self.simArgs.getValue('fps'), self.gridHandler.extendedView, self.gridHandler.cellSize)
+            self.uiHandler = ui(self.simArgs.getValue('fps'), self.gridHandler.totalExtendedView, self.gridHandler.cellSize)
             self.ui_data = {}
         
         # Initialize Ego Vehicle controller here
@@ -122,7 +122,7 @@ class V2I(gym.Env):
 
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("local-view"), self.gridHandler.extendedView, occGrid))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid))
 
     def step(self, action):
 
@@ -154,6 +154,6 @@ class V2I(gym.Env):
 
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.simArgs.getValue("local-view"), self.gridHandler.extendedView, occGrid))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid))
         
         return collision

@@ -64,3 +64,6 @@ def getAgentID(laneMap, agentLane):
 
 def arcLength(radius, arcAngleDeg):
     return np.deg2rad(arcAngleDeg) * radius
+
+def reverseDict(dictToReverse):
+    return dict(map(reversed, dictToReverse.items()))

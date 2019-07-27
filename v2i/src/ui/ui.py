@@ -137,14 +137,14 @@ class ui:
         # ---- Max Speed ---- #
 
         #---- Local Visiblity ----#
-        localVisiblityString = 'Local Visiblity : %.2f m'%(viewRange)
+        localVisiblityString = 'Total Local Visiblity : %.2f m'%(viewRange)
         localVisibliyStringText = self.str2font(localVisiblityString)
         screen.blit(localVisibliyStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Local Visiblity ----#
 
         #---- Extended View  ----#
-        extendedVisiblityString = 'Extended Visiblity : %.2f m'%(extendedViewInMetre)
+        extendedVisiblityString = 'Total Extended Visiblity : %.2f m'%(extendedViewInMetre)
         extendedVisibliyStringText = self.str2font(extendedVisiblityString)
         screen.blit(extendedVisibliyStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP

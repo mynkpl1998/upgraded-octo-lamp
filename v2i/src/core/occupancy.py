@@ -4,43 +4,42 @@ import numpy as np
 from gym.spaces import Box
 from v2i.src.core.utils import raiseValueError
 from v2i.src.core.constants import CAR_LENGTH, LANE_RADIUS, SCALE, LANES, OCCGRID_CONSTS
-from v2i.src.core.common import getAgentID, arcAngle, arcLength
+from v2i.src.core.common import getAgentID, arcAngle, arcLength, reverseDict
 
 class Grid:
 
-    def __init__(self, localView, maxSpeed, extendedView=None, cellSize=1):
-        self.localView = localView # in metre
+    def __init__(self, localView, maxSpeed, regionWidth, extendedView=None, cellSize=1):
+        self.totalLocalView = localView # in metre
         self.cellSize = cellSize # in metre
-        self.extendedView = extendedView
+        self.totalExtendedView = extendedView
         self.maxSpeed = maxSpeed
+        self.regWidthInMetres = regionWidth
 
         #---- Checks ----#
-        if self.extendedView == None:
-            self.extendedView = self.localView
+        if self.totalExtendedView == None:
+            self.totalExtendedView = self.totalLocalView
         
-        if self.extendedView < self.localView:
+        if self.totalExtendedView < self.totalLocalView:
             raiseValueError("size of extended view should be greater than local view")
         #---- Checks ----#
 
         #---- Calculate Communicable Region ----#
-        self.commView = self.extendedView - self.localView # in metre
+        self.totalCommView = 2*((self.totalExtendedView/2) - (self.totalLocalView/2)) # in metre
         #---- Calculate Communicable Region ----#
 
-        if self.extendedView % self.cellSize != 0:
+        if self.totalExtendedView % self.cellSize != 0:
             raiseValueError("communication should be completely divisible by cellsize")
         
         if self.cellSize > CAR_LENGTH:
             raiseValueError("Cell-Size (%.2f m) should be smaller than Car Length (%.2f m) "%(self.cellSize, CAR_LENGTH))
 
         #---- Calculate the number of columns ----#
-        self.numCols = int(self.extendedView / self.cellSize)
+        self.numCols = int(self.totalExtendedView / self.cellSize)
         #---- Calculate the number of columns ----#
 
         self.init()
     
     def initObservationSpace(self):
-        gridSize = self.numCols * LANES
-        
         occBoundLow = np.ones((LANES, self.numCols)) * OCCGRID_CONSTS[min(OCCGRID_CONSTS, key=OCCGRID_CONSTS.get)]
         occBoundHigh = np.ones((LANES, self.numCols)) * OCCGRID_CONSTS[max(OCCGRID_CONSTS, key=OCCGRID_CONSTS.get)]
         
@@ -52,6 +51,29 @@ class Grid:
         
         self.observation_space = Box(low=obsLowBound, high=obsHighBound, dtype=np.float)
 
+    def initComm(self):
+        numRegs = int(self.totalCommView / self.regWidthInMetres)
+        regWidth = int(self.regWidthInMetres / self.cellSize)
+        
+        #---- Region Mapping ----#
+        self.commMap = {}
+        for idx in range(0, numRegs):
+            regName = "reg_%d"%(idx)
+            self.commMap[idx] = regName
+        
+        #---- Region Mapping ----#
+        start = 0
+        self.commIndexMap = {}
+        for i in range(0, int(numRegs/2)):
+            self.commIndexMap[self.commMap[i]] = list(np.linspace(start, start + regWidth-1, num=regWidth, dtype='int'))
+            start += regWidth
+        
+        start = (int(self.numCols/2) - 1) + int((self.totalLocalView/2) / self.cellSize) + 1
+        for i in range(int(numRegs/2), numRegs):
+            self.commIndexMap[self.commMap[i]] = list(np.linspace(start, start + regWidth - 1, num=regWidth, dtype='int'))
+            start += regWidth
+        #---- Region to Index Map ----#
+
     def init(self):
         '''
         All common initialization goes here.
@@ -59,11 +81,23 @@ class Grid:
         self.halfExtendedViewInAngle = []
         self.shift = []
         for lane in range(0, LANES):
-            self.halfExtendedViewInAngle.append(arcAngle(LANE_RADIUS[lane], (self.extendedView/2) * SCALE))
+            self.halfExtendedViewInAngle.append(arcAngle(LANE_RADIUS[lane], (self.totalExtendedView/2) * SCALE))
             self.shift.append(arcAngle(LANE_RADIUS[lane], (CAR_LENGTH/2) * SCALE))
         
         # Intialize Observation Space 
         self.initObservationSpace()
+
+        # Intialize Communication
+        self.isCommEnabled = False
+        if self.totalCommView > 0:
+            if not (self.totalCommView % self.regWidthInMetres == 0):
+                raiseValueError("communicable region should be completely divisible by comm-size")
+            
+            if not (self.regWidthInMetres % self.cellSize == 0):
+                raiseValueError("comm-size should be completely divisible by cell-size")
+            
+            self.isCommEnabled = True
+            self.initComm()
         
     def getOccupancyGrid(self, laneMap, agentLane):
         occGrid = np.zeros((2, self.numCols))
@@ -252,7 +286,6 @@ class Grid:
                     velGrid[otherLane][int(index)+1:int(index)+numIndexs+1] = val
                     velGrid[otherLane][int(index)-numIndexs:int(index)] = val
         '''
-
         return occGrid, velGrid
     
     def verifyGrids(self, occGrid, velGrid):
@@ -267,7 +300,16 @@ class Grid:
                     if velGrid[lane][col] > self.maxSpeed or velGrid[lane][col] < 0.0:
                         raiseValueError("speed can be greater than %.2f and less than 0.0, However, speed of vehicle is %.2f"%(self.maxSpeed, velGrid[lane][col]))
 
+
     def getGrids(self, laneMap, agentLane):
         occGrid, velGrid = self.getOccupancyGrid(laneMap, agentLane)
         self.verifyGrids(occGrid, velGrid)
+
+        if self.isCommEnabled:
+            for key in self.commMap:
+                    indexs = self.commIndexMap[self.commMap[key]]
+                    for index in indexs:
+                        occGrid[:, index] = OCCGRID_CONSTS['UNKNOWN']
+                        velGrid[:, index] = 0
+        
         return occGrid, velGrid
