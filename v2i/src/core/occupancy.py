@@ -253,9 +253,21 @@ class Grid:
                     velGrid[otherLane][int(index)-numIndexs:int(index)] = val
         '''
 
-        #print(velGrid)
-        return occGrid
-        
-    def getGrids(self, laneMap, agentLane):
-        return self.getOccupancyGrid(laneMap, agentLane)
+        return occGrid, velGrid
+    
+    def verifyGrids(self, occGrid, velGrid):
+        assert occGrid.shape[0] == velGrid.shape[0]
+        assert occGrid.shape[1] == velGrid.shape[1]
+        for lane in range(0, LANES):
+            for col in range(0, occGrid.shape[1]):
+                if occGrid[lane][col] == 0:
+                    if velGrid[lane][col] > 0.0:
+                        raiseValueError("mistmatch in occGrids and velocity Grids")
+                else:
+                    if velGrid[lane][col] > self.maxSpeed or velGrid[lane][col] < 0.0:
+                        raiseValueError("speed can be greater than %.2f and less than 0.0, However, speed of vehicle is %.2f"%(self.maxSpeed, velGrid[lane][col]))
 
+    def getGrids(self, laneMap, agentLane):
+        occGrid, velGrid = self.getOccupancyGrid(laneMap, agentLane)
+        self.verifyGrids(occGrid, velGrid)
+        return occGrid, velGrid

@@ -180,10 +180,12 @@ class ui:
                     x, y = self.getCoordinates(point, constants.LANE_BOUNDARIES[lane][1], constants.CENTRE)
                     p.append((x,y))
 
-                if occGrid[lane][col] == 1:
+                if occGrid[lane][col] == constants.OCCGRID_CONSTS["OCCUPIED"]:
                     pygame.draw.polygon(screen, self.colorBlack, p, 0)
-                elif occGrid[lane][col] == 2:
+                elif occGrid[lane][col] == constants.OCCGRID_CONSTS["AGENT"]:
                     pygame.draw.polygon(screen, self.colorBlack, p, 0)
+                elif occGrid[lane][col] == constants.OCCGRID_CONSTS["UNKNOWN"]:
+                    pygame.draw.polygon(screen, self.colorRed, p, 0)
                 else:
                     pygame.draw.polygon(screen, color, p, 1)
                 self.startAngleDeg[lane] += self.cellSizeInDeg[lane]
