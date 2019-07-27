@@ -8,5 +8,10 @@ for i in range(0, 1):
     
 for i in range(0, 100000):
 
-    act = 3
+    act = 0
+    if i == 200:
+        act = 3
+    if i == 400:
+        act = 3
     gameOver = obj.step(act)
+    act = 0

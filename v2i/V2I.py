@@ -120,8 +120,19 @@ class V2I(gym.Env):
 
     def step(self, action):
 
+        # Perform the required action
+        egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(action, self.lane_map, self.agent_lane)
+
+        # Change Lane if lane changes is asked and is valid
+        if(laneToChange != self.agent_lane and collision == False):
+            agentIDX = getAgentID(self.lane_map, self.agent_lane)
+            egoVehicleProp = self.lane_map[self.agent_lane][agentIDX]
+            self.lane_map[self.agent_lane] = np.delete(self.lane_map[self.agent_lane], agentIDX)
+            self.lane_map[laneToChange] = np.append(egoVehicleProp, self.lane_map[laneToChange])
+            self.agent_lane = laneToChange
+            egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(2, self.lane_map, self.agent_lane)
+        
         # Update Agent Location and Speed
-        egodistTravelledInDeg, egoSpeed, collision = self.egoControllerHandler.executeAction(action, self.lane_map, self.agent_lane)
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        

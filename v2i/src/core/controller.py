@@ -1,7 +1,8 @@
+import numpy as np
 from gym.spaces import Discrete
 
 from v2i.src.core.constants import IDM_CONSTS, LANE_RADIUS, SCALE, LANES, CAR_LENGTH
-from v2i.src.core.common import getAgentID, arcAngle
+from v2i.src.core.common import getAgentID, arcAngle, raiseValueError
 
 class egoController:
 
@@ -71,6 +72,7 @@ class egoController:
         distTravelledInDeg = arcAngle(LANE_RADIUS[agentLane], distTravelledInMetres * SCALE)
         distTravelledInDeg %= 360
         newAgentSpeed = self.newSpeed(acc, self.tPeriod, agentSpeed)
+        newAgentSpeed = np.clip(newAgentSpeed, 0, self.maxSpeed)
         '''
         Only agent new pos is required to check for collision
         '''
@@ -79,7 +81,7 @@ class egoController:
             distTravelledInDeg = 0.0
             newAgentSpeed = 0.0
             collision = True
-        return distTravelledInDeg, newAgentSpeed, collision
+        return distTravelledInDeg, newAgentSpeed, collision, agentLane
     
 
     def performDecelerate(self, laneMap, agentLane, agentIDX):
@@ -93,6 +95,7 @@ class egoController:
         distTravelledInDeg = arcAngle(LANE_RADIUS[agentLane], distTravelledInMetres * SCALE)
         distTravelledInDeg %= 360
         newAgentSpeed = self.newSpeed(dec, self.tPeriod,agentSpeed)
+        newAgentSpeed = np.clip(newAgentSpeed, 0, self.maxSpeed)
         '''
         Only agent new pos is required to check for collision
         '''
@@ -101,7 +104,7 @@ class egoController:
             distTravelledInDeg = 0.0
             newAgentSpeed = 0.0
             collision = True
-        return distTravelledInDeg, newAgentSpeed, collision
+        return distTravelledInDeg, newAgentSpeed, collision, agentLane
     
     def performDoNothing(self, laneMap, agentLane, agentIDX):
         agentSpeed = laneMap[agentLane][agentIDX]['speed']
@@ -111,6 +114,7 @@ class egoController:
         distTravelledInDeg = arcAngle(LANE_RADIUS[agentLane], distTravelledInMetres * SCALE)
         distTravelledInDeg %= 360
         newAgentSpeed = agentSpeed
+        newAgentSpeed = np.clip(newAgentSpeed, 0, self.maxSpeed)
         '''
         Only agent new pos is required to check for collision
         '''
@@ -119,26 +123,8 @@ class egoController:
             distTravelledInDeg = 0.0
             newAgentSpeed = 0.0
             collision = True
-        return distTravelledInDeg, newAgentSpeed, collision
+        return distTravelledInDeg, newAgentSpeed, collision, agentLane
     
-    def checkValidLaneChange(self, laneToChange, agentLane, laneMap, agentPos):
-        egoLowLimit = (agentPos - self.laneChangeAngle[laneToChange]) % 360
-        egoHighLimit = (agentPos + self.laneChangeAngle[laneToChange]) % 360
-        for idx in range(0, laneMap[laneToChange].shape[0]):
-            nonEgoLowLimit = (laneMap[laneToChange][idx]['pos'] - self.laneChangeAngle[laneToChange]) % 360
-            nonEgoHighLimit = (laneMap[laneToChange][idx]['pos'] + self.laneChangeAngle[laneToChange]) % 360
-            
-            if egoHighLimit < egoLowLimit:
-                if(egoLowLimit < nonEgoHighLimit and egoLowLimit > nonEgoLowLimit):
-                    return False
-                if(egoHighLimit < nonEgoHighLimit and egoHighLimit > nonEgoLowLimit):
-                    return False
-            if (egoLowLimit > nonEgoLowLimit and egoLowLimit < nonEgoHighLimit):
-                return False
-            if (egoHighLimit < nonEgoHighLimit and egoHighLimit > nonEgoLowLimit):
-                return False
-        return True
-
     def performLaneChange(self, laneMap, agentLane, agentIDX):
         agentSpeed = laneMap[agentLane][agentIDX]['speed']
         agentPos = laneMap[agentLane][agentIDX]['pos']
@@ -148,15 +134,36 @@ class egoController:
         else:
             laneToChange = 0
         #---- Identify the neighbouring lane ----#
-        
-        # We assume no distance is travelled during lane change and no acceleration is allowed
         distTravelledInDeg = 0.0
         newAgentSpeed = agentSpeed
-        
-        print(self.checkValidLaneChange(laneToChange, agentLane, laneMap, agentPos))
-
-        return distTravelledInDeg, newAgentSpeed, False
-
+        newAgentSpeed = np.clip(newAgentSpeed, 0, self.maxSpeed)
+        collision = False
+        if not self.checkValidLaneChange(laneToChange, agentLane, laneMap, agentPos):
+            distTravelledInDeg = 0.0
+            newAgentSpeed = 0.0
+            collision = True
+        return distTravelledInDeg, newAgentSpeed, collision, laneToChange
+    
+    def checkValidLaneChange(self, laneToChange, agentLane, laneMap, agentPos):
+        egoLowLimit = (agentPos - self.laneChangeAngle[laneToChange]) % 360
+        egoHighLimit = (agentPos + self.laneChangeAngle[laneToChange]) % 360
+        for idx in range(0, laneMap[laneToChange].shape[0]):
+            nonEgoLowLimit = (laneMap[laneToChange][idx]['pos'] - self.laneChangeAngle[laneToChange]) % 360
+            nonEgoHighLimit = (laneMap[laneToChange][idx]['pos'] + self.laneChangeAngle[laneToChange]) % 360
+            
+            if egoHighLimit < egoLowLimit:
+                if (nonEgoHighLimit > egoLowLimit and nonEgoLowLimit < nonEgoHighLimit):
+                    return False
+                if nonEgoHighLimit < egoHighLimit:
+                    return False
+                if nonEgoLowLimit > egoLowLimit and nonEgoLowLimit < 360 and nonEgoHighLimit > egoHighLimit and nonEgoHighLimit > 0:
+                    return False
+            else:
+                if (egoLowLimit > nonEgoLowLimit and egoLowLimit < nonEgoHighLimit):
+                    return False
+                if (egoHighLimit < nonEgoHighLimit and egoHighLimit > nonEgoLowLimit):
+                    return False
+        return True
     
     def executeAction(self, action, laneMap, agentLane):
         agentIDX = getAgentID(laneMap, agentLane)
@@ -164,12 +171,14 @@ class egoController:
         newSpeed = 0.0
 
         if action == 0:
-            distTravelledInDeg, newSpeed, collision = self.performAccelerate(laneMap, agentLane, agentIDX)
+            distTravelledInDeg, newSpeed, collision, laneToChange = self.performAccelerate(laneMap, agentLane, agentIDX)
         elif action == 1:
-            distTravelledInDeg, newSpeed, collision = self.performDecelerate(laneMap, agentLane, agentIDX)
+            distTravelledInDeg, newSpeed, collision, laneToChange = self.performDecelerate(laneMap, agentLane, agentIDX)
         elif action == 2:
-            distTravelledInDeg, newSpeed, collision = self.performDoNothing(laneMap, agentLane, agentIDX)
+            distTravelledInDeg, newSpeed, collision, laneToChange = self.performDoNothing(laneMap, agentLane, agentIDX)
         elif action == 3:
-            distTravelledInDeg, newSpeed, collision = self.performLaneChange(laneMap, agentLane, agentIDX)
+            distTravelledInDeg, newSpeed, collision, laneToChange = self.performLaneChange(laneMap, agentLane, agentIDX)
+        else:
+            raiseValueError("%d is not a valid action !"%(action))
 
-        return distTravelledInDeg, newSpeed, collision
+        return distTravelledInDeg, newSpeed, collision, laneToChange
