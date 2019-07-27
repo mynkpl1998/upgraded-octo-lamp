@@ -1,5 +1,4 @@
 import numpy as np
-from gym.spaces import Discrete
 
 from v2i.src.core.constants import IDM_CONSTS, LANE_RADIUS, SCALE, LANES, CAR_LENGTH
 from v2i.src.core.common import getAgentID, arcAngle, raiseValueError
@@ -20,9 +19,11 @@ class egoController:
         self.initLaneChangeAngle()
 
     def initActionSpace(self):
-        possibleActions = ['acc', 'dec', 'do-nothing', 'lane-change']
-        self.actionSpace = Discrete(len(possibleActions))
-        self.planMap = self.buildPlanningActionMap(possibleActions)
+        self.possibleActions = ['acc', 'dec', 'do-nothing', 'lane-change']
+        self.planMap = self.buildPlanningActionMap(self.possibleActions)
+
+    def planSpace(self):
+        return self.possibleActions
     
     def initLaneChangeAngle(self):
         self.laneChangeAngle = []
@@ -170,15 +171,15 @@ class egoController:
         distTravelledInDeg = 0
         newSpeed = 0.0
 
-        if action == 0:
+        if action == "acc":
             distTravelledInDeg, newSpeed, collision, laneToChange = self.performAccelerate(laneMap, agentLane, agentIDX)
-        elif action == 1:
+        elif action == "dec":
             distTravelledInDeg, newSpeed, collision, laneToChange = self.performDecelerate(laneMap, agentLane, agentIDX)
-        elif action == 2:
+        elif action == "do-nothing":
             distTravelledInDeg, newSpeed, collision, laneToChange = self.performDoNothing(laneMap, agentLane, agentIDX)
-        elif action == 3:
+        elif action == "lane-change":
             distTravelledInDeg, newSpeed, collision, laneToChange = self.performLaneChange(laneMap, agentLane, agentIDX)
         else:
-            raiseValueError("%d is not a valid action !"%(action))
+            raiseValueError("%s is not a valid action !"%(action))
 
         return distTravelledInDeg, newSpeed, collision, laneToChange

@@ -1,5 +1,7 @@
 import yaml
 from copy import deepcopy
+from gym.spaces import Discrete
+
 from v2i.src.core.common import checkFileExists, readYaml, raiseValueError
 from v2i.src.core.defaults import DEFAULT_DICT
 
@@ -36,6 +38,24 @@ class configParser:
     def getFullConfigDict(self,):
         return self.defautDict
          
+class ActionEncoderDecoder:
 
-
-
+    def __init__(self, planSpace, querySpace):
+        self.planSpace = planSpace
+        self.querySpace = querySpace
+    
+    def encodeActions(self):
+        self.actMap = {}
+        index = 0
+        for planAct in self.planSpace:
+            for queryAct in self.querySpace:
+                self.actMap[index] = planAct + "," + queryAct
+                index += 1
+    
+    def getActionSpace(self):
+        return Discrete(len(self.actMap))
+    
+    def decodeAction(self, actionKey):
+        action = self.actMap[actionKey]
+        planAct, commAct = action.split(",")
+        return planAct, commAct

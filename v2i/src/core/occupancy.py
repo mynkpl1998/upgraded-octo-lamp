@@ -74,6 +74,11 @@ class Grid:
             start += regWidth
         #---- Region to Index Map ----#
 
+        #---- Add Null Query ----#
+        self.commMap[numRegs] = "null"
+        self.commIndexMap[self.commMap[numRegs]] = []
+        #---- Add Null Query ----#
+
     def init(self):
         '''
         All common initialization goes here.
@@ -299,17 +304,28 @@ class Grid:
                 else:
                     if velGrid[lane][col] > self.maxSpeed or velGrid[lane][col] < 0.0:
                         raiseValueError("speed can be greater than %.2f and less than 0.0, However, speed of vehicle is %.2f"%(self.maxSpeed, velGrid[lane][col]))
+    
+    def querySpace(self):
+        possibleQueries = []
+        if self.isCommEnabled:
+            for key in self.commMap.keys():
+                possibleQueries.append(self.commMap[key])
+        else:
+            possibleQueries.append('null')
+        return possibleQueries
 
-
-    def getGrids(self, laneMap, agentLane):
+    def getGrids(self, laneMap, agentLane, queryAct):
         occGrid, velGrid = self.getOccupancyGrid(laneMap, agentLane)
         self.verifyGrids(occGrid, velGrid)
 
         if self.isCommEnabled:
             for key in self.commMap:
-                    indexs = self.commIndexMap[self.commMap[key]]
-                    for index in indexs:
-                        occGrid[:, index] = OCCGRID_CONSTS['UNKNOWN']
-                        velGrid[:, index] = 0
+                    if self.commMap[key] == queryAct:
+                        pass
+                    else:
+                        indexs = self.commIndexMap[self.commMap[key]]
+                        for index in indexs:
+                            occGrid[:, index] = OCCGRID_CONSTS['UNKNOWN']
+                            velGrid[:, index] = 0
         
         return occGrid, velGrid

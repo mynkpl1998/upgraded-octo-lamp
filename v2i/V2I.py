@@ -2,7 +2,7 @@ import gym
 import numpy as np
 import v2i.src.core.constants as constants
 
-from v2i.src.core.utils import configParser
+from v2i.src.core.utils import configParser, ActionEncoderDecoder
 from v2i.src.core.common import loadPKL, raiseValueError
 from v2i.src.core.occupancy import Grid
 from v2i.src.ui.ui import ui
@@ -57,6 +57,18 @@ class V2I(gym.Env):
     def initGymProp(self, obsHandler):
         self.observation_space = obsHandler.observation_space
         
+        # Intialize Action Encoder and Decoder
+        self.actionEncoderDecoderHandler = ActionEncoderDecoder(self.egoControllerHandler.planSpace(), self.gridHandler.querySpace())
+        
+        # Encode Actions
+        self.actionEncoderDecoderHandler.encodeActions()
+
+        # Get Action Space
+        self.action_space = self.actionEncoderDecoderHandler.getActionSpace()
+
+        # Get Action Map
+        self.action_map = self.actionEncoderDecoderHandler.actMap
+        
     def buildlaneMap(self, trajecDict, trajecIndex, epsiodeDensity, numCars):
         laneMap = {}
         for lane in range(0, constants.LANES):
@@ -68,7 +80,7 @@ class V2I(gym.Env):
             laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
         return laneMap
     
-    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid):
+    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid, planAct, queryAct):
         data = {}
         agentID = np.where(self.lane_map[agentLane]['agent'] == 1)[0]
         data["allData"] = laneMap
@@ -79,6 +91,8 @@ class V2I(gym.Env):
         data["extendedViewRange"] = extendedRange
         data["agentLane"] = agentLane
         data["occGrid"] = occGrid
+        data["planAct"] = planAct
+        data["queryAct"] = queryAct
         return data
 
     def reset(self, density=None):
@@ -117,17 +131,20 @@ class V2I(gym.Env):
         self.lane_map[self.agent_lane][self.randomIDX]['agent'] = 1
         
         #---- Get Occupancy & Velocity Grids ----#
-        occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane)
+        occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
         #---- Get Occupancy & Velocity Grids ----#
 
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null"))
 
     def step(self, action):
 
-        # Perform the required action
-        egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(action, self.lane_map, self.agent_lane)
+        # Decodes Action -> Plan Action, Query Action
+        planAct, queryAct = self.actionEncoderDecoderHandler.decodeAction(action)
+        
+        # Perform the required planing action
+        egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(planAct, self.lane_map, self.agent_lane)
 
         # Change Lane if lane changes is asked and is valid
         if(laneToChange != self.agent_lane and collision == False):
@@ -136,7 +153,7 @@ class V2I(gym.Env):
             self.lane_map[self.agent_lane] = np.delete(self.lane_map[self.agent_lane], agentIDX)
             self.lane_map[laneToChange] = np.append(egoVehicleProp, self.lane_map[laneToChange])
             self.agent_lane = laneToChange
-            egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(2, self.lane_map, self.agent_lane)
+            egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction("do-nothing", self.lane_map, self.agent_lane)
         
         # Update Agent Location and Speed
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
@@ -149,11 +166,11 @@ class V2I(gym.Env):
         self.time_elapsed += self.simArgs.getValue("t-period")
 
         #---- Get Occupancy & Velocity Grids ----#
-        occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane)
+        occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, queryAct)
         #---- Get Occupancy & Velocity Grids ----#
 
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct))
         
         return collision

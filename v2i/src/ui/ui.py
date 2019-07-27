@@ -111,7 +111,7 @@ class ui:
     def str2font(self, msgStr):
         return self.font.render(msgStr, False, (0, 0, 0))
 
-    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed, viewRange, extendedViewInMetre, agentLane):
+    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed, viewRange, extendedViewInMetre, agentLane, planAct, queryAct):
         self.resetInfoBoardLoc()
         screen.blit(self.infoBoard, self.infoBoardDim)
         
@@ -156,6 +156,20 @@ class ui:
         screen.blit(agentLaneStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Agent Lane ----#
+
+        #---- Plan Action ----#
+        planActString = 'Plan Action : %s'%(planAct)
+        planActStringText = self.str2font(planActString)
+        screen.blit(planActStringText, (self.infoBoardCurX, self.infoBoardCurY))
+        self.infoBoardCurY += constants.INFO_BOARD_GAP
+        #---- Plan Action ----#
+
+        #---- Query Act ----#
+        queryActString = 'Query Region : %s'%(queryAct)
+        queryActStringText = self.str2font(queryActString)
+        screen.blit(queryActStringText, (self.infoBoardCurX, self.infoBoardCurY))
+        self.infoBoardCurY += constants.INFO_BOARD_GAP
+        #---- Query Act ----#
 
     def drawGrids(self, screen, color, occGrid, agentID, extendedViewInMetre, laneMap, agentLane):
         agentPos = laneMap[agentLane][agentID]['pos']
@@ -214,7 +228,7 @@ class ui:
         self.drawAllCars(data["allData"])
         
         # Update Information Board data
-        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["extendedViewRange"], data["agentLane"])
+        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["extendedViewRange"], data["agentLane"], data["planAct"], data["queryAct"])
         
         # Update pygame screen
         pygame.display.flip()
