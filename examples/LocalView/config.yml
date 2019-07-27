@@ -4,7 +4,7 @@ config:
   t-period: 0.1 # in secs
 
   # IDM settings
-  max-speed: 9 # in m/s
+  max-speed: 10 # in m/s
   local-view: 20 # in metres
   extended-view: 40 # in metres
   cell-size: 1 # in metres

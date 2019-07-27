@@ -1,16 +1,18 @@
 import math
 import numpy as np
 
+from gym.spaces import Box
 from v2i.src.core.utils import raiseValueError
-from v2i.src.core.constants import CAR_LENGTH, LANE_RADIUS, SCALE, LANES
+from v2i.src.core.constants import CAR_LENGTH, LANE_RADIUS, SCALE, LANES, OCCGRID_CONSTS
 from v2i.src.core.common import getAgentID, arcAngle, arcLength
 
 class Grid:
 
-    def __init__(self, localView, extendedView=None, cellSize=1):
+    def __init__(self, localView, maxSpeed, extendedView=None, cellSize=1):
         self.localView = localView # in metre
         self.cellSize = cellSize # in metre
         self.extendedView = extendedView
+        self.maxSpeed = maxSpeed
 
         #---- Checks ----#
         if self.extendedView == None:
@@ -36,6 +38,19 @@ class Grid:
 
         self.init()
     
+    def initObservationSpace(self):
+        gridSize = self.numCols * LANES
+        
+        occBoundLow = np.ones((LANES, self.numCols)) * OCCGRID_CONSTS[min(OCCGRID_CONSTS, key=OCCGRID_CONSTS.get)]
+        occBoundHigh = np.ones((LANES, self.numCols)) * OCCGRID_CONSTS[max(OCCGRID_CONSTS, key=OCCGRID_CONSTS.get)]
+        
+        velGridBoundLow = np.ones((LANES, self.numCols)) * 0.0
+        velGridBoundHigh = np.ones((LANES, self.numCols)) * self.maxSpeed
+
+        obsLowBound = np.concatenate((occBoundLow.flatten(), velGridBoundLow.flatten())).astype(np.float)
+        obsHighBound = np.concatenate((occBoundHigh.flatten(), velGridBoundHigh.flatten())).astype(np.float)
+        
+        self.observation_space = Box(low=obsLowBound, high=obsHighBound, dtype=np.float)
 
     def init(self):
         '''
@@ -46,6 +61,9 @@ class Grid:
         for lane in range(0, LANES):
             self.halfExtendedViewInAngle.append(arcAngle(LANE_RADIUS[lane], (self.extendedView/2) * SCALE))
             self.shift.append(arcAngle(LANE_RADIUS[lane], (CAR_LENGTH/2) * SCALE))
+        
+        # Intialize Observation Space 
+        self.initObservationSpace()
         
     def getOccupancyGrid(self, laneMap, agentLane):
         occGrid = np.zeros((2, self.numCols))

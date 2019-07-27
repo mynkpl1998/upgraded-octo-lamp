@@ -41,7 +41,7 @@ class V2I(gym.Env):
         self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"), self.simArgs.getValue("local-view"))
 
         # Intialize Grid Handler here
-        self.gridHandler = Grid(self.simArgs.getValue("local-view"), self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
+        self.gridHandler = Grid(self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
 
         # Inititalize UI Handler here
         if self.simArgs.getValue("render"):
@@ -50,6 +50,12 @@ class V2I(gym.Env):
         
         # Initialize Ego Vehicle controller here
         self.egoControllerHandler = egoController(self.simArgs.getValue("t-period"), self.simArgs.getValue("max-speed"))
+
+        # Init Gym Env Properties
+        self.initGymProp(self.gridHandler)
+    
+    def initGymProp(self, obsHandler):
+        self.observation_space = obsHandler.observation_space
         
     def buildlaneMap(self, trajecDict, trajecIndex, epsiodeDensity, numCars):
         laneMap = {}

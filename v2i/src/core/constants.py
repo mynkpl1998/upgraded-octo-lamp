@@ -41,3 +41,11 @@ IDM_CONSTS = {
     'MIN_SPACING': 2,
     'DELTA': 4 
 }
+
+# Observation Grid constants
+OCCGRID_CONSTS = {
+    'FREE' : 0,
+    'OCCUPIED' : 1,
+    'AGENT' : 2,
+    'UNKNOWN' : 3,
+}
