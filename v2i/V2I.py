@@ -137,6 +137,12 @@ class V2I(gym.Env):
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
             self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null"))
+        
+        return self.buildObservation(occGrid, velGrid)
+    
+    def buildObservation(self, occGrid, velGrid):
+        combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
+        return combinedObs.copy()
 
     def step(self, action):
 
@@ -173,4 +179,5 @@ class V2I(gym.Env):
         if self.simArgs.getValue("render"):
             self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct))
         
-        return collision
+        # state, reward, done, info
+        return self.buildObservation(occGrid, velGrid), 0.0, collision, {}
