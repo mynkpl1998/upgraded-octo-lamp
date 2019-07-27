@@ -77,7 +77,7 @@ class ui:
         self.infoBoardCurY = self.infoBoardY + 10
     
     def initFonts(self):
-        self.font = pygame.font.SysFont('Comic Sans MS', constants.FONT_SIZE)
+        self.font = pygame.font.Font("v2i/src/data/fonts/RobotoSlab-Bold.ttf", constants.FONT_SIZE)
     
     def initClock(self):
         self.clock = pygame.time.Clock()
@@ -119,42 +119,42 @@ class ui:
         timeString = 'Time Elapsed : %d secs'%(timeElapsed)
         timeStringText = self.str2font(timeString)
         screen.blit(timeStringText, (self.infoBoardCurX, self.infoBoardCurY))
-        self.infoBoardCurY += 30
+        self.infoBoardCurY += constants.INFO_BOARD_GAP
         # ---- Time Elapsed ---- #
 
         # ---- Agent Speed ---- #
         speedString = 'Agent Speed : %.2f km/hr'%(round((18/5.0)*agentSpeed, 2))
         speedStringText = self.str2font(speedString)
         screen.blit(speedStringText, (self.infoBoardCurX, self.infoBoardCurY))
-        self.infoBoardCurY += 30
+        self.infoBoardCurY += constants.INFO_BOARD_GAP
         # ---- Agent Speed ---- #
 
         # ---- Max Speed ---- #
         maxSpeedString = 'Max Speed : %.2f km/hr'%(round((18/5.0)*maxSpeed, 2))
         maxspeedStringText = self.str2font(maxSpeedString)
         screen.blit(maxspeedStringText, (self.infoBoardCurX, self.infoBoardCurY))
-        self.infoBoardCurY += 30
+        self.infoBoardCurY += constants.INFO_BOARD_GAP
         # ---- Max Speed ---- #
 
         #---- Local Visiblity ----#
         localVisiblityString = 'Local Visiblity : %.2f m'%(viewRange)
         localVisibliyStringText = self.str2font(localVisiblityString)
         screen.blit(localVisibliyStringText, (self.infoBoardCurX, self.infoBoardCurY))
-        self.infoBoardCurY += 30
+        self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Local Visiblity ----#
 
         #---- Extended View  ----#
         extendedVisiblityString = 'Extended Visiblity : %.2f m'%(extendedViewInMetre)
         extendedVisibliyStringText = self.str2font(extendedVisiblityString)
         screen.blit(extendedVisibliyStringText, (self.infoBoardCurX, self.infoBoardCurY))
-        self.infoBoardCurY += 30
+        self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Extended View  ----#
 
         #---- Agent Lane ----#
         agentLaneString = 'Agent Lane : %d'%(agentLane)
         agentLaneStringText = self.str2font(agentLaneString)
         screen.blit(agentLaneStringText, (self.infoBoardCurX, self.infoBoardCurY))
-        self.infoBoardCurY += 30
+        self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Agent Lane ----#
 
     def drawGrids(self, screen, color, occGrid, agentID, extendedViewInMetre, laneMap, agentLane):
@@ -219,6 +219,5 @@ class ui:
 
         # FPS clock
         self.clock.tick(self.fps)
-        #time.sleep(100)
 
 
