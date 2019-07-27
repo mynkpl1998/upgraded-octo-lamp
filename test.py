@@ -10,7 +10,7 @@ print(obj.action_space)
 print(obj.action_map)
 
 for i in range(0, 1):
-    state = obj.reset(0.1)
+    state = obj.reset(0.2)
 
 for i in range(0, 100000):
     act = obj.action_space.sample()

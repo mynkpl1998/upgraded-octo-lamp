@@ -28,7 +28,7 @@ class egoController:
     def initLaneChangeAngle(self):
         self.laneChangeAngle = []
         for lane in range(0, LANES):
-            self.laneChangeAngle.append(arcAngle(LANE_RADIUS[lane], (CAR_LENGTH/2 + 1) * SCALE))
+            self.laneChangeAngle.append(arcAngle(LANE_RADIUS[lane], (CAR_LENGTH) * SCALE))
     
     def initCollisionAngle(self):
         '''
