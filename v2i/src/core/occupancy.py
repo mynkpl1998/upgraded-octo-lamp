@@ -116,21 +116,13 @@ class Grid:
         '''
         Manually handle the bug which prevents the detection of vehicles near ego vehicles in other lane.
         '''
-        lowLimit = agentPos - 10
-        highLimit = agentPos + 10
-        allLanes = [0, 1]
-        allLanes.remove(agentLane)
-        lowLimit = agentPos - 2
-        lowLimit %= 360
-        highLimit = agentPos + 2
-        highLimit %= 360
-
         for lane in range(0, LANES):
+            shift = self.shift[lane]
             forward_done = False
             _next_ = None
 
             for j in range(0, laneMap[lane].shape[0]):
-                if(laneMap[lane][j]['pos'] - self.shift[lane] > agentPos):
+                if(laneMap[lane][j]['pos'] - shift > agentPos):
                     _next_ = j
                     break
 
@@ -145,10 +137,10 @@ class Grid:
                 if(next_car_angle <= agentPos):
                     next_car_angle += 360
                 
-                angleDiff = next_car_angle - agentPos - self.shift[lane]
+                angleDiff = next_car_angle - agentPos -shift
                 angleDiff = angleDiff % 360
 
-                if(angleDiff < self.halfExtendedViewInAngle[lane]):
+                if(angleDiff <= self.halfExtendedViewInAngle[lane]):
                     count_forward += 1
                     copy_next += 1
                     if(copy_next > (laneMap[lane].shape[0] - 1)):
@@ -163,7 +155,8 @@ class Grid:
                 if(next_car_angle < agentPos):
                     next_car_angle += 360
                 
-                angleDiff = next_car_angle - agentPos - self.shift[lane]
+                angleDiff = next_car_angle - agentPos - shift
+                angleDiff = angleDiff % 360
 
                 if (angleDiff <= self.halfExtendedViewInAngle[lane]):
                     dist = arcLength(LANE_RADIUS[lane], angleDiff)
@@ -174,6 +167,7 @@ class Grid:
                     numIndexs = math.ceil((CAR_LENGTH * 0.5) / self.cellSize)
                     occGrid[lane][halfLen + int(index)] = 1
                     velGrid[lane][halfLen + int(index)] = next_car_speed
+                    
                     if((_next_ + 1) > (laneMap[lane].shape[0]- 1)):
                         _next_ = 0
                     else:
@@ -182,14 +176,14 @@ class Grid:
         numIndexesOthers = math.ceil(CAR_LENGTH/self.cellSize)
         half = int(occGrid[0].shape[0]/2) - 1
         tmpCopy = np.copy(occGrid)
-
+        
         for lane in range(0, LANES):
             for idx in range(half, occGrid[lane].shape[0]):
                 if(tmpCopy[lane][idx] == 1):
                     occGrid[lane][idx+1:idx + numIndexesOthers + 1] = 1
                     val = velGrid[lane][idx]
                     velGrid[lane][idx+1:idx + numIndexesOthers + 1] = val
-        
+
         tmp = {}
         tmp[0] = np.sort(laneMap[0], order=['pos'])[::-1]
         tmp[1] = np.sort(laneMap[1], order=['pos'])[::-1]
@@ -199,7 +193,7 @@ class Grid:
             _prev_ = None
 
             for j in range(0, tmp[lane].shape[0]):
-                if(tmp[lane][j]['pos'] + self.shift[lane] < agentPos):
+                if(tmp[lane][j]['pos'] + shift < agentPos):
                     _prev_ = [i for i, tup in enumerate(laneMap[lane]) if tup['pos'] == tmp[lane][j]['pos']][0]
                     break
                 
@@ -211,7 +205,7 @@ class Grid:
 
             for x in range(0, laneMap[lane].shape[0]):
 
-                prev_car_angle = laneMap[lane][copy_prev]['pos'] + self.shift[lane]
+                prev_car_angle = laneMap[lane][copy_prev]['pos'] + shift
                 angleDiff = (agentPos - prev_car_angle)
                 angleDiff = angleDiff % 360
 
@@ -225,7 +219,7 @@ class Grid:
             
             for x in range(0, count):
 
-                prev_car_angle = laneMap[lane][_prev_]['pos'] + self.shift[lane]
+                prev_car_angle = laneMap[lane][_prev_]['pos'] + shift
                 prev_car_speed = laneMap[lane][_prev_]['speed']
                 angleDiff = (agentPos - prev_car_angle)
                 angleDiff %= 360
@@ -240,57 +234,55 @@ class Grid:
                     velGrid[lane][halfLen - 1 - int(index)] = prev_car_speed
                     _prev_ -= 1
         
-        tmpCopy = np.copy(occGrid)
-        halfLen = int(occGrid[0].shape[0]/2)
+        tmp_copy = np.copy(occGrid)
+        half_len = int(occGrid[0].shape[0]/2)
         numIndexs = math.ceil((CAR_LENGTH * 0.5)/self.cellSize)
         numIndexesOthers = math.ceil(CAR_LENGTH/self.cellSize)
 
         for lane in range(0, LANES):
-            for idx in range(0, halfLen):
-                if(tmpCopy[lane][idx] == 1):
-                    if(idx - numIndexesOthers <= 0):
-                        occGrid[lane][0:idx] = 1
-                        val = velGrid[lane][idx]
-                        velGrid[lane][0:idx] = val
+            for i in range(0, half_len):
+
+                if(tmp_copy[lane][i] == 1):
+                    
+                    if(i - numIndexesOthers <= 0):
+                        occGrid[lane][0:i] = 1
+                        val = velGrid[lane][i]
+                        velGrid[lane][0:i] = val
                     else:
-                        occGrid[lane][idx - numIndexesOthers : idx] = 1
-                        val = velGrid[lane][idx]
-                        velGrid[lane][idx - numIndexesOthers:idx] = val
-
-        halfLen = int(occGrid[0].shape[0]/2)
+                        occGrid[lane][i - numIndexesOthers:i] = 1
+                        val = velGrid[lane][i]
+                        velGrid[lane][i - numIndexesOthers:i] = val
+        
+        half_len = int(occGrid[0].shape[0]/2)
         numIndexs = math.ceil((CAR_LENGTH * 0.5)/self.cellSize)
-        occGrid[agentLane][halfLen-1] = 2
-        occGrid[agentLane][halfLen-1+1:halfLen-1+numIndexs+1] = 2
-        occGrid[agentLane][halfLen-1-numIndexs:halfLen-1] = 2
-        velGrid[agentLane][halfLen-1] = laneMap[agentLane][agentID]['speed']
-        velGrid[agentLane][halfLen-1+1:halfLen-1+numIndexs+1] = laneMap[agentLane][agentID]['speed']
-        velGrid[agentLane][halfLen-1-numIndexs:halfLen-1] = laneMap[agentLane][agentID]['speed']
+        occGrid[agentLane][half_len - 1] = 2
+        occGrid[agentLane][half_len-1+1:half_len-1+numIndexs+1] = 2
+        occGrid[agentLane][half_len-1-numIndexs:half_len-1] = 2
+        velGrid[agentLane][half_len - 1] = laneMap[agentLane][agentID]['speed']
+        velGrid[agentLane][half_len-1+1:half_len-1+numIndexs+1] = laneMap[agentLane][agentID]['speed']
+        velGrid[agentLane][half_len-1-numIndexs:half_len-1] = laneMap[agentLane][agentID]['speed']
 
+        low_range = agentPos - shift
+        high_range = agentPos + shift
+        other_lanes = [0, 1]
+        other_lanes.pop(agentLane)
+        for other_lane in other_lanes:
+            for car in range(0, laneMap[other_lane].shape[0]):
 
-        '''
-        lowRange = agentPos - self.shift[agentLane]
-        highRange = agentPos = self.shift[agentLane]
-        otherLanes = [0, 1]
-        otherLanes.pop(agentLane)
-
-        for otherLane in otherLanes:
-            for car in range( laneMap[otherLane].shape[0]):
-                if(laneMap[otherLane][car]['pos'] >= lowRange and laneMap[otherLane][car]['pos'] <= highRange):
-                    viewAngle = agentPos - self.halfExtendedViewInAngle[lane]
-                    angleDiff = laneMap[otherLane][car]['pos'] - viewAngle
-                    angleDiff = angleDiff % 360
-
-                    dist = arcLength(LANE_RADIUS[lane], angleDiff)
+                if(laneMap[other_lane][car]['pos'] >= low_range and laneMap[other_lane][car]['pos'] <= high_range):
+                    view_angle = agentPos - self.halfExtendedViewInAngle[other_lane]
+                    angleDiff = laneMap[other_lane][car]['pos'] - view_angle
+                    dist = arcLength(LANE_RADIUS[other_lane], angleDiff)
                     distInMetres = dist / SCALE
                     index = distInMetres / float(self.cellSize)
-                    occGrid[otherLane][int(index)] = 1
-                    velGrid[otherLane][int(index)] = laneMap[otherLane][car]['speed']
-                    occGrid[otherLane][int(index)+1:int(index)+numIndexs+1] = 1
-                    occGrid[otherLane][int(index)-numIndexs:int(index)] = 1
-                    val = velGrid[otherLane][int(index)]
-                    velGrid[otherLane][int(index)+1:int(index)+numIndexs+1] = val
-                    velGrid[otherLane][int(index)-numIndexs:int(index)] = val
-        '''
+                    occGrid[other_lane][int(index)] = 1
+                    velGrid[other_lane][int(index)] = laneMap[other_lane][car]['speed']
+                    occGrid[other_lane][int(index)+1:int(index)+numIndexs+1] = 1
+                    occGrid[other_lane][int(index)-numIndexs:int(index)] = 1
+                    val = velGrid[other_lane][int(index)]
+                    velGrid[other_lane][int(index)+1:int(index)+numIndexs+1] = val
+                    velGrid[other_lane][int(index)-numIndexs:int(index)] = val
+
         return occGrid, velGrid
     
     def verifyGrids(self, occGrid, velGrid):
