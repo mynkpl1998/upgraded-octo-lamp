@@ -9,14 +9,12 @@ obj.seed(10)
 print(obj.action_space)
 print(obj.action_map)
 
-for i in range(0, 1):
-    state = obj.reset(0.1)
+for i in range(0, 100):
+    obj.reset()
 
-for i in range(0, 100000):
-    #act = obj.action_space.sample()
-    act = 1
-    state, reward, gameOver, info = obj.step(act)
-    #print(reward)
+    while True:
+        act = 0
+        state, reward, done, info = obj.step(act)
 
-    if gameOver:
-        break
+        if done:
+            break
