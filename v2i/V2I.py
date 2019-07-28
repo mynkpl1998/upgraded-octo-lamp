@@ -95,7 +95,16 @@ class V2I(gym.Env):
         data["queryAct"] = queryAct
         return data
 
+    def fixIssue2(self, density):
+        if density == 0.3:
+            return self.densities[2]
+        elif density == 0.7:
+            return self.densities[6]
+        else:
+            return density
+        
     def reset(self, density=None):
+        density = self.fixIssue2(density)
         # ---- Density Generation ----#
         epsiodeDensity = None
         if density == None:
