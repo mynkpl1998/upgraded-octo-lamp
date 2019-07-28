@@ -1,6 +1,6 @@
 # V2I
 
-V2I is an open-source simulator for autonomous driving research developed at Cyber-Physical Systems Lab IIIT-Delhi. It has been developed to address the need of a simualtor which can simulate Vehicle-To-Infrastructure communication. The simulator is designed primarily to learn driving and querying policies using Reinforcement Learning.
+V2I is an open-source simulator for autonomous driving research developed at Cyber-Physical Systems Lab IIIT-Delhi. It has been developed to address the need of a simulator which can simulate Vehicle-To-Infrastructure communication. The simulator is designed primarily to learn driving and querying policies using Reinforcement Learning.
 
 <p align="center">
   <img width="340" height="305" src="v2i/src/data/images/logo.gif">
