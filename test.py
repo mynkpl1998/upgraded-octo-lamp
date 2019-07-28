@@ -9,6 +9,8 @@ obj.seed(10)
 print(obj.action_space)
 print(obj.action_map)
 
+time.sleep(10)
+
 for i in range(0, 1):
     state = obj.reset(0.1)
 

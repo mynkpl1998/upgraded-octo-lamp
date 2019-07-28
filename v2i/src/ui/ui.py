@@ -116,63 +116,63 @@ class ui:
         screen.blit(self.infoBoard, self.infoBoardDim)
         
         # ---- Time Elapsed ---- #
-        timeString = 'Time Elapsed : %d secs'%(timeElapsed)
+        timeString = 'Time Elapsed : \t\t%d secs'%(timeElapsed)
         timeStringText = self.str2font(timeString)
         screen.blit(timeStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         # ---- Time Elapsed ---- #
 
         # ---- Agent Speed ---- #
-        speedString = 'Agent Speed : %.2f km/hr'%(round((18/5.0)*agentSpeed, 2))
+        speedString = 'Agent Speed : \t\t%.2f km/hr'%(round((18/5.0)*agentSpeed, 2))
         speedStringText = self.str2font(speedString)
         screen.blit(speedStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         # ---- Agent Speed ---- #
 
         # ---- Max Speed ---- #
-        maxSpeedString = 'Max Speed : %.2f km/hr'%(round((18/5.0)*maxSpeed, 2))
+        maxSpeedString = 'Max Speed : \t\t%.2f km/hr'%(round((18/5.0)*maxSpeed, 2))
         maxspeedStringText = self.str2font(maxSpeedString)
         screen.blit(maxspeedStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         # ---- Max Speed ---- #
 
         #---- Local Visiblity ----#
-        localVisiblityString = 'Total Local Visiblity : %.2f m'%(viewRange)
+        localVisiblityString = 'Total Local Visiblity : \t\t%.2f m'%(viewRange)
         localVisibliyStringText = self.str2font(localVisiblityString)
         screen.blit(localVisibliyStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Local Visiblity ----#
 
         #---- Extended View  ----#
-        extendedVisiblityString = 'Total Extended Visiblity : %.2f m'%(extendedViewInMetre)
+        extendedVisiblityString = 'Total Extended Visiblity : \t\t%.2f m'%(extendedViewInMetre)
         extendedVisibliyStringText = self.str2font(extendedVisiblityString)
         screen.blit(extendedVisibliyStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Extended View  ----#
 
         #---- Agent Lane ----#
-        agentLaneString = 'Agent Lane : %d'%(agentLane)
+        agentLaneString = 'Agent Lane : \t\t%d'%(agentLane)
         agentLaneStringText = self.str2font(agentLaneString)
         screen.blit(agentLaneStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Agent Lane ----#
 
         #---- Plan Action ----#
-        planActString = 'Plan Action : %s'%(planAct)
+        planActString = 'Plan Action : \t\t%s'%(planAct)
         planActStringText = self.str2font(planActString)
         screen.blit(planActStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Plan Action ----#
 
         #---- Query Act ----#
-        queryActString = 'Query Region : %s'%(queryAct)
+        queryActString = 'Query Region : \t\t%s'%(queryAct)
         queryActStringText = self.str2font(queryActString)
         screen.blit(queryActStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Query Act ----#
 
         #---- Agent Reward ----#
-        rewardString = 'Reward : %s'%(agentReward)
+        rewardString = 'Reward : \t\t%s'%(agentReward)
         rewardStringText = self.str2font(rewardString)
         screen.blit(rewardStringText, (self.infoBoardCurX, self.infoBoardCurY))
         self.infoBoardCurY += constants.INFO_BOARD_GAP
