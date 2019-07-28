@@ -74,7 +74,7 @@ class ui:
 
     def resetInfoBoardLoc(self):
         self.infoBoardCurX = self.infoBoardX + 10
-        self.infoBoardCurY = self.infoBoardY + 10
+        self.infoBoardCurY = self.infoBoardY
     
     def initFonts(self):
         self.font = pygame.font.Font("v2i/src/data/fonts/RobotoSlab-Bold.ttf", constants.FONT_SIZE)
@@ -111,7 +111,7 @@ class ui:
     def str2font(self, msgStr):
         return self.font.render(msgStr, False, (0, 0, 0))
 
-    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed, viewRange, extendedViewInMetre, agentLane, planAct, queryAct):
+    def updateInfoBoard(self, screen, agentSpeed, maxSpeed, timeElapsed, viewRange, extendedViewInMetre, agentLane, planAct, queryAct, agentReward):
         self.resetInfoBoardLoc()
         screen.blit(self.infoBoard, self.infoBoardDim)
         
@@ -171,6 +171,13 @@ class ui:
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Query Act ----#
 
+        #---- Agent Reward ----#
+        rewardString = 'Reward : %s'%(agentReward)
+        rewardStringText = self.str2font(rewardString)
+        screen.blit(rewardStringText, (self.infoBoardCurX, self.infoBoardCurY))
+        self.infoBoardCurY += constants.INFO_BOARD_GAP
+        #---- Agent Reward ----#
+
     def drawGrids(self, screen, color, occGrid, agentID, extendedViewInMetre, laneMap, agentLane):
         agentPos = laneMap[agentLane][agentID]['pos']
         self.startAngleDeg = []
@@ -228,12 +235,10 @@ class ui:
         self.drawAllCars(data["allData"])
         
         # Update Information Board data
-        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["extendedViewRange"], data["agentLane"], data["planAct"], data["queryAct"])
+        self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["extendedViewRange"], data["agentLane"], data["planAct"], data["queryAct"], data["agentReward"])
         
         # Update pygame screen
         pygame.display.flip()
 
         # FPS clock
         self.clock.tick(self.fps)
-
-

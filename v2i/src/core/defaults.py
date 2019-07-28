@@ -8,6 +8,9 @@ DEFAULT_DICT = {
     'cell-size' : 1, # in metres
     'reg-size': 5, # size of 1 comm region in metres
 
+    # Reward Function
+    'collision-penalty': -100,
+
     # IDM Settings
     'max-speed': 9, # in m/s
 

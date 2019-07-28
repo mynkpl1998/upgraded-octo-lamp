@@ -80,7 +80,7 @@ class V2I(gym.Env):
             laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
         return laneMap
     
-    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid, planAct, queryAct):
+    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid, planAct, queryAct, agentReward):
         data = {}
         agentID = np.where(self.lane_map[agentLane]['agent'] == 1)[0]
         data["allData"] = laneMap
@@ -93,6 +93,7 @@ class V2I(gym.Env):
         data["occGrid"] = occGrid
         data["planAct"] = planAct
         data["queryAct"] = queryAct
+        data["agentReward"] = agentReward
         return data
 
     def fixIssue2(self, density):
@@ -145,13 +146,17 @@ class V2I(gym.Env):
 
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null"))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"))
         
         return self.buildObservation(occGrid, velGrid)
     
     def buildObservation(self, occGrid, velGrid):
         combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
         return combinedObs.copy()
+    
+    def rewardFunc(self, laneMap, agentLane):
+        agentIDX = getAgentID(laneMap, agentLane)
+        return laneMap[agentLane][agentIDX]['speed']
 
     def step(self, action):
 
@@ -184,9 +189,15 @@ class V2I(gym.Env):
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, queryAct)
         #---- Get Occupancy & Velocity Grids ----#
 
+        #---- Calculate Reward ----#
+        reward = self.rewardFunc(self.lane_map, self.agent_lane)
+        if collision:
+            reward = self.simArgs.getValue("collision-penalty")
+        #---- Calculate Reward ----#
+
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 1)))
         
         # state, reward, done, info
-        return self.buildObservation(occGrid, velGrid), 0.0, collision, {}
+        return self.buildObservation(occGrid, velGrid), reward, collision, {}

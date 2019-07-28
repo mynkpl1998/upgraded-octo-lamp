@@ -10,7 +10,7 @@ print(obj.action_space)
 print(obj.action_map)
 
 for i in range(0, 1):
-    state = obj.reset(1.0)
+    state = obj.reset(0.1)
 
 for i in range(0, 100000):
     #act = obj.action_space.sample()
@@ -18,3 +18,7 @@ for i in range(0, 100000):
     if i == 200:
         act = 3
     state, reward, gameOver, info = obj.step(act)
+    print(reward)
+
+    if gameOver:
+        break

@@ -10,6 +10,9 @@ config:
   reg-size: 5 # in metres
   cell-size: 1 # in metres
 
+  # Reward Function
+  collision-penalty: -10
+
   # UI settings
   render: true
   fps: 30
