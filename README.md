@@ -22,8 +22,10 @@ We recommend you to use virtual environment like conda for installation. You can
 
 ```
 conda create -n v2i python=3.6
-pip install -r requirements.txt
-
 # Activate the environment
 conda activate v2i
+
+# Install all required dependencies
+pip install -r requirements.txt
+
 ```
