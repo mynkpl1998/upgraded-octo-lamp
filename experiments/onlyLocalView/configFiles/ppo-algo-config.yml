@@ -29,11 +29,11 @@ EXP_NAME:
 
     # ---- SGD Configs ---- #
     # Size of batches collected from each worker
-    sample_batch_size : 64
+    sample_batch_size : 200
     # Total SGD batch size across all devices for SGD
-    sgd_minibatch_size: 512
+    sgd_minibatch_size: 4086
     # Number of timesteps collected for each SGD round (leave this, script will autofill this according to best value)
-    train_batch_size: 6144
+    train_batch_size: 
     # Whether to shuffle sequences in the batch when training (recommended)
     # shuffle_sequences: true (not implemented in release 0.7.2)
     # Number of SGD iterations in each outer loop
