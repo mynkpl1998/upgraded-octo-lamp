@@ -16,5 +16,8 @@ DEFAULT_DICT = {
 
     # UI settings
     'render': True,
-    'fps': 120
+    'fps': 120,
+
+    # Set Mode
+    'mode': 'train'
 }

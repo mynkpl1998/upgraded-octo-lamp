@@ -28,4 +28,6 @@ conda activate v2i
 # Install all required dependencies
 pip install -r requirements.txt
 
+# Install Tensorflow
+conda install tensorflow-gpu
 ```

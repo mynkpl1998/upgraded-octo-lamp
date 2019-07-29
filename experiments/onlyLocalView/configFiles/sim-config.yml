@@ -11,14 +11,14 @@ config:
   cell-size: 1 # in metres
 
   # Reward Function
-  collision-penalty: -10
+  collision-penalty: -50
 
   # UI settings
   render: true
   fps: 30
 
   # Set Mode
-  mode: 'test'
+  mode: 'train'
 
 
   

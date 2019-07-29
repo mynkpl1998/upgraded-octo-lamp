@@ -35,6 +35,12 @@ class configParser:
         else:
             return self.defautDict[key]
     
+    def setValue(self, key, value):
+        if key not in self.defautDict:
+            raiseValueError("Trying to access invalid key -> %s"%(key))
+        else:
+            self.defautDict[key] = value
+    
     def getFullConfigDict(self,):
         return self.defautDict
          

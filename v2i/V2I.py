@@ -1,3 +1,5 @@
+import os
+import sys
 import gym
 import numpy as np
 import v2i.src.core.constants as constants
@@ -17,11 +19,16 @@ class V2I(gym.Env):
         # Parse Config file and return the handle
         self.simArgs = configParser(config)
 
+        # Set render based on mode
+        if self.simArgs.getValue("mode") == "train":
+            self.simArgs.setValue("render", False)
+
         # Seed the random number generator
         self.seed(self.simArgs.getValue("seed"))
 
         # Load Trajectories
-        self.trajecDict = loadPKL('v2i/src/data/trajec.pkl')
+        currPath = os.path.realpath(__file__)[:-6]
+        self.trajecDict = loadPKL(currPath + 'src/data/trajec.pkl')
         if self.trajecDict == None:
             raiseValueError("no or invalid trajectory file found at v2i/src/data/")
         
