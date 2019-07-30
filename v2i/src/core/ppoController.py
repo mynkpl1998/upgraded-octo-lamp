@@ -1,0 +1,32 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+class ppoController:
+
+    def __init__(self, sim_config, algoConfig, checkPointPath):
+
+        import ray
+        from ray.tune import run_experiments
+        from ray.tune.registry import register_env
+        from ray.rllib.agents.registry import get_agent_class
+        
+        from v2i import V2I
+
+        # Do Essentials
+        algoConfig["EXP_NAME"]["config"]["num_workers"] = 2
+        algoConfig["EXP_NAME"]["config"]["num_envs_per_worker"] = 1
+        algoConfig["EXP_NAME"]["config"]["train_batch_size"] = algoConfig["EXP_NAME"]["config"]["num_workers"] * algoConfig["EXP_NAME"]["config"]["sgd_minibatch_size"]
+        env_creator_name = "v2i-v0"
+        register_env(env_creator_name, lambda config: V2I.V2I(sim_config))
+
+        ray.init()
+        cls = get_agent_class('PPO')
+        self.agent = cls(env=env_creator_name, config=algoConfig["EXP_NAME"]["config"])
+        self.agent.restore(checkPointPath)
+        print("Loaded Checkpoint -> %s"%(checkPointPath))
+    
+
+    def getAction(self, state, lstm_state):
+        action, lstm_state, vf = self.agent.compute_action(state, lstm_state)
+        return action, lstm_state
