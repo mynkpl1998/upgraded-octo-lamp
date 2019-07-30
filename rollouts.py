@@ -13,6 +13,27 @@ parser.add_argument("-c", "--checkpoint-file", type=str, required=True, help="ch
 parser.add_argument("-tc", "--training-algo-config", type=str, required=True, help="algorithm configuration file")
 parser.add_argument("-sc", "--sim-config", type=str, required=True, help="simulation configuration file")
 
+def run_rollouts(args, env):
+    for episode in range(0, args.num_episodes):
+        # Check for specific density
+        if args.density != None:
+            prev_state = env.reset(args.density)
+        else:
+            prev_state = env.reset()
+        
+        # Init variables
+        lstm_state = [np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"]), np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"])]
+        episodeReward = 0.0
+        for step in range(0, args.episode_length):
+            action, lstm_state = controller.getAction(prev_state, lstm_state)
+            next_state, reward, done, info_dict = env.step(action)
+            episodeReward += reward
+            prev_state = next_state
+            if done:
+                break
+        print("Episode %d, Total Reward : %.2f"%(episode + 1, episodeReward))
+
+
 if __name__ == "__main__":
     
     # Parse arguments
@@ -27,32 +48,7 @@ if __name__ == "__main__":
     # Local Env
     env = V2I.V2I(args.sim_config)
 
-    print(env.action_map)
+    # Start rolling out :)...
+    run_rollouts(args, env)
 
-    # Loop
-    for episode in range(0, args.num_episodes):
-        
-        # Check for specific density
-        if args.density != None:
-            prev_state = env.reset(args.density)
-        else:
-            prev_state = env.reset()
-        
-        # Set lstm state
-        lstm_state = lstm_state = [np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"]), np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"])]
-        '''
-        if algoConfig["EXP_NAME"]["config"]["model"]["use_lstm"]:
-            
-        '''
-        episode_reward = 0.0
-        for step in range(0, args.episode_length):
-            action, lstm_state = controller.getAction(prev_state, lstm_state)
-            next_state, reward, done, info_dict = env.step(action)
-
-            episode_reward += reward
-            prev_state = next_state
-
-            if done:
-                break
-        
-        print("Episode %d, Total Reward : %.2f"%(episode + 1, episode_reward))
+    

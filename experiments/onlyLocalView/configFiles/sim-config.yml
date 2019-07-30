@@ -18,7 +18,7 @@ config:
   fps: 30
 
   # Set Mode
-  mode: 'train'
+  mode: 'test'
 
 
   
