@@ -15,10 +15,13 @@ config:
 
   # UI settings
   render: true
-  fps: 30
+  fps: 5
 
   # Set Mode
   mode: 'test'
+
+  # Frame Skip
+  frame-skip-value: 5
 
 
   

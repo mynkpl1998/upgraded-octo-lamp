@@ -19,5 +19,8 @@ DEFAULT_DICT = {
     'fps': 120,
 
     # Set Mode
-    'mode': 'train'
+    'mode': 'train',
+
+    # Frame Skip
+    'frame-skip-value': 1
 }

@@ -10,10 +10,10 @@ print(obj.action_space)
 print(obj.action_map)
 
 for i in range(0, 100):
-    obj.reset()
+    obj.reset(0.1)
 
     while True:
-        act = 0
+        act = obj.action_space.sample()
         state, reward, done, info = obj.step(act)
 
         if done:

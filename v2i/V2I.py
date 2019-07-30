@@ -164,8 +164,16 @@ class V2I(gym.Env):
     def rewardFunc(self, laneMap, agentLane):
         agentIDX = getAgentID(laneMap, agentLane)
         return laneMap[agentLane][agentIDX]['speed']
-
+    
     def step(self, action):
+        for i in range(self.simArgs.getValue("frame-skip-value")):
+            observation, reward, done, infoDict = self.frame(action)
+            if done:
+                return (observation, reward, done, infoDict)
+        return (observation, reward, done, infoDict)
+
+
+    def frame(self, action):
 
         # Decodes Action -> Plan Action, Query Action
         planAct, queryAct = self.actionEncoderDecoderHandler.decodeAction(action)
