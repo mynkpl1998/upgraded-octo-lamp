@@ -18,7 +18,7 @@ config:
   fps: 30
 
   # Set Mode
-  mode: 'test'
+  mode: 'train'
 
   # Frame Skip
   frame-skip-value: 5

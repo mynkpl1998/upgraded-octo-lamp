@@ -37,6 +37,10 @@ class V2I(gym.Env):
         # Initializes the required variables
         self.init()
 
+        # Check for valid frame-skip-value
+        if self.simArgs.getValue("frame-skip-value") <= 0:
+            raiseValueError("frame skip value should be at least one")
+
     def seed(self, value=0):
         np.random.seed(value)
     
@@ -166,11 +170,13 @@ class V2I(gym.Env):
         return laneMap[agentLane][agentIDX]['speed']
     
     def step(self, action):
+        cumReward = 0.0
         for i in range(self.simArgs.getValue("frame-skip-value")):
             observation, reward, done, infoDict = self.frame(action)
+            cumReward += reward
             if done:
-                return (observation, reward, done, infoDict)
-        return (observation, reward, done, infoDict)
+                return (observation, cumReward, done, infoDict)
+        return (observation, cumReward, done, infoDict)
 
 
     def frame(self, action):

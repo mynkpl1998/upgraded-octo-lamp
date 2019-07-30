@@ -13,7 +13,7 @@ for i in range(0, 100):
     obj.reset(0.1)
 
     while True:
-        act = obj.action_space.sample()
+        act = 3
         state, reward, done, info = obj.step(act)
 
         if done:

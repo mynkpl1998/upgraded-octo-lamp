@@ -21,7 +21,4 @@ config:
   mode: 'test'
 
   # Frame Skip
-  frame-skip-value: 5
-
-
-  
+  frame-skip-value: 1
