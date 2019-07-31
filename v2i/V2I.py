@@ -176,7 +176,6 @@ class V2I(gym.Env):
                 return (observation, reward, done, infoDict)
         return (observation, reward, done, infoDict)
 
-
     def frame(self, action):
 
         # Decodes Action -> Plan Action, Query Action
@@ -184,7 +183,7 @@ class V2I(gym.Env):
         
         # Perform the required planing action
         egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(planAct, self.lane_map, self.agent_lane)
-
+        
         # Change Lane if lane changes is asked and is valid
         if(laneToChange != self.agent_lane and collision == False):
             agentIDX = getAgentID(self.lane_map, self.agent_lane)
@@ -193,7 +192,7 @@ class V2I(gym.Env):
             self.lane_map[laneToChange] = np.append(egoVehicleProp, self.lane_map[laneToChange])
             self.agent_lane = laneToChange
             egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction("do-nothing", self.lane_map, self.agent_lane)
-        
+
         # Update Agent Location and Speed
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360

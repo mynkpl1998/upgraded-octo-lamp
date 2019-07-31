@@ -15,7 +15,7 @@ config:
 
   # UI settings
   render: true
-  fps: 5
+  fps: 120
 
   # Set Mode
   mode: 'test'

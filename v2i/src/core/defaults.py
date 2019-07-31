@@ -22,5 +22,5 @@ DEFAULT_DICT = {
     'mode': 'train',
 
     # Frame Skip
-    'frame-skip-value': 1
+    'frame-skip-value': 1,
 }
