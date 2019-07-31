@@ -127,8 +127,16 @@ class egoController:
         return distTravelledInDeg, newAgentSpeed, collision, agentLane
     
     def performLaneChange(self, laneMap, agentLane, agentIDX):
+        '''
+        Function : Checks for valid lane change operation and return pos, speed, lane change is valid or not.
+        Criteria :
+            1. If agent speed is greater than zero, only then lane change can be done.
+            2. lane change just changes the lane of the agent if it is valid and keeps it speed and postion unchanged.
+        '''
+        
         agentSpeed = laneMap[agentLane][agentIDX]['speed']
         agentPos = laneMap[agentLane][agentIDX]['pos']
+
         #---- Identify the neighbouring lane ----#
         if agentLane == 0:
             laneToChange = 1
@@ -139,6 +147,13 @@ class egoController:
         newAgentSpeed = agentSpeed
         newAgentSpeed = np.clip(newAgentSpeed, 0, self.maxSpeed)
         collision = False
+
+        if agentSpeed == 0.0:
+            distTravelledInDeg = 0.0
+            newAgentSpeed = 0.0
+            collision = True
+            return distTravelledInDeg, newAgentSpeed, collision, laneToChange
+        
         if not self.checkValidLaneChange(laneToChange, agentLane, laneMap, agentPos):
             distTravelledInDeg = 0.0
             newAgentSpeed = 0.0

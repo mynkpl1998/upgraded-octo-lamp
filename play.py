@@ -35,11 +35,8 @@ def runEpisode(env, reversedActMap, density):
     
     while True:
         act = reversedActMap["do-nothing,null"]
-        #act = reversedActMap["lane-change,null"]
         pygame.event.pump()
-        
         for event in pygame.event.get():
-            
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     act = reversedActMap["lane-change,null"]
@@ -49,7 +46,6 @@ def runEpisode(env, reversedActMap, density):
                     act = reversedActMap["dec,null"]
                 elif event.key == pygame.K_UP:
                     act = reversedActMap["acc,null"]
-    
         state, reward, done, _ = env.step(act)
         if done:
             break
