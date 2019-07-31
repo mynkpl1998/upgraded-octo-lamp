@@ -28,7 +28,6 @@ def init(env):
     return reversedActMap
 
 def runEpisode(env, reversedActMap, density):
-
     if density != None:
         env.reset(density)
     else:
@@ -50,8 +49,6 @@ def runEpisode(env, reversedActMap, density):
                     act = reversedActMap["dec,null"]
                 elif event.key == pygame.K_UP:
                     act = reversedActMap["acc,null"]
-        
-        #keys_pressed = pygame.key.get_pressed()
     
         state, reward, done, _ = env.step(act)
         if done:
