@@ -14,14 +14,14 @@ config:
   collision-penalty: -50
 
   # UI settings
-  render: true
+  render: false
   fps: 30
 
   # Set Mode
-  mode: 'train'
+  mode: 'test'
 
   # Frame Skip
-  frame-skip-value: 5
+  frame-skip-value: 1
 
 
   

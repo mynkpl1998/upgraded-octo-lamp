@@ -9,5 +9,6 @@ requests==2.22.0
 opencv-python==4.1.0.25
 lz4==2.1.10
 setproctitle==1.1.10
+tqdm==4.32.2
 ray[rllib]
 huepy
