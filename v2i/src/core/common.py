@@ -67,3 +67,9 @@ def arcLength(radius, arcAngleDeg):
 
 def reverseDict(dictToReverse):
     return dict(map(reversed, dictToReverse.items()))
+
+def buildDictWithKeys(keys, initValue):
+    d = {}
+    for key in keys:
+        d[key] = initValue
+    return d.copy()

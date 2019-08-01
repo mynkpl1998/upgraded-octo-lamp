@@ -26,19 +26,26 @@ def run_rollouts(args, env):
     dataDict = {}
     densityList = args.density
     
+    # ---- Meta-data ----#
+    dataDict["maxSpeed"] = env.simArgs.getValue("max-speed") * 3.6
+    dataDict["plan-acts"] = env.actionEncoderDecoderHandler.planSpace
+    dataDict["query-acts"] = env.actionEncoderDecoderHandler.querySpace
+    dataDict["data"] = {}
+    # ---- Meta-data ----#
+
     if len(densityList) == 0:
         for episode in range(0, args.num_episodes):
             densityList.append(getRandomDensity())
 
     for density in densityList:
         print("Running Simulation for %.1f density : "%(density))
-        dataDict[density] = {}
+        dataDict["data"][density] = {}
 
         for episode in tqdm(range(0, args.num_episodes)):
-            dataDict[density][episode] = {}
-            dataDict[density][episode]["speed"] = []
-            dataDict[density][episode]["rewards"] = []
-            dataDict[density][episode]["actions"] = []
+            dataDict["data"][density][episode] = {}
+            dataDict["data"][density][episode]["speed"] = []
+            dataDict["data"][density][episode]["rewards"] = []
+            dataDict["data"][density][episode]["actions"] = []
 
             prev_state = env.reset(density)
             # Init variables
@@ -51,9 +58,9 @@ def run_rollouts(args, env):
                 
                 #--- Saving data ----#
                 agentIDX = getAgentID(env.lane_map, env.agent_lane)
-                dataDict[density][episode]["speed"].append(env.lane_map[env.agent_lane][agentIDX]['speed'])
-                dataDict[density][episode]["rewards"].append(reward)
-                dataDict[density][episode]["actions"].append((env.planAct, env.queryAct))
+                dataDict["data"][density][episode]["speed"].append(env.lane_map[env.agent_lane][agentIDX]['speed'])
+                dataDict["data"][density][episode]["rewards"].append(reward)
+                dataDict["data"][density][episode]["actions"].append((env.planAct, env.queryAct))
                 #--- Saving data ----#
 
                 episodeReward += reward
