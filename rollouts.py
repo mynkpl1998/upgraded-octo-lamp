@@ -30,6 +30,7 @@ def run_rollouts(args, env):
     dataDict["maxSpeed"] = env.simArgs.getValue("max-speed") * 3.6
     dataDict["plan-acts"] = env.actionEncoderDecoderHandler.planSpace
     dataDict["query-acts"] = env.actionEncoderDecoderHandler.querySpace
+    dataDict["max-episode-length"] = args.episode_length
     dataDict["data"] = {}
     # ---- Meta-data ----#
 

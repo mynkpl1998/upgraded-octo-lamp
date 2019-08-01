@@ -21,12 +21,15 @@ def plot(simData, args):
     avgSpeed = []
     planDist = []
     queryDist = []
+    EpisodeLength = []
 
     for density in densitiesList:
         densityAvgSpeed = []
+        
         planDictCount = buildDictWithKeys(simData["plan-acts"], 0)
         queryDictCount = buildDictWithKeys(simData["query-acts"], 0)
         actionCounts = 0
+        totalNumberSteps = 0
 
         numEpisodes = len(simData["data"][density])
         for episode in simData["data"][density]:
@@ -37,6 +40,7 @@ def plot(simData, args):
             for speed in simData["data"][density][episode]['speed']:
                 episodeAvgSpeed += speed
                 episodeLength += 1
+                totalNumberSteps += 1
             #----- Episode Avg Speed -----#
 
             #----- Action Percentages -----#
@@ -67,9 +71,13 @@ def plot(simData, args):
         queryDist.append(queryDictCount.copy())
         #---- Action Percentages ----#
 
+        #---- Episode Length ----#
+        EpisodeLength.append(totalNumberSteps/numEpisodes)
+        #---- Episode Length ----#
+
     #---- Plot Avg Speed ----#
     avgSpeedGraph = pygal.Bar()
-    avgSpeedGraph.title = "Average Agent Speed (km/hr)"
+    avgSpeedGraph.title = "Average Agent Speed (km/hr), (max: %.2f km/hr)"%(simData["maxSpeed"])
     #avgSpeedGraph.x_labels = map(str, densitiesList)
     for i, speed in enumerate(avgSpeed):
         avgSpeedGraph.add(str(densitiesList[i]), speed)
@@ -111,6 +119,14 @@ def plot(simData, args):
          queryActGraph.add(act, query[act])
     queryActGraph.render_to_file(args.out_file_path + "/queryDist.svg")
     #---- Plot plan distribution ----#
+
+    #---- Average Episode Length ----#
+    avgEpisodeLengthGraph = pygal.Bar()
+    avgEpisodeLengthGraph.title = "Avg Episode Length, (Max: %d)"%(simData["max-episode-length"])
+    for i, epLength in enumerate(EpisodeLength):
+        avgEpisodeLengthGraph.add(str(densitiesList[i]), epLength)
+    avgEpisodeLengthGraph.render_to_file(args.out_file_path + "/avgEpisodeLength.svg")
+    #---- Average Episode Length ----#
     
 if __name__ == "__main__":
     
