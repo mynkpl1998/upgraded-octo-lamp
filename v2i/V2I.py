@@ -181,7 +181,7 @@ class V2I(gym.Env):
         if bum2bumDist < (constants.CAR_LENGTH + 1):
             return self.simArgs.getValue("collision-penalty") / 10
         else:
-            return laneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue("max-speed")
+            return tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue("max-speed")
     
     def step(self, action):
         for i in range(self.simArgs.getValue("frame-skip-value")):
@@ -231,7 +231,7 @@ class V2I(gym.Env):
 
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 1)))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)))
         
         # state, reward, done, info
         return self.buildObservation(occGrid, velGrid), reward, collision, {}
