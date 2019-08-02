@@ -59,7 +59,7 @@ if __name__ == "__main__":
     controlActsMsg()
 
     # Init environment object
-    env = V2I.V2I(args.sim_config)
+    env = V2I.V2I(args.sim_config, "test")
 
     # Init Function
     reversedActMap = init(env)
