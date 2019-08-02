@@ -47,7 +47,6 @@ def runEpisode(env, reversedActMap, density):
                 elif event.key == pygame.K_UP:
                     act = reversedActMap["acc,null"]
         state, reward, done, _ = env.step(act)
-        print(reward)
         if done:
             break
 
