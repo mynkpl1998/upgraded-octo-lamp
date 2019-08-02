@@ -45,7 +45,7 @@ EXP_NAME:
 
     # ---- Optimizer Configs ---- #
     # Stepsize of SGD
-    lr: 0.00001
+    lr: 0.0001
     # Learning rate schedule
     lr_schedule: 
     # Uses the sync samples optimizer instead of the multi-gpu one. This does
