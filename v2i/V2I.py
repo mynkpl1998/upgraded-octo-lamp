@@ -10,7 +10,7 @@ from v2i.src.core.occupancy import Grid
 from v2i.src.ui.ui import ui
 from v2i.src.core.idm import idm
 from v2i.src.core.controller import egoController
-from v2i.src.core.common import getAgentID
+from v2i.src.core.common import getAgentID, arcLength
 
 class V2I(gym.Env):
 
@@ -165,9 +165,23 @@ class V2I(gym.Env):
         combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
         return combinedObs.copy()
     
+    def getBum2BumDist(self, laneMap, agentLane, agentIDX):
+        if agentIDX == 0:
+            angleDiff = laneMap[agentLane][-1]['pos'] - laneMap[agentLane][0]['pos'] 
+        else:
+            angleDiff = laneMap[agentLane][agentIDX-1]['pos'] - laneMap[agentLane][agentIDX]['pos']
+        angleDiff %= 360
+        return (arcLength(constants.LANE_RADIUS[agentLane], angleDiff) / constants.SCALE) - constants.CAR_LENGTH
+    
     def rewardFunc(self, laneMap, agentLane):
-        agentIDX = getAgentID(laneMap, agentLane)
-        return laneMap[agentLane][agentIDX]['speed']
+        tmpLaneMap = laneMap.copy()
+        tmpLaneMap[agentLane] = np.sort(tmpLaneMap[agentLane], order=['pos'])[::-1]
+        agentIDX = getAgentID(tmpLaneMap, agentLane)
+        bum2bumDist = self.getBum2BumDist(tmpLaneMap, agentLane, agentIDX)
+        if bum2bumDist < (constants.CAR_LENGTH + 1):
+            return self.simArgs.getValue("collision-penalty") / 10
+        else:
+            return laneMap[agentLane][agentIDX]['speed']
     
     def step(self, action):
         for i in range(self.simArgs.getValue("frame-skip-value")):

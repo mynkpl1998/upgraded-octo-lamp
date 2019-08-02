@@ -66,5 +66,3 @@ if __name__ == "__main__":
 
     # Run Episode
     runEpisode(env, reversedActMap, args.density)
-
-
