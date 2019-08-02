@@ -14,7 +14,7 @@ config:
   collision-penalty: -50
 
   # UI settings
-  render: false
+  render: true
   fps: 30
 
   # Set Mode
