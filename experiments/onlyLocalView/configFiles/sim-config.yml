@@ -11,7 +11,7 @@ config:
   cell-size: 1 # in metres
 
   # Reward Function
-  collision-penalty: -50
+  collision-penalty: -10
 
   # UI settings
   render: true

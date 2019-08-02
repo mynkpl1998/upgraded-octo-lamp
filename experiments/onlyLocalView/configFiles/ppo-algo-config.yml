@@ -24,6 +24,8 @@ EXP_NAME:
     kl_target: 0.01
     # Whether to rollout "complete_episodes" or "truncate_episodes"
     batch_mode: "truncate_episodes"
+    # Forget Factor
+    gamma: 0.99
     # ---- PPO Configs ---- #
 
 

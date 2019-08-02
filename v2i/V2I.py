@@ -181,7 +181,7 @@ class V2I(gym.Env):
         if bum2bumDist < (constants.CAR_LENGTH + 1):
             return self.simArgs.getValue("collision-penalty") / 10
         else:
-            return laneMap[agentLane][agentIDX]['speed']
+            return laneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue("max-speed")
     
     def step(self, action):
         for i in range(self.simArgs.getValue("frame-skip-value")):
