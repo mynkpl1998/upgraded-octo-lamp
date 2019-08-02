@@ -22,7 +22,7 @@ class ppoController:
         algoConfig["EXP_NAME"]["config"]["num_envs_per_worker"] = 1
         algoConfig["EXP_NAME"]["config"]["train_batch_size"] = algoConfig["EXP_NAME"]["config"]["num_workers"] * algoConfig["EXP_NAME"]["config"]["sgd_minibatch_size"]
         env_creator_name = "v2i-v0"
-        register_env(env_creator_name, lambda config: V2I.V2I(sim_config))
+        register_env(env_creator_name, lambda config: V2I.V2I(sim_config, "train"))
 
         ray.init()
         cls = get_agent_class('PPO')

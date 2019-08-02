@@ -44,7 +44,7 @@ if __name__ == "__main__":
     algoConfig = doEssentials(algoConfig, args)
 
     # Register Environment
-    register_env("v2i-v0", lambda config: V2I.V2I(args.sim_config))
+    register_env("v2i-v0", lambda config: V2I.V2I(args.sim_config, "train"))
 
     # Start the training
     ray.init()

@@ -14,13 +14,13 @@ from v2i.src.core.common import getAgentID
 
 class V2I(gym.Env):
 
-    def __init__(self, config):
+    def __init__(self, config, mode):
 
         # Parse Config file and return the handle
         self.simArgs = configParser(config)
 
         # Set render based on mode
-        if self.simArgs.getValue("mode") == "train":
+        if mode == "train":
             self.simArgs.setValue("render", False)
 
         # Seed the random number generator
@@ -183,7 +183,7 @@ class V2I(gym.Env):
         
         self.planAct = planAct
         self.queryAct = queryAct
-        
+
         # Perform the required planing action
         egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(planAct, self.lane_map, self.agent_lane)
         

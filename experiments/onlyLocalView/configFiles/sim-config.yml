@@ -17,9 +17,6 @@ config:
   render: true
   fps: 30
 
-  # Set Mode
-  mode: 'test'
-
   # Frame Skip
   frame-skip-value: 1
 

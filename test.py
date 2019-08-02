@@ -3,7 +3,7 @@ from v2i.src.core.common import getAgentID
 
 import time
 path = "/home/mayank/Documents/upgraded-octo-lamp/examples/LocalView/config.yml"
-obj = V2I.V2I(path)
+obj = V2I.V2I(path, "test")
 obj.seed(10)
 #print(obj.observation_space.low)
 #print(obj.observation_space.high)

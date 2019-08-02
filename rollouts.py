@@ -119,7 +119,7 @@ if __name__ == "__main__":
         print(info(bold(red("save is disabled, simulation data will not be saved to disk."))))
     
     # Local Env
-    env = V2I.V2I(args.sim_config)
+    env = V2I.V2I(args.sim_config, "test")
 
     # Init Render if enabled
     fig, ax1, ax2 = None, None, None
