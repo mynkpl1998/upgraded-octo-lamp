@@ -25,7 +25,7 @@ EXP_NAME:
     # Whether to rollout "complete_episodes" or "truncate_episodes"
     batch_mode: "truncate_episodes"
     # Forget Factor
-    gamma: 0.9
+    gamma: 0.99
     # ---- PPO Configs ---- #
 
 

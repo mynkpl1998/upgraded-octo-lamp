@@ -173,13 +173,15 @@ class V2I(gym.Env):
         angleDiff %= 360
         return (arcLength(constants.LANE_RADIUS[agentLane], angleDiff) / constants.SCALE) - constants.CAR_LENGTH
     
-    def rewardFunc(self, laneMap, agentLane):
+    def rewardFunc(self, laneMap, agentLane, planAct):
         tmpLaneMap = laneMap.copy()
         tmpLaneMap[agentLane] = np.sort(tmpLaneMap[agentLane], order=['pos'])[::-1]
         agentIDX = getAgentID(tmpLaneMap, agentLane)
         bum2bumDist = self.getBum2BumDist(tmpLaneMap, agentLane, agentIDX)
         if bum2bumDist < (constants.CAR_LENGTH + 1):
             return self.simArgs.getValue("collision-penalty") / 10
+        elif planAct == "lane-change":
+            return (tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue('max-speed')) - 1
         else:
             return tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue("max-speed")
     
@@ -224,7 +226,7 @@ class V2I(gym.Env):
         #---- Get Occupancy & Velocity Grids ----#
 
         #---- Calculate Reward ----#
-        reward = self.rewardFunc(self.lane_map, self.agent_lane)
+        reward = self.rewardFunc(self.lane_map, self.agent_lane, planAct)
         if collision:
             reward = self.simArgs.getValue("collision-penalty")
         #---- Calculate Reward ----#
