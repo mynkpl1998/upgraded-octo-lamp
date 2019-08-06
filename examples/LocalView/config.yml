@@ -14,8 +14,11 @@ config:
   collision-penalty: -10
 
   # UI settings
-  render: true
-  fps: 10
+  render: false
+  fps: 60
 
   # Frame Skip
   frame-skip-value: 1
+
+  # Traffic Lights
+  enable-tf: true

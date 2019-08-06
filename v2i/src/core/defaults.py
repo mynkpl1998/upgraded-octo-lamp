@@ -20,4 +20,7 @@ DEFAULT_DICT = {
 
     # Frame Skip
     'frame-skip-value': 1,
+
+    # Traffic Lights
+    'enable-tf' : True,
 }

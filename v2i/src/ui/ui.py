@@ -7,11 +7,12 @@ from v2i.src.core.common import arcAngle, getAgentID
 
 class ui:
 
-    def __init__(self, fps, extendedViewInMetre, cellSizeInMetre):
+    def __init__(self, fps, extendedViewInMetre, cellSizeInMetre, isTFEnabled):
 
         self.fps = fps
         self.extendedViewInMetre = extendedViewInMetre
         self.cellSizeInMetre = cellSizeInMetre
+        self.isTFEnabled = isTFEnabled
 
         # Init Graphics Library - PyGame
         pygame.init()
@@ -31,6 +32,10 @@ class ui:
         
         # Init occupancy Grids
         self.initDrawGrid()
+
+        # Init Traffic Lights
+        if self.isTFEnabled:
+            self.initLight()
 
         # Init FPS Clock
         self.initClock()
@@ -75,6 +80,10 @@ class ui:
     def resetInfoBoardLoc(self):
         self.infoBoardCurX = self.infoBoardX + 10
         self.infoBoardCurY = self.infoBoardY
+    
+    def initLight(self):
+        self.redLightImage = pygame.image.load("v2i/src/data/images/red.png").convert_alpha()
+        self.greenLightImage = pygame.image.load("v2i/src/data/images/green.png").convert_alpha()
     
     def initFonts(self):
         self.font = pygame.font.Font("v2i/src/data/fonts/RobotoSlab-Bold.ttf", constants.FONT_SIZE)

@@ -11,19 +11,20 @@ obj.seed(10)
 print(obj.action_space)
 print(obj.action_map)
 
-for i in range(0, 100):
+for i in range(0, 1):
     print("Starting episode : %d"%(i+1))
     obj.reset(0.2)
     count = 0
     while True:
-        
+        act = 0
+        '''
         if count < 10:
             act = 0
         else:
             act = obj.action_space.sample()
             if act == 1:
                 act = 2
-
+        '''
         '''
         agentIDX = getAgentID(obj.lane_map, obj.agent_lane)
         if obj.lane_map[obj.agent_lane][agentIDX]['speed'] == 0.0:

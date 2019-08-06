@@ -11,6 +11,7 @@ from v2i.src.ui.ui import ui
 from v2i.src.core.idm import idm
 from v2i.src.core.controller import egoController
 from v2i.src.core.common import getAgentID, arcLength
+from v2i.src.core.tfLights import tfController
 
 class V2I(gym.Env):
 
@@ -53,10 +54,14 @@ class V2I(gym.Env):
 
         # Intialize Grid Handler here
         self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), 2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
+        
+        # Initialize Traffic Lights
+        if self.simArgs.getValue("enable-tf"):
+            self.tfHandler = tfController()
 
         # Inititalize UI Handler here
         if self.simArgs.getValue("render"):
-            self.uiHandler = ui(self.simArgs.getValue('fps'), self.gridHandler.totalExtendedView, self.gridHandler.cellSize)
+            self.uiHandler = ui(self.simArgs.getValue('fps'), self.gridHandler.totalExtendedView, self.gridHandler.cellSize, self.simArgs.getValue("enable-tf"))
             self.ui_data = {}
         
         # Initialize Ego Vehicle controller here
