@@ -59,6 +59,7 @@ def run_rollouts(args, env, fig, ax1, ax2):
 
             # Clear the figures at the start of new episode
             if fig is not None:
+                ax1.cla()
                 plotX = []
                 vf = []
 
@@ -96,6 +97,7 @@ def initRender():
 def render(vfPreds, probs, timeStep, acts, fig, ax1, ax2):
     ax1.plot(timeStep, vfPreds, color='red')
     ax1.set_ylabel("$V(s)$")
+    ax2.cla()
     ax2.set_ylim([0, 1.1])
     ax2.bar(np.arange(len(probs)), probs, color="blue")
     ax2.set_xticks(np.arange(len(probs)))
