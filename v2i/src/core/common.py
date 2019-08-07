@@ -44,7 +44,7 @@ def loadPKL(filenamePath):
         1. filenamePath - absolute path of the file to load
 
     Return Args:
-        returns the loaded object if successfully loaded else return None
+        returns the loaded object if successfully loaded else raise value error with exception as the message.
     
     '''
 
