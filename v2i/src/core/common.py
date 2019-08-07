@@ -52,8 +52,8 @@ def loadPKL(filenamePath):
         with open(filenamePath, "rb") as handle:
             trajecDict = pickle.load(handle)
         return trajecDict
-    except:
-        return None
+    except Exception as e:
+        raiseValueError(e)
 
 def arcAngle(radius, arcLength):
     return np.rad2deg(arcLength/radius)
