@@ -38,6 +38,11 @@ def fillTrajectories(numTrajecs, args, genObj, trajecDict):
     trajecDict["numTrajecs"] = len(trajecDict["data"])
     return trajecDict
 
+def printTrajecDetails(trajecDict):
+    print("Num Trajectories : ", trajecDict["numTrajecs"])
+    for i, trajec in enumerate(trajecDict["data"]):
+        print("Length of %d Trajectory : %d"%(i+1, len(trajec)))
+
 if __name__ == "__main__":
 
     # Parser Command Line Arguments
@@ -53,6 +58,9 @@ if __name__ == "__main__":
 
     # Fill Trajectories
     tfTrajectDict = fillTrajectories(args.num_trajecs, args, gen, tfTrajectDict)
+
+    # Print Details
+    printTrajecDetails(tfTrajectDict)
 
     # Dump the dict to a file.
     savePKL(tfTrajectDict, "v2i/src/data/tftrajec.pkl")
