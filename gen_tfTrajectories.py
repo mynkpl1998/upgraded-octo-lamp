@@ -33,6 +33,7 @@ def fillmetaData(args):
 def fillTrajectories(numTrajecs, args, genObj, trajecDict):
     trajecDict["data"] = []
     for trajec in range(0, numTrajecs):
+        genObj.reset()
         trajecDict["data"].append(genObj.gen())
     trajecDict["numTrajecs"] = len(trajecDict["data"])
     return trajecDict
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     max_dur_steps = int(args.max_duration / args.time_period)
     min_dur_steps = int(args.min_duration / args.time_period)
     gen = RandomIntervalGenerator(min_dur_steps, max_dur_steps, args.num_pts, 1, args.horizon, args.num_tries)
-
+    
     # Create dict to store data & fill meta data
     tfTrajectDict = fillmetaData(args)
 

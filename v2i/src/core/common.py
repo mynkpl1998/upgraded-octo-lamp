@@ -62,6 +62,10 @@ def getAgentID(laneMap, agentLane):
     agentID = np.where(laneMap[agentLane]['agent'] == 1)[0]
     return agentID[0]
 
+def getTfID(laneMap, lane):
+    TfID = np.where(laneMap[lane]['agent'] == 2)[0]
+    return TfID[0]
+
 def arcLength(radius, arcAngleDeg):
     return np.deg2rad(arcAngleDeg) * radius
 

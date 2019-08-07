@@ -20,5 +20,8 @@ config:
   # Frame Skip
   frame-skip-value: 1
 
+  # Enable Traffic Lights
+  enable-tf: true
+
 
   

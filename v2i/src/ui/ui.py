@@ -82,8 +82,13 @@ class ui:
         self.infoBoardCurY = self.infoBoardY
     
     def initLight(self):
-        self.redLightImage = pygame.image.load("v2i/src/data/images/red.png").convert_alpha()
-        self.greenLightImage = pygame.image.load("v2i/src/data/images/green.png").convert_alpha()
+        self.redLightImage = pygame.transform.scale(pygame.image.load("v2i/src/data/images/red.png").convert_alpha(), (40, 80))
+        self.greenLightImage = pygame.transform.scale(pygame.image.load("v2i/src/data/images/green.png").convert_alpha(), (40, 80))
+        # Find Light Coordinates for Both the Lanes
+        self.tfCoordinates = []
+        self.tfCoordinates.append((constants.CENTRE[0] + constants.LANE_RADIUS[1] + 50, constants.LANE_RADIUS[0] - 100))
+        self.tfCoordinates.append((constants.CENTRE[0] + constants.LANE_RADIUS[0] - 118, constants.LANE_RADIUS[0] - 100))
+        
     
     def initFonts(self):
         self.font = pygame.font.Font("v2i/src/data/fonts/RobotoSlab-Bold.ttf", constants.FONT_SIZE)
@@ -219,8 +224,16 @@ class ui:
                 else:
                     pygame.draw.polygon(screen, color, p, 1)
                 self.startAngleDeg[lane] += self.cellSizeInDeg[lane]
+    
+
+    def drawLights(self, red=[False, False]):
+        for lane in range(0, constants.LANES):
+            if red[lane] == True:
+                self.screen.blit(self.redLightImage, self.tfCoordinates[lane])
+            else:
+                self.screen.blit(self.greenLightImage, self.tfCoordinates[lane])
                 
-    def updateScreen(self, data):
+    def updateScreen(self, data, lightStat):
         self.screen.fill(self.colorBG)
         
         #---- lane 1----#
@@ -246,6 +259,10 @@ class ui:
         # Update Information Board data
         self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["extendedViewRange"], data["agentLane"], data["planAct"], data["queryAct"], data["agentReward"])
         
+        # Update TF Lights
+        if self.isTFEnabled:
+            self.drawLights(lightStat)
+
         # Update pygame screen
         pygame.display.flip()
 

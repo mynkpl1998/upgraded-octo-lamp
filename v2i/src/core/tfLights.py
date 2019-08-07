@@ -126,10 +126,47 @@ class tfController:
 
 	def __init__(self, ):
 		self.tfTrajecDict = self.loadtfTrajecs()
-		print(self.tfTrajecDict)
 	
 	def loadtfTrajecs(self):
 		return loadPKL("v2i/src/data/tftrajec.pkl")
+	
+	def sample(self):
+		sampleTrajecs = np.random.randint(0, self.tfTrajecDict["numTrajecs"], size=2)
+		trajecs = []
+		for tid in sampleTrajecs:
+			trajecs.append(self.tfTrajecDict["data"][tid])
+		return trajecs
+	
+	def expandPts(self):
+		trajecs = self.sample()
+
+		expandedTrajecs = []
+		for trajec in trajecs:
+			tmpTrajec = []
+			for a in trajec:
+				tmpTrajec.append(a[0])
+				tmpTrajec.append(a[0] + a[1])
+			expandedTrajecs.append(tmpTrajec)
+		return expandedTrajecs
+	
+	def toggle(self, curValue, lane):
+		return not curValue[lane]
+	
+	def addDummytfVehicle(self, laneMap, lane):
+		dummyVehicle = self.tfDummyVehicle(laneMap, lane)
+		laneMap[lane] = np.append(dummyVehicle, laneMap[lane])
+		return laneMap
+	
+	def tfDummyVehicle(self, laneMap, lane):
+		vehicleProp = laneMap[0][0].copy()
+		vehicleProp["pos"] = 0.0
+		vehicleProp["speed"] = 0.0
+		vehicleProp["lane"] = lane
+		vehicleProp["agent"] = 2 # Used to identify tf vehicle
+		vehicleProp["id"] = -1
+		return vehicleProp
+
+	
 
 if __name__ == "__main__":
 

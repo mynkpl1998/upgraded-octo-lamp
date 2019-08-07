@@ -10,7 +10,7 @@ from v2i.src.core.occupancy import Grid
 from v2i.src.ui.ui import ui
 from v2i.src.core.idm import idm
 from v2i.src.core.controller import egoController
-from v2i.src.core.common import getAgentID, arcLength
+from v2i.src.core.common import getAgentID, arcLength, getTfID
 from v2i.src.core.tfLights import tfController
 
 class V2I(gym.Env):
@@ -137,6 +137,7 @@ class V2I(gym.Env):
         self.time_elapsed = 0
         self.num_cars = {}
         self.num_trajec = {}
+        self.num_steps = 0
         
         for lane in range(0, constants.LANES):
             self.num_trajec[lane] = len(self.trajecDict[lane][epsiodeDensity])            
@@ -160,10 +161,16 @@ class V2I(gym.Env):
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
         #---- Get Occupancy & Velocity Grids ----#
 
-        # ---- Init variables ----#    
+        # ---- Set Traffic Light ----#
+        if self.simArgs.getValue("enable-tf"):
+            self.isLightRed = [False, False]
+            self.tfTogglePts = self.tfHandler.expandPts()
+            #print(self.tfTogglePts[0])
+
+        # ---- Init variables ----#
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"))
-        
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"), self.isLightRed)
+
         return self.buildObservation(occGrid, velGrid)
     
     def buildObservation(self, occGrid, velGrid):
@@ -198,6 +205,14 @@ class V2I(gym.Env):
         return (observation, reward, done, infoDict)
 
     def frame(self, action):
+        
+        self.num_steps += 1
+
+        # Check for turing tf to green or red
+        if self.simArgs.getValue("enable-tf"):
+            for lane in range(0, constants.LANES):
+                if self.num_steps in self.tfTogglePts[lane]:
+                    self.isLightRed[lane] = self.tfHandler.toggle(self.isLightRed, lane)
 
         # Decodes Action -> Plan Action, Query Action
         planAct, queryAct = self.actionEncoderDecoderHandler.decodeAction(action)
@@ -221,8 +236,22 @@ class V2I(gym.Env):
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
 
+
+        # Add a vehicle if tf light is Red
+        if self.simArgs.getValue("enable-tf"):
+            for lane in range(0, constants.LANES):
+                if self.isLightRed[lane]:
+                    self.lane_map = self.tfHandler.addDummytfVehicle(self.lane_map, lane)
+        
         # IDM Update Step
         self.idmHandler.step(self.lane_map)
+
+        # Remove Dummy Vehicle if added
+        if self.simArgs.getValue("enable-tf"):
+            for lane in range(0, constants.LANES):
+                if self.isLightRed[lane]:
+                    tfIDX = getTfID(self.lane_map, lane)
+                    self.lane_map[lane] = np.delete(self.lane_map[lane], tfIDX)
 
         self.time_elapsed += self.simArgs.getValue("t-period")
 
@@ -238,7 +267,7 @@ class V2I(gym.Env):
 
         # ---- Init variables ----#    
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)))
+            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), self.isLightRed)
         
         # state, reward, done, info
         return self.buildObservation(occGrid, velGrid), reward, collision, {}
