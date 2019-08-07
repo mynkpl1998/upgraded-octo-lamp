@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-from v2i.src.core.common import loadPKL
+from v2i.src.core.common import loadPKL, raiseValueError
 
 class RandomIntervalGenerator:
 
@@ -124,11 +124,16 @@ class RandomIntervalGenerator:
 
 class tfController:
 
-	def __init__(self, ):
+	def __init__(self, tPeriod):
 		self.tfTrajecDict = self.loadtfTrajecs()
+		self.validateConfig(self.tfTrajecDict, tPeriod)
 	
 	def loadtfTrajecs(self):
 		return loadPKL("v2i/src/data/tftrajec.pkl")
+	
+	def validateConfig(self, tfTrajecDict, tPeriod):
+		if tfTrajecDict["metadata"]["time-period"] != tPeriod:
+			raiseValueError("time-period doesn't match")
 	
 	def sample(self):
 		sampleTrajecs = np.random.randint(0, self.tfTrajecDict["numTrajecs"], size=2)

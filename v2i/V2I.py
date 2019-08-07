@@ -57,7 +57,7 @@ class V2I(gym.Env):
         
         # Initialize Traffic Lights
         if self.simArgs.getValue("enable-tf"):
-            self.tfHandler = tfController()
+            self.tfHandler = tfController(self.simArgs.getValue("t-period"))
 
         # Inititalize UI Handler here
         if self.simArgs.getValue("render"):
