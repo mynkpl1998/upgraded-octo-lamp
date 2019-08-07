@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import os
 
 from v2i.src.core.common import loadPKL, raiseValueError
 
@@ -129,7 +130,8 @@ class tfController:
 		self.validateConfig(self.tfTrajecDict, tPeriod)
 	
 	def loadtfTrajecs(self):
-		return loadPKL("v2i/src/data/tftrajec.pkl")
+		currPath = os.path.realpath(__file__)[:-16]
+		return loadPKL(currPath + "/data/tftrajec.pkl")
 	
 	def validateConfig(self, tfTrajecDict, tPeriod):
 		if tfTrajecDict["metadata"]["time-period"] != tPeriod:
