@@ -172,7 +172,10 @@ class V2I(gym.Env):
 
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"), self.isLightRed)
+            if self.simArgs.getValue("enable-tf"):
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"), self.isLightRed)
+            else:
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"), None)
 
         return self.buildObservation(occGrid, velGrid)
     
@@ -269,9 +272,12 @@ class V2I(gym.Env):
             reward = self.simArgs.getValue("collision-penalty")
         #---- Calculate Reward ----#
 
-        # ---- Init variables ----#    
+        # ---- Init variables ----#
         if self.simArgs.getValue("render"):
-            self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), self.isLightRed)
+            if self.simArgs.getValue("enable-tf"):
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), self.isLightRed)
+            else:
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), None)
         
         # state, reward, done, info
         return self.buildObservation(occGrid, velGrid), reward, collision, {}

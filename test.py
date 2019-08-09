@@ -13,7 +13,7 @@ print(obj.action_map)
 
 for i in range(0, 100):
     print("Starting episode : %d"%(i+1))
-    obj.reset(0.1)
+    obj.reset(0.2)
     count = 0
     while True:
         
@@ -38,7 +38,7 @@ for i in range(0, 100):
         
         if count > 1000:
             break
-        
+
         if done:
             print(obj.action_map[act])
             break
