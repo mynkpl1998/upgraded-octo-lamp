@@ -11,7 +11,7 @@ EXP_NAME:
     # If true, use the Generalized Advantage Estimator (GAE)
     use_gae: true
     # GAE(lambda) parameter
-    lambda: 0.999
+    lambda: 0.95
     # ---- Generalized Advantage Estimator Parameters ---- #
 
 
@@ -25,7 +25,7 @@ EXP_NAME:
     # Whether to rollout "complete_episodes" or "truncate_episodes"
     batch_mode: "truncate_episodes"
     # Forget Factor
-    gamma: 0.99
+    gamma: 0.999
     # ---- PPO Configs ---- #
 
 
