@@ -59,7 +59,7 @@ class egoController:
             angleDiff = laneMap[agentLane][agentIDX+1]['pos'] - agentPos
         else:
             angleDiff = laneMap[agentLane][0]['pos'] - agentPos
-            angleDiff = angleDiff % 360
+        angleDiff = angleDiff % 360
         return angleDiff > self.minCollisionAngle[agentLane]
     
     def performAccelerate(self, laneMap, agentLane, agentIDX):
@@ -117,7 +117,7 @@ class egoController:
         newAgentSpeed = agentSpeed
         newAgentSpeed = np.clip(newAgentSpeed, 0, self.maxSpeed)
         '''
-        Only agent new pos is required to check for collision
+        Only agent's new pos is required to check for collision
         '''
         collision = False
         if not self.checkValidAction(agentLane, laneMap, agentPos + distTravelledInDeg, agentIDX):

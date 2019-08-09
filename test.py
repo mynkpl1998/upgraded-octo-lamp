@@ -3,7 +3,7 @@ from v2i.src.core.common import getAgentID
 
 import time
 path = "/home/mayank/Documents/upgraded-octo-lamp/examples/LocalView/config.yml"
-obj = V2I.V2I(path, "test")
+obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 #print(obj.observation_space.low)
 #print(obj.observation_space.high)
@@ -11,20 +11,21 @@ obj.seed(10)
 print(obj.action_space)
 print(obj.action_map)
 
-for i in range(0, 1):
+for i in range(0, 100):
     print("Starting episode : %d"%(i+1))
-    obj.reset(0.2)
+    obj.reset(0.1)
     count = 0
     while True:
-        act = 0
-        '''
-        if count < 10:
+        
+        if count < 100:
             act = 0
         else:
+            '''
             act = obj.action_space.sample()
             if act == 1:
                 act = 2
-        '''
+            '''
+            act = 3
         '''
         agentIDX = getAgentID(obj.lane_map, obj.agent_lane)
         if obj.lane_map[obj.agent_lane][agentIDX]['speed'] == 0.0:
@@ -36,4 +37,5 @@ for i in range(0, 1):
         count += 1
 
         if done:
+            print(obj.action_map[act])
             break

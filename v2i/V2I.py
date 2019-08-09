@@ -230,6 +230,9 @@ class V2I(gym.Env):
             self.lane_map[self.agent_lane] = np.delete(self.lane_map[self.agent_lane], agentIDX)
             self.lane_map[laneToChange] = np.append(egoVehicleProp, self.lane_map[laneToChange])
             self.agent_lane = laneToChange
+            #print("Before : ", collision)
+            egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction("do-nothing", self.lane_map, self.agent_lane)
+            #print("After : ", collision)
 
         # Update Agent Location and Speed
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
