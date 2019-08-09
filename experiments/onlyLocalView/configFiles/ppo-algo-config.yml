@@ -11,7 +11,7 @@ EXP_NAME:
     # If true, use the Generalized Advantage Estimator (GAE)
     use_gae: true
     # GAE(lambda) parameter
-    lambda: 0.95
+    lambda: 0.999
     # ---- Generalized Advantage Estimator Parameters ---- #
 
 
