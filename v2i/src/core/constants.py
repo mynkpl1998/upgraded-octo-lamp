@@ -49,3 +49,8 @@ OCCGRID_CONSTS = {
     'AGENT' : 2,
     'UNKNOWN' : 3,
 }
+
+# Traffic Light Constants
+TF_CONSTS = {
+    'EPISODE_TF_GEN_PROB': 0.7
+}

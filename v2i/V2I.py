@@ -12,6 +12,7 @@ from v2i.src.core.idm import idm
 from v2i.src.core.controller import egoController
 from v2i.src.core.common import getAgentID, arcLength, getTfID
 from v2i.src.core.tfLights import tfController
+from v2i.src.core.constants import TF_CONSTS
 
 class V2I(gym.Env):
 
@@ -164,8 +165,10 @@ class V2I(gym.Env):
         # ---- Set Traffic Light ----#
         if self.simArgs.getValue("enable-tf"):
             self.isLightRed = [False, False]
-            self.tfTogglePts = self.tfHandler.expandPts()
-            #print(self.tfTogglePts[0])
+            if np.random.rand() <= TF_CONSTS['EPISODE_TF_GEN_PROB']:
+                self.tfTogglePts = self.tfHandler.expandPts()
+            else:
+                self.tfTogglePts = [[], []]
 
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):

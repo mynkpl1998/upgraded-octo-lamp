@@ -147,7 +147,6 @@ class tfController:
 	
 	def expandPts(self):
 		trajecs = self.sample()
-
 		expandedTrajecs = []
 		for trajec in trajecs:
 			tmpTrajec = []

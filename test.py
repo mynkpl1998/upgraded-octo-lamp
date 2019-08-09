@@ -35,7 +35,10 @@ for i in range(0, 100):
         state, reward, done, info = obj.step(act)
     
         count += 1
-
+        
+        if count > 1000:
+            break
+        
         if done:
             print(obj.action_map[act])
             break
