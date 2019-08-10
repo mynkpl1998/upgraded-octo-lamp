@@ -82,7 +82,7 @@ def plot(simData, args):
         #---- Episode Length ----#
 
         #----- Ego Max Speed -----#
-        maxEgoSpeed.append(gloablEgoMaxSpeed)
+        maxEgoSpeed.append(gloablEgoMaxSpeed * 3.6)
         #----- Ego Max Speed -----#        
 
     #---- Plot Avg Speed ----#
