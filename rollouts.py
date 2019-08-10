@@ -32,6 +32,7 @@ def run_rollouts(args, env, fig, ax1, ax2):
     
     # ---- Meta-data ----#
     dataDict["maxSpeed"] = env.simArgs.getValue("max-speed") * 3.6
+    dataDict["maxViewSpeed"] = env.idmHandler.nonEgoMaxVel * 3.6
     dataDict["plan-acts"] = env.actionEncoderDecoderHandler.planSpace
     dataDict["query-acts"] = env.actionEncoderDecoderHandler.querySpace
     dataDict["max-episode-length"] = args.episode_length
@@ -51,7 +52,8 @@ def run_rollouts(args, env, fig, ax1, ax2):
             dataDict["data"][density][episode]["speed"] = []
             dataDict["data"][density][episode]["rewards"] = []
             dataDict["data"][density][episode]["actions"] = []
-
+            dataDict["data"][density][episode]["EgoMaxSpeed"] = -10
+            
             prev_state = env.reset(density)
             # Init variables
             lstm_state = [np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"]), np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"])]
@@ -79,6 +81,7 @@ def run_rollouts(args, env, fig, ax1, ax2):
                 dataDict["data"][density][episode]["speed"].append(env.lane_map[env.agent_lane][agentIDX]['speed'])
                 dataDict["data"][density][episode]["rewards"].append(reward)
                 dataDict["data"][density][episode]["actions"].append((env.planAct, env.queryAct))
+                dataDict["data"][density][episode]["EgoMaxSpeed"] = max(dataDict["data"][density][episode]["EgoMaxSpeed"], env.lane_map[env.agent_lane][agentIDX]['speed'])
                 #--- Saving data ----#
 
                 episodeReward += reward

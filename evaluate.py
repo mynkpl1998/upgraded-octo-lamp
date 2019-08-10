@@ -22,6 +22,7 @@ def plot(simData, args):
     planDist = []
     queryDist = []
     EpisodeLength = []
+    maxEgoSpeed = []
 
     for density in densitiesList:
         densityAvgSpeed = []
@@ -30,6 +31,7 @@ def plot(simData, args):
         queryDictCount = buildDictWithKeys(simData["query-acts"], 0)
         actionCounts = 0
         totalNumberSteps = 0
+        gloablEgoMaxSpeed = -10
 
         numEpisodes = len(simData["data"][density])
         for episode in simData["data"][density]:
@@ -42,6 +44,10 @@ def plot(simData, args):
                 episodeLength += 1
                 totalNumberSteps += 1
             #----- Episode Avg Speed -----#
+
+            #----- Ego Max Speed -----#
+            gloablEgoMaxSpeed = max(gloablEgoMaxSpeed, simData["data"][density][episode]['EgoMaxSpeed'])
+            #----- Ego Max Speed -----#
 
             #----- Action Percentages -----#
             for action in simData["data"][density][episode]["actions"]:
@@ -75,6 +81,10 @@ def plot(simData, args):
         EpisodeLength.append(totalNumberSteps/numEpisodes)
         #---- Episode Length ----#
 
+        #----- Ego Max Speed -----#
+        maxEgoSpeed.append(gloablEgoMaxSpeed)
+        #----- Ego Max Speed -----#        
+
     #---- Plot Avg Speed ----#
     avgSpeedGraph = pygal.Bar()
     avgSpeedGraph.title = "Average Agent Speed (km/hr), (max: %.2f km/hr)"%(simData["maxSpeed"])
@@ -83,6 +93,14 @@ def plot(simData, args):
         avgSpeedGraph.add(str(densitiesList[i]), speed)
     avgSpeedGraph.render_to_file(args.out_file_path + "/avgSpeed.svg")
     #---- Plot Avg Speed ----#
+
+    #----- Plot Ego Max Speed -----#
+    EgoMaxSpeedGraph = pygal.Bar()
+    EgoMaxSpeedGraph.title = "Ego Vehicle max Speed (km/hr), (max : %.2f km/hr)"%(simData["maxViewSpeed"])
+    for i, speed in enumerate(maxEgoSpeed):
+        EgoMaxSpeedGraph.add(str(densitiesList[i]), speed)
+    EgoMaxSpeedGraph.render_to_file(args.out_file_path + "/egoMaxSpeed.svg")
+    #----- Plot Ego Max Speed -----#
 
     #---- Plot plan distribution ----#
     planActGraph = pygal.StackedBar()
