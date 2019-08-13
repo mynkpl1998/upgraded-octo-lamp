@@ -5,6 +5,7 @@ from __future__ import print_function
 import argparse
 import numpy as np
 import pygal
+import matplotlib.pyplot as plt
 
 # Ray Imports
 from v2i import V2I
@@ -26,6 +27,7 @@ def plot(simData, args):
 
     for density in densitiesList:
         densityAvgSpeed = []
+        allEpisodesSpeed = []
         
         planDictCount = buildDictWithKeys(simData["plan-acts"], 0)
         queryDictCount = buildDictWithKeys(simData["query-acts"], 0)
@@ -41,6 +43,7 @@ def plot(simData, args):
             episodeAvgSpeed = 0.0
             for speed in simData["data"][density][episode]['speed']:
                 episodeAvgSpeed += speed
+                allEpisodesSpeed.append(speed * 3.6)
                 episodeLength += 1
                 totalNumberSteps += 1
             #----- Episode Avg Speed -----#
@@ -59,6 +62,13 @@ def plot(simData, args):
             #----- Action Percentages -----#        
             densityAvgSpeed.append((episodeAvgSpeed/episodeLength) * 3.6)
         
+        plt.hist(allEpisodesSpeed, bins=200, density=True)
+        plt.title("Density : %.2f, Total Steps : %d"%(density, len(allEpisodesSpeed)))
+        plt.xlabel("Speed (km/hr), max allowed by LV : %.2f"%(simData["maxViewSpeed"]))
+        plt.ylabel("Count (normalized) % ")
+        plt.savefig(args.out_file_path + "/speedHist_%.2f.png"%(density))
+        plt.cla()
+
         # ---- Avg Speed ---- #
         speedSum = 0.0
         for avg in densityAvgSpeed:
@@ -85,9 +95,10 @@ def plot(simData, args):
         maxEgoSpeed.append(gloablEgoMaxSpeed * 3.6)
         #----- Ego Max Speed -----#        
 
+    
     #---- Plot Avg Speed ----#
     avgSpeedGraph = pygal.Bar()
-    avgSpeedGraph.title = "Average Agent Speed (km/hr), (max: %.2f km/hr)"%(simData["maxSpeed"])
+    avgSpeedGraph.title = "Average Agent Speed (km/hr), (max : %.2f km/hr)"%(simData["maxSpeed"])
     #avgSpeedGraph.x_labels = map(str, densitiesList)
     for i, speed in enumerate(avgSpeed):
         avgSpeedGraph.add(str(densitiesList[i]), speed)
@@ -96,7 +107,7 @@ def plot(simData, args):
 
     #----- Plot Ego Max Speed -----#
     EgoMaxSpeedGraph = pygal.Bar()
-    EgoMaxSpeedGraph.title = "Ego Vehicle max Speed (km/hr), (max : %.2f km/hr)"%(simData["maxViewSpeed"])
+    EgoMaxSpeedGraph.title = "Ego Vehicle max Speed (km/hr), (max allowed by LV : %.2f km/hr)"%(simData["maxViewSpeed"])
     for i, speed in enumerate(maxEgoSpeed):
         EgoMaxSpeedGraph.add(str(densitiesList[i]), speed)
     EgoMaxSpeedGraph.render_to_file(args.out_file_path + "/egoMaxSpeed.svg")
