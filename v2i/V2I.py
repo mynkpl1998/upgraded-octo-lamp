@@ -126,8 +126,9 @@ class V2I(gym.Env):
         # ---- Density Generation ----#
         epsiodeDensity = None
         if density == None:
-            randomIndex = np.random.randint(0, len(self.densities))
-            epsiodeDensity = self.densities[randomIndex]
+            #randomIndex = np.random.randint(0, len(self.densities))
+            #epsiodeDensity = self.densities[randomIndex]
+            epsiodeDensity = np.random.choice(self.densities, p=constants.DENSITIES_WEIGHTS)
         else:
             if density not in self.densities:
                 raiseValueError("invalid density -> %f"%(density))
