@@ -14,7 +14,7 @@ config:
   collision-penalty: -10
 
   # UI settings
-  render: true
+  render: false
   fps: 30
 
   # Frame Skip
