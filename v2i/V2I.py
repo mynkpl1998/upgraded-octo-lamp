@@ -14,9 +14,20 @@ from v2i.src.core.common import getAgentID, arcLength, getTfID
 from v2i.src.core.tfLights import tfController
 from v2i.src.core.constants import TF_CONSTS
 
+
 class V2I(gym.Env):
 
-    def __init__(self, config, mode):
+    '''
+    Input Params :
+        1. config - simulation config file used for training.
+        2. mode - if mode is set to "train", then objects properties are set to values given in config file and disbales the rendering.
+                "train" mode signifies, this object will be used for training purpose.
+                If mode is set to any thing other than "train", then  it signifies that object will be created for testing mode.
+                You can pass additional param dict to overwrite the values specified by config file.
+        3. params : Expects a dictionay when mode is not set to "train"
+    '''
+
+    def __init__(self, config, mode, params=None):
 
         # Parse Config file and return the handle
         self.simArgs = configParser(config)
@@ -24,6 +35,10 @@ class V2I(gym.Env):
         # Set render based on mode
         if mode == "train":
             self.simArgs.setValue("render", False)
+        else:
+            if params is not None:
+                for param in params.keys():
+                    self.simArgs.setValue(param, params[param])
 
         # Seed the random number generator
         self.seed(self.simArgs.getValue("seed"))

@@ -20,6 +20,8 @@ parser.add_argument("-sc", "--sim-config", type=str, required=True, help="simula
 parser.add_argument("-save", "--save-data", type=int, default=1, help="save policy data to disk (default:1)")
 parser.add_argument("-dir", type=str, help="directory to dump data, valid only if -save is enabled")
 parser.add_argument("-r", "--render-graphs", default=1, type=int, help="render predictions in real-time, default:0")
+parser.add_argument("-tf", "--enable-tf", default=0, type=int, help="enable/disbale traffic lights")
+parser.add_argument("-sr", "--render-screen", default=0, type=int, help="enable/disable environment screen rendering")
 
 def getRandomDensity():
     densities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
@@ -108,6 +110,19 @@ def render(vfPreds, probs, timeStep, acts, fig, ax1, ax2):
     fig.canvas.update()
     plt.pause(0.001)
 
+def paramDict(args):
+    envParams = {}
+    if args.render_screen == 1:
+        envParams["render"] = True
+    else:
+        envParams["render"] = False
+    
+    if args.enable_tf == 1:
+        envParams["enable-tf"] = True
+    else:
+        envParams["enable-tf"] = False
+    return envParams
+
 if __name__ == "__main__":
     
     # Parse arguments
@@ -124,7 +139,7 @@ if __name__ == "__main__":
         print(info(bold(red("save is disabled, simulation data will not be saved to disk."))))
     
     # Local Env
-    env = V2I.V2I(args.sim_config, "test")
+    env = V2I.V2I(args.sim_config, "test", paramDict(args))
 
     # Init Render if enabled
     fig, ax1, ax2 = None, None, None
@@ -136,5 +151,10 @@ if __name__ == "__main__":
 
     # Dump Data to file
     if(args.save_data == 1):
-        savePKL(simData, args.dir+"/data.pkl")
+        fileName = None
+        if args.enable_tf == 1:
+            fileName = "data_tf_enabled.pkl"
+        else:
+            fileName = "data_tf_disabled.pkl"
+        savePKL(simData, args.dir + "/" + fileName)
     
