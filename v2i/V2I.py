@@ -218,6 +218,12 @@ class V2I(gym.Env):
             return (tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue('max-speed')) - 1
         else:
             return tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue("max-speed")
+        
+    def commPenalty(self, PlanReward, queryAct):
+        if queryAct == "null":
+            return PlanReward
+        else:
+            return PlanReward - self.simArgs.getValue('comm-penalty')
     
     def step(self, action):
         for i in range(self.simArgs.getValue("frame-skip-value")):
@@ -284,6 +290,8 @@ class V2I(gym.Env):
 
         #---- Calculate Reward ----#
         reward = self.rewardFunc(self.lane_map, self.agent_lane, planAct)
+        if self.gridHandler.isCommEnabled:
+            reward = self.commPenalty(reward, queryAct)
         if collision:
             reward = self.simArgs.getValue("collision-penalty")
         #---- Calculate Reward ----#

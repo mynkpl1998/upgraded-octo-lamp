@@ -2,7 +2,7 @@ from v2i import V2I
 from v2i.src.core.common import getAgentID
 
 import time
-path = "/home/mayank/Documents/upgraded-octo-lamp/examples/LocalView/config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/examples/WithFullCommunication/config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 #print(obj.observation_space.low)
@@ -25,7 +25,7 @@ for i in range(0, 100):
             if act == 1:
                 act = 2
             '''
-            act = 3
+            act = obj.action_space.sample()
         '''
         agentIDX = getAgentID(obj.lane_map, obj.agent_lane)
         if obj.lane_map[obj.agent_lane][agentIDX]['speed'] == 0.0:

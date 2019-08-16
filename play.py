@@ -5,8 +5,10 @@ from huepy import blue, bold
 from v2i import V2I
 from v2i.src.core.common import raiseValueError, reverseDict
 
-parser = argparse.ArgumentParser(description="Script to control planing actions using keyboard")
+parser = argparse.ArgumentParser(description="Script to control planing actions and traffic light using keyboard")
 parser.add_argument("-sc", "--sim-config", type=str, help="path to simulation configuration file")
+parser.add_argument("-c", "--checkpoint-file", type=str, default=None, help="checkpoint file to load model from")
+parser.add_argument("-tc", "--training-algo-config", type=str, default=None, help="algorithm configuration file")
 parser.add_argument("-d", "--density", type=float, default=None, help="specify episode density, (default:None)")
 
 def controlActsMsg():
@@ -59,7 +61,7 @@ if __name__ == "__main__":
     controlActsMsg()
 
     # Init environment object
-    env = V2I.V2I(args.sim_config, "test")
+    env = V2I.V2I(args.sim_config, "test", {'render': True})
 
     # Init Function
     reversedActMap = init(env)

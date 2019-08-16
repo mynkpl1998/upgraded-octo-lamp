@@ -10,6 +10,7 @@ DEFAULT_DICT = {
 
     # Reward Function
     'collision-penalty': -10,
+    'comm-penalty': 0.0,
 
     # IDM Settings
     'max-speed': 9, # in m/s
