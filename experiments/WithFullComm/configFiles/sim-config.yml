@@ -12,7 +12,7 @@ config:
 
   # Reward Function
   collision-penalty: -10
-  comm-penalty: 0.2
+  comm-penalty: 0.0
 
   # UI settings
   render: true
