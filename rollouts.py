@@ -93,7 +93,7 @@ def run_rollouts(args, env, fig, ax1, ax2):
     return dataDict
 
 def initRender():
-    fig = plt.figure()
+    fig = plt.figure(figsize=(4, 6))
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212)
     fig.show()
@@ -106,7 +106,7 @@ def render(vfPreds, probs, timeStep, acts, fig, ax1, ax2):
     ax2.set_ylim([0, 1.1])
     ax2.bar(np.arange(len(probs)), probs, color="blue")
     ax2.set_xticks(np.arange(len(probs)))
-    ax2.set_xticklabels(acts)
+    ax2.set_xticklabels(acts, rotation='vertical')
     fig.canvas.update()
     plt.pause(0.001)
 
