@@ -24,9 +24,12 @@ def plot(simData, args):
     queryDist = []
     EpisodeLength = []
     maxEgoSpeed = []
+    numFullEpisodesList = []
+    FullEpisodesavgSpeed = []
 
     for density in densitiesList:
         densityAvgSpeed = []
+        densityFullEpisodeAvgSpeed = []
         allEpisodesSpeed = []
         
         planDictCount = buildDictWithKeys(simData["plan-acts"], 0)
@@ -34,6 +37,7 @@ def plot(simData, args):
         actionCounts = 0
         totalNumberSteps = 0
         gloablEgoMaxSpeed = -10
+        numFullEpisodes = 0
 
         numEpisodes = len(simData["data"][density])
         for episode in simData["data"][density]:
@@ -41,6 +45,10 @@ def plot(simData, args):
 
             #----- Episode Avg Speed -----#
             episodeAvgSpeed = 0.0
+            
+            if len(simData["data"][density][episode]['speed']) == simData["max-episode-length"]:
+                numFullEpisodes += 1
+
             for speed in simData["data"][density][episode]['speed']:
                 episodeAvgSpeed += speed
                 allEpisodesSpeed.append(speed * 3.6)
@@ -61,6 +69,9 @@ def plot(simData, args):
 
             #----- Action Percentages -----#        
             densityAvgSpeed.append((episodeAvgSpeed/episodeLength) * 3.6)
+            if len(simData["data"][density][episode]['speed']) == simData["max-episode-length"]:
+                densityFullEpisodeAvgSpeed.append((episodeAvgSpeed/episodeLength) * 3.6)
+
         
         plt.hist(allEpisodesSpeed, bins=200, density=True)
         plt.title("Density : %.2f, Total Steps : %d"%(density, len(allEpisodesSpeed)))
@@ -75,6 +86,13 @@ def plot(simData, args):
             speedSum += avg
         avgSpeed.append(speedSum/numEpisodes)
         # ---- Avg Speed ---- #
+
+        # ---- Avg Speed Full Episode ---- #
+        speedSum = 0.0
+        for avg in densityFullEpisodeAvgSpeed:
+            speedSum += avg
+        FullEpisodesavgSpeed.append(speedSum/numFullEpisodes)
+        # ---- Avg Speed Full Episode ---- #                
 
         #---- Action Percentages ----#
         for key in planDictCount.keys():
@@ -95,6 +113,9 @@ def plot(simData, args):
         maxEgoSpeed.append(gloablEgoMaxSpeed * 3.6)
         #----- Ego Max Speed -----#        
 
+        #----- Full Epsiodes List ----#
+        numFullEpisodesList.append(numFullEpisodes)
+        #----- Full Epsiodes List ----#
     
     #---- Plot Avg Speed ----#
     avgSpeedGraph = pygal.Bar()
@@ -103,6 +124,15 @@ def plot(simData, args):
     for i, speed in enumerate(avgSpeed):
         avgSpeedGraph.add(str(densitiesList[i]), speed)
     avgSpeedGraph.render_to_file(args.out_file_path + "/avgSpeed.svg")
+    #---- Plot Avg Speed ----#
+
+    #---- Plot Avg Speed ----#
+    avgSpeedFullEpisodesGraph = pygal.Bar()
+    avgSpeedFullEpisodesGraph.title = "Average Agent Speed FullEpisodes(km/hr), (max : %.2f km/hr)"%(simData["maxSpeed"])
+    #avgSpeedGraph.x_labels = map(str, densitiesList)
+    for i, speed in enumerate(FullEpisodesavgSpeed):
+        avgSpeedFullEpisodesGraph.add(str(densitiesList[i]), speed)
+    avgSpeedFullEpisodesGraph.render_to_file(args.out_file_path + "/avgSpeedFullEpisodes.svg")
     #---- Plot Avg Speed ----#
 
     #----- Plot Ego Max Speed -----#
@@ -156,6 +186,14 @@ def plot(simData, args):
         avgEpisodeLengthGraph.add(str(densitiesList[i]), epLength)
     avgEpisodeLengthGraph.render_to_file(args.out_file_path + "/avgEpisodeLength.svg")
     #---- Average Episode Length ----#
+
+    #----- Full Epsiodes List Plot----#
+    numFullEpisodesListGraph = pygal.Bar()
+    numFullEpisodesListGraph.title = "Number of Full Episodes, (Number of episodes tested : %d)"%(numEpisodes)
+    for i, numEpi in enumerate(numFullEpisodesList):
+        numFullEpisodesListGraph.add(str(densitiesList[i]), numEpi)
+    numFullEpisodesListGraph.render_to_file(args.out_file_path + "/numFullEpisodes.svg")
+    #----- Full Epsiodes List Plot----#
     
 if __name__ == "__main__":
     
