@@ -23,7 +23,7 @@ EXP_NAME:
     # Target value for KL divergence
     kl_target: 0.01
     # Whether to rollout "complete_episodes" or "truncate_episodes"
-    batch_mode: "truncate_episodes"
+    batch_mode: "complete_episodes"
     # Forget Factor
     gamma: 0.999
     # ---- PPO Configs ---- #
@@ -45,9 +45,9 @@ EXP_NAME:
 
     # ---- Optimizer Configs ---- #
     # Stepsize of SGD
-    lr: 0.00001
+    lr: 0.00005
     # Learning rate schedule
-    lr_schedule: 
+    lr_schedule:
     # Uses the sync samples optimizer instead of the multi-gpu one. This does
     # not support minibatches.
     simple_optimizer: false
@@ -60,7 +60,7 @@ EXP_NAME:
     vf_share_layers: true
     #Coefficient of the value function loss. It's important to tune this if
     #you set vf_share_layers: True
-    vf_loss_coeff: 0.01
+    vf_loss_coeff: 0.1
     # Clip param for the value function. Note that this is sensitive to the
     # scale of the rewards. If your expected V is large, increase this.
     vf_clip_param: 10000.0
