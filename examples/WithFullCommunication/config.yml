@@ -15,7 +15,7 @@ config:
   comm-penalty: 0.2
 
   # UI settings
-  render: true
+  render: false
   fps: 120
 
   # Frame Skip

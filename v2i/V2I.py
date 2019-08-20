@@ -58,6 +58,16 @@ class V2I(gym.Env):
         if self.simArgs.getValue("frame-skip-value") <= 0:
             raiseValueError("frame skip value should be at least one")
 
+        # Info Dict
+        self.infoDict = self.buildInfoDict(self.densities)
+
+    def buildInfoDict(self, densities):
+        infoDict = {}
+        for density in densities:
+            infoDict[density] = 0
+        infoDict["totalEpisodes"] = 0
+        return infoDict
+
     def seed(self, value=0):
         np.random.seed(value)
     
@@ -138,6 +148,7 @@ class V2I(gym.Env):
         
     def reset(self, density=None):
         density = self.fixIssue2(density)
+
         # ---- Density Generation ----#
         epsiodeDensity = None
         if density == None:
@@ -155,6 +166,8 @@ class V2I(gym.Env):
         self.num_cars = {}
         self.num_trajec = {}
         self.num_steps = 0
+        self.infoDict['totalEpisodes'] += 1
+        self.infoDict[epsiodeDensity] += 1
         
         for lane in range(0, constants.LANES):
             self.num_trajec[lane] = len(self.trajecDict[lane][epsiodeDensity])            
@@ -232,6 +245,12 @@ class V2I(gym.Env):
                 return (observation, reward, done, infoDict)
         return (observation, reward, done, infoDict)
 
+    def processInfoDict(self):
+        infoDict = {}
+        for density in self.densities:
+            infoDict[density] = self.infoDict[density] / self.infoDict["totalEpisodes"]
+        return infoDict
+
     def frame(self, action):
         
         self.num_steps += 1
@@ -304,4 +323,4 @@ class V2I(gym.Env):
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), None)
         
         # state, reward, done, info
-        return self.buildObservation(occGrid, velGrid), reward, collision, {}
+        return self.buildObservation(occGrid, velGrid), reward, collision, self.processInfoDict()
