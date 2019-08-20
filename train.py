@@ -9,7 +9,7 @@ from ray.tune.registry import register_env
 from ray import tune
 
 from v2i import V2I
-from v2i.src.core.common import readYaml
+from v2i.src.core.common import readYaml, raiseValueError
 import argparse
 
 parser = argparse.ArgumentParser(description="Training Script for v2i simulator")
@@ -19,7 +19,22 @@ parser.add_argument("-w", "--num-workers", type=int, default=4, help="number of 
 parser.add_argument("-n", "--name", type=str, required=True, help="experiment name")
 parser.add_argument("-f", "--checkpoint-freq", type=int, default=100, help="checkpoint frequency")
 
-def doEssentials(algoConfig, args):
+def doIMPALAEssentials(algoConfig, args):
+    # Set Experiment Name
+    algoConfig[args.name] = algoConfig.pop("EXP_NAME")
+    # Set Number of Workers
+    algoConfig[args.name]["config"]["num_workers"] = int(args.num_workers)
+    # Set batch size
+    algoConfig[args.name]["config"]["train_batch_size"] = int(args.num_workers) * algoConfig[args.name]["config"]["sample_batch_size"] * int(algoConfig[args.name]["config"]["num_envs_per_worker"])
+    # Set Environment Name
+    algoConfig[args.name]["env"] = "v2i-v0"
+    # Set Algorithm Here
+    algoConfig[args.name]["run"] = "IMPALA"
+    # Set Checkpoint Frequency
+    algoConfig[args.name]["checkpoint_freq"] = args.checkpoint_freq
+    return algoConfig
+
+def doPPOEssentials(algoConfig, args):
     # Set Experiment Name
     algoConfig[args.name] = algoConfig.pop("EXP_NAME")
     # Set Number of Workers
@@ -39,14 +54,23 @@ if __name__ == "__main__":
 
     # Read Config Files
     algoConfig = readYaml(args.training_algo_config)
-
-    # Set Essentials
-    algoConfig = doEssentials(algoConfig, args)
+    
+    # Set essentials
+    trainAlgo = args.training_algo_config.split("/")[-1].split('-')[0].upper()
+    if trainAlgo == 'PPO':
+        algoConfig = doPPOEssentials(algoConfig, args)
+    elif trainAlgo == 'IMPALA':
+        algoConfig == doIMPALAEssentials(algoConfig, args)
+    else:
+        raiseValueError("invalid training algo %s"%(trainAlgo))
 
     # Register Environment
     register_env("v2i-v0", lambda config: V2I.V2I(args.sim_config, "train"))
 
+    print(algoConfig)
     # Start the training
+    '''
     ray.init()
     run_experiments(algoConfig)
+    '''
     
