@@ -226,17 +226,17 @@ class V2I(gym.Env):
         agentIDX = getAgentID(tmpLaneMap, agentLane)
         bum2bumDist = self.getBum2BumDist(tmpLaneMap, agentLane, agentIDX)
         if bum2bumDist < (constants.CAR_LENGTH + 1):
-            return self.simArgs.getValue("collision-penalty") / 10
+            return (tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue('max-speed')) - (bum2bumDist/(constants.CAR_LENGTH + 1))
         elif planAct == "lane-change":
-            return (tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue('max-speed')) - 1
+            return (tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue('max-speed'))
         else:
-            return tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue("max-speed")
+            return tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue("max-speed") + 0.1
         
     def commPenalty(self, PlanReward, queryAct):
         if queryAct == "null":
-            return PlanReward
+            return PlanReward + 0.1
         else:
-            return PlanReward - self.simArgs.getValue('comm-penalty')
+            return PlanReward
     
     def step(self, action):
         for i in range(self.simArgs.getValue("frame-skip-value")):
@@ -311,8 +311,11 @@ class V2I(gym.Env):
         reward = self.rewardFunc(self.lane_map, self.agent_lane, planAct)
         if self.gridHandler.isCommEnabled:
             reward = self.commPenalty(reward, queryAct)
+        
         if collision:
-            reward = self.simArgs.getValue("collision-penalty")
+            #reward = self.simArgs.getValue("collision-penalty")
+            reward = 0.0
+        
         #---- Calculate Reward ----#
 
         # ---- Init variables ----#

@@ -1,7 +1,7 @@
 config:
 
   # Simulation Parameters
-  t-period: 0.1 # in secs
+  t-period: 0.3 # in secs
 
   # IDM settings
   max-speed: 11.11 # in m/s
