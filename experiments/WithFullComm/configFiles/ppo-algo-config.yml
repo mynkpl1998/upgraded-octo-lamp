@@ -4,7 +4,6 @@ EXP_NAME:
   # ---- Checkpoint Frequency ---- #
   checkpoint_freq: 100
   # ---- Checkpoint Frequency ---- #
-
   config:
 
     # ---- Generalized Advantage Estimator Parameters ---- #
@@ -77,7 +76,7 @@ EXP_NAME:
 
     # ---- Misc ---- #
     # Gradient Clipping
-    grad_clip: 0.5
+    grad_clip: 
     # Which observation filter to apply to the observation
     observation_filter: "NoFilter"
     # Max length of episode
