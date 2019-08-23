@@ -16,11 +16,11 @@ EXP_NAME:
 
     # ---- PPO Configs ---- #
     # Initial coefficient for KL divergence
-    kl_coeff: 0.2
+    kl_coeff: 0.0
     # PPO clip parameter
-    clip_param: 0.3
+    clip_param: 0.2
     # Target value for KL divergence
-    kl_target: 0.01
+    kl_target: 0.0
     # Whether to rollout "complete_episodes" or "truncate_episodes"
     batch_mode: "truncate_episodes"
     # Forget Factor
@@ -30,11 +30,11 @@ EXP_NAME:
 
     # ---- SGD Configs ---- #
     # Size of batches collected from each worker
-    sample_batch_size : 200
+    sample_batch_size : 100
     # Total SGD batch size across all devices for SGD
-    sgd_minibatch_size: 128
+    sgd_minibatch_size: 4086
     # Number of timesteps collected for each SGD round (leave this, script will autofill this according to best value)
-    train_batch_size: 4000
+    train_batch_size:
     # Whether to shuffle sequences in the batch when training (recommended)
     # shuffle_sequences: true (not implemented in release 0.7.2)
     # Number of SGD iterations in each outer loop
