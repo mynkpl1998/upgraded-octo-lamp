@@ -18,13 +18,13 @@ EXP_NAME:
     # Initial coefficient for KL divergence
     kl_coeff: 0.2
     # PPO clip parameter
-    clip_param: 0.2
+    clip_param: 0.3
     # Target value for KL divergence
     kl_target: 0.01
     # Whether to rollout "complete_episodes" or "truncate_episodes"
     batch_mode: "truncate_episodes"
     # Forget Factor
-    gamma: 0.97
+    gamma: 0.99
     # ---- PPO Configs ---- #
 
 
@@ -32,9 +32,9 @@ EXP_NAME:
     # Size of batches collected from each worker
     sample_batch_size : 200
     # Total SGD batch size across all devices for SGD
-    sgd_minibatch_size: 4086
+    sgd_minibatch_size: 128
     # Number of timesteps collected for each SGD round (leave this, script will autofill this according to best value)
-    train_batch_size: 
+    train_batch_size: 4000
     # Whether to shuffle sequences in the batch when training (recommended)
     # shuffle_sequences: true (not implemented in release 0.7.2)
     # Number of SGD iterations in each outer loop
@@ -56,10 +56,10 @@ EXP_NAME:
     # ---- Value Function Configs ---- #
     # Share layers for value function. If you set this to True, it's important
     # to tune vf_loss_coeff.
-    vf_share_layers: true
+    vf_share_layers: false
     #Coefficient of the value function loss. It's important to tune this if
-    #you set vf_share_layers: True
-    vf_loss_coeff: 0.001
+    #you set vf_share_layers: False
+    vf_loss_coeff: 0.1
     # Clip param for the value function. Note that this is sensitive to the
     # scale of the rewards. If your expected V is large, increase this.
     vf_clip_param: 1000.0
@@ -68,7 +68,7 @@ EXP_NAME:
     
     # ---- Policy Entropy Regularizer ---- #
     # Coefficient of the entropy regularizer
-    #entropy_coeff: 0.0 (not implemented in release 0.7.2)
+    entropy_coeff: 0.01
     # Decay schedule for the entropy regularizer
     #entropy_coeff_schedule: None (not implemented in release 0.7.2)
     # ---- Policy Entropy Regularizer ---- #
@@ -96,7 +96,9 @@ EXP_NAME:
     model:
       use_lstm: true
       max_seq_len: 16
-      lstm_cell_size: 256
+      lstm_cell_size: 128
+      fcnet_hiddens: [128]
+      fcnet_activation: "relu"
       lstm_use_prev_action_reward: false
       framestack: false
       grayscale: false

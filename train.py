@@ -40,7 +40,8 @@ def doPPOEssentials(algoConfig, args):
     # Set Number of Workers
     algoConfig[args.name]["config"]["num_workers"] = int(args.num_workers)
     # Set batch size
-    algoConfig[args.name]["config"]["train_batch_size"] = int(args.num_workers) * algoConfig[args.name]["config"]["sgd_minibatch_size"]
+    if algoConfig[args.name]["config"]["train_batch_size"] == None:
+        algoConfig[args.name]["config"]["train_batch_size"] = int(args.num_workers) * algoConfig[args.name]["config"]["sgd_minibatch_size"]
     # Set Environment Name
     algoConfig[args.name]["env"] = "v2i-v0"
     # Set Algorithm Here
@@ -68,7 +69,10 @@ if __name__ == "__main__":
     register_env("v2i-v0", lambda config: V2I.V2I(args.sim_config, "train"))
 
     # Start the training
+    print(algoConfig)
+    '''
     ray.init()
     run_experiments(algoConfig)
-    
+    '''
+
     

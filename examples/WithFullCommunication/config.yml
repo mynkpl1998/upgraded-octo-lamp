@@ -16,7 +16,7 @@ config:
 
   # UI settings
   render: true
-  fps: 15
+  fps: 120
 
   # Frame Skip
   frame-skip-value: 1

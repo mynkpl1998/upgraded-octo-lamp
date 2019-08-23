@@ -49,11 +49,11 @@ EXP_NAME:
     # Which observation filter to apply to the observation
     observation_filter: "NoFilter"
     # Max length of episode
-    horizon: 10000
+    horizon: 3550
     # Whether to rollout "complete_episodes" or "truncate_episodes"
     batch_mode: "truncate_episodes"
     # Forget Factor
-    gamma: 0.999
+    gamma: 0.99
     # ---- Misc ---- #
 
 
@@ -70,7 +70,7 @@ EXP_NAME:
     # ---- Neutral Net Configs ---- #
     model:
       use_lstm: true
-      max_seq_len: 32
+      max_seq_len: 16
       lstm_cell_size: 256
       lstm_use_prev_action_reward: false
       framestack: false

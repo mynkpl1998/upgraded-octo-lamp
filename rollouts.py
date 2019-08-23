@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 from v2i import V2I
-from v2i.src.core.common import readYaml, getAgentID, savePKL
+from v2i.src.core.common import readYaml, getAgentID, savePKL, raiseValueError
 from v2i.src.core.ppoController import ppoController
+from v2i.src.core.impalaController import impalaController
 
 parser = argparse.ArgumentParser(description="v2i rollout script")
 parser.add_argument("-n", "--num_episodes", default=10, type=int, help="number of episodes to run, (default: 10)")
@@ -132,7 +133,14 @@ if __name__ == "__main__":
     algoConfig = readYaml(args.training_algo_config)
 
     # Build the ppo controller
-    controller = ppoController(args.sim_config, algoConfig, args.checkpoint_file)
+    trainAlgo = args.training_algo_config.split("/")[-1].split('-')[0].upper()
+    print(trainAlgo)
+    if trainAlgo == "IMPALA":
+        controller = impalaController(args.sim_config, algoConfig, args.checkpoint_file)
+    elif trainAlgo == "PPO":
+        controller = ppoController(args.sim_config, algoConfig, args.checkpoint_file)
+    else:
+        raiseValueError("invalid training algo %s"%(trainAlgo))
 
     # Warn user if data save is not enabled
     if(args.save_data != 1):

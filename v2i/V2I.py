@@ -205,6 +205,10 @@ class V2I(gym.Env):
         # ---- Set Traffic Light ----#
         if self.simArgs.getValue("enable-tf"):
             self.isLightRed = [False, False]
+            if np.random.rand() <= TF_CONSTS['EPISODE_TF_GEN_PROB']:
+                self.tfTogglePts = self.tfHandler.expandPts()
+            else:
+                self.tfTogglePts = [[], []]
 
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
@@ -263,6 +267,7 @@ class V2I(gym.Env):
         self.num_steps += 1
         
         # Check for turing tf to green or red
+        '''
         if self.simArgs.getValue("enable-tf"):
             agentIDX = getAgentID(self.lane_map, self.agent_lane)
             agentSpeed = self.lane_map[self.agent_lane][agentIDX]['speed']
@@ -272,6 +277,12 @@ class V2I(gym.Env):
             else:
                 for lane in range(0, constants.LANES):
                     self.isLightRed[lane] = False
+        '''
+        if self.simArgs.getValue("enable-tf"):
+            for lane in range(0, constants.LANES):
+                if self.num_steps in self.tfTogglePts[lane]:
+                    self.isLightRed[lane] = self.tfHandler.toggle(self.isLightRed, lane)
+        
 
         # Decodes Action -> Plan Action, Query Action
         planAct, queryAct = self.actionEncoderDecoderHandler.decodeAction(action)
