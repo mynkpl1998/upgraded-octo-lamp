@@ -69,10 +69,6 @@ if __name__ == "__main__":
     register_env("v2i-v0", lambda config: V2I.V2I(args.sim_config, "train"))
 
     # Start the training
-    print(algoConfig)
-    '''
     ray.init()
     run_experiments(algoConfig)
-    '''
-
     
