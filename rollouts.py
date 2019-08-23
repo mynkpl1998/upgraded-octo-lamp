@@ -59,7 +59,8 @@ def run_rollouts(args, env, fig, ax1, ax2):
             
             prev_state = env.reset(density)
             # Init variables
-            lstm_state = [np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"]), np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"])]
+            #lstm_state = [np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"]), np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"])]
+            lstm_state = None
             episodeReward = 0.0
 
             # Clear the figures at the start of new episode
