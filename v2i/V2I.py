@@ -2,8 +2,8 @@ import os
 import sys
 import gym
 import numpy as np
-import v2i.src.core.constants as constants
 
+import v2i.src.core.constants as constants
 from v2i.src.core.utils import configParser, ActionEncoderDecoder
 from v2i.src.core.common import loadPKL, raiseValueError
 from v2i.src.core.occupancy import Grid
@@ -13,6 +13,7 @@ from v2i.src.core.controller import egoController
 from v2i.src.core.common import getAgentID, arcLength, getTfID
 from v2i.src.core.tfLights import tfController
 from v2i.src.core.constants import TF_CONSTS
+from v2i.src.core.obsQueue import obsWrapper
 
 
 class V2I(gym.Env):
@@ -42,6 +43,10 @@ class V2I(gym.Env):
 
         # Seed the random number generator
         self.seed(self.simArgs.getValue("seed"))
+
+        # Set the observation size based on memory
+        if self.simArgs.getValue("enable-lstm"):
+            self.simArgs.setValue("k-frames", 1)
 
         # Load Trajectories
         currPath = os.path.realpath(__file__)[:-6]
@@ -79,7 +84,7 @@ class V2I(gym.Env):
         self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"), self.simArgs.getValue("local-view"))
 
         # Intialize Grid Handler here
-        self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), 2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
+        self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), self.simArgs.getValue("k-frames"),2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
         
         # Initialize Traffic Lights
         if self.simArgs.getValue("enable-tf"):
@@ -95,7 +100,10 @@ class V2I(gym.Env):
 
         # Init Gym Env Properties
         self.initGymProp(self.gridHandler)
-    
+
+        # Initialze Observation Wrapper if lstm is disabled
+        self.obsWrapper = obsWrapper(self.simArgs.getValue('k-frames'), int(self.gridHandler.observation_space.shape[0]/self.simArgs.getValue("k-frames")))
+
     def initGymProp(self, obsHandler):
         self.observation_space = obsHandler.observation_space
         
@@ -216,8 +224,12 @@ class V2I(gym.Env):
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"), self.isLightRed)
             else:
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"), None)
-
-        return self.buildObservation(occGrid, velGrid)
+        
+        # Reset Observation Queue
+        self.obsWrapper.resetQueue()
+        obs = self.buildObservation(occGrid, velGrid)
+        self.obsWrapper.addObs(obs)
+        return self.obsWrapper.getObs()
     
     def buildObservation(self, occGrid, velGrid):
         combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
@@ -245,7 +257,7 @@ class V2I(gym.Env):
         
     def commPenalty(self, PlanReward, queryAct):
         if queryAct == "null":
-            return PlanReward + 0.1
+            return PlanReward + self.simArgs.getValue("nocomm-incentive")
         else:
             return PlanReward
     
@@ -349,4 +361,6 @@ class V2I(gym.Env):
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), None)
         
         # state, reward, done, info
-        return self.buildObservation(occGrid, velGrid), reward, collision, self.processInfoDict()
+        obs = self.buildObservation(occGrid, velGrid)
+        self.obsWrapper.addObs(obs)
+        return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()

@@ -94,10 +94,9 @@ EXP_NAME:
     
     # ---- Neutral Net Configs ---- #
     model:
-      use_lstm: true
       max_seq_len: 16
       lstm_cell_size: 128
-      fcnet_hiddens: [128]
+      fcnet_hiddens: [128, 128]
       fcnet_activation: "relu"
       lstm_use_prev_action_reward: false
       framestack: false

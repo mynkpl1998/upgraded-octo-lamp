@@ -9,8 +9,8 @@ DEFAULT_DICT = {
     'reg-size': 5, # size of 1 comm region in metres
 
     # Reward Function
-    'collision-penalty': -10,
-    'comm-penalty': 0.0,
+    'collision-penalty': 0.0,
+    'nocomm-incentive': 0.1,
 
     # IDM Settings
     'max-speed': 9, # in m/s
@@ -24,4 +24,8 @@ DEFAULT_DICT = {
 
     # Traffic Lights
     'enable-tf' : True,
+
+    # Memory Configuration
+    'enable-lstm': False,
+    'k-frames': 3
 }

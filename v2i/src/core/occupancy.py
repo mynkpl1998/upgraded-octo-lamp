@@ -8,12 +8,13 @@ from v2i.src.core.common import getAgentID, arcAngle, arcLength, reverseDict
 
 class Grid:
 
-    def __init__(self, localView, maxSpeed, regionWidth, extendedView=None, cellSize=1):
+    def __init__(self, localView, maxSpeed, regionWidth,k, extendedView=None, cellSize=1):
         self.totalLocalView = localView # in metre
         self.cellSize = cellSize # in metre
         self.totalExtendedView = extendedView
         self.maxSpeed = maxSpeed
         self.regWidthInMetres = regionWidth
+        self.k = k
 
         #---- Checks ----#
         if self.totalExtendedView == None:
@@ -39,18 +40,32 @@ class Grid:
 
         self.init()
     
-    def initObservationSpace(self):
+    def initObservationSpace(self, k):
         occBoundLow = np.ones((LANES, self.numCols)) * OCCGRID_CONSTS[min(OCCGRID_CONSTS, key=OCCGRID_CONSTS.get)]
         occBoundHigh = np.ones((LANES, self.numCols)) * OCCGRID_CONSTS[max(OCCGRID_CONSTS, key=OCCGRID_CONSTS.get)]
         
         velGridBoundLow = np.ones((LANES, self.numCols)) * 0.0
         velGridBoundHigh = np.ones((LANES, self.numCols)) * self.maxSpeed
 
-        obsLowBound = np.concatenate((occBoundLow.flatten(), velGridBoundLow.flatten())).astype(np.float)
-        obsHighBound = np.concatenate((occBoundHigh.flatten(), velGridBoundHigh.flatten())).astype(np.float)
+        mergedBoundlow = []
+        mergedBoundHigh = []
+
+        for frame in range(0, k):
+            mergedBoundlow.append(occBoundLow.copy())
+            mergedBoundlow.append(velGridBoundLow.copy())
+
+            mergedBoundHigh.append(occBoundHigh.copy())
+            mergedBoundHigh.append(velGridBoundHigh.copy())
+        
+        mergedBoundlow = np.array(mergedBoundlow)
+        mergedBoundHigh = np.array(mergedBoundHigh)
+        
+        obsLowBound = mergedBoundlow.flatten().astype(np.float)
+        obsHighBound = mergedBoundHigh.flatten().astype(np.float)
         
         self.observation_space = Box(low=obsLowBound, high=obsHighBound, dtype=np.float)
-
+        
+        
     def initComm(self):
         numRegs = int(self.totalCommView / self.regWidthInMetres)
         regWidth = int(self.regWidthInMetres / self.cellSize)
@@ -90,7 +105,7 @@ class Grid:
             self.shift.append(arcAngle(LANE_RADIUS[lane], (CAR_LENGTH/2) * SCALE))
         
         # Intialize Observation Space 
-        self.initObservationSpace()
+        self.initObservationSpace(self.k)
 
         # Intialize Communication
         self.isCommEnabled = False

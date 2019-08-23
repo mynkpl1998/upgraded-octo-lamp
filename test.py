@@ -14,14 +14,16 @@ obj.seed(10)
 print(obj.action_space)
 print(obj.action_map)
 
-for i in tqdm(range(0, 100)):
+for i in tqdm(range(0, 1)):
     #print("Starting episode : %d"%(i+1))
-    obj.reset(0.3)
+    state = obj.reset(0.2)
+    print(state.shape)
     count = 0
 
-    for i in range(0, 3550):
-        act = 5
+    for i in range(0, 3350):
+        act = 0
         state, reward, done, info = obj.step(act)
+        print(state.shape)
         if done:
             break
 '''

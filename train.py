@@ -34,7 +34,7 @@ def doIMPALAEssentials(algoConfig, args):
     algoConfig[args.name]["checkpoint_freq"] = args.checkpoint_freq
     return algoConfig
 
-def doPPOEssentials(algoConfig, args):
+def doPPOEssentials(algoConfig, simConfig, args):
     # Set Experiment Name
     algoConfig[args.name] = algoConfig.pop("EXP_NAME")
     # Set Number of Workers
@@ -48,6 +48,12 @@ def doPPOEssentials(algoConfig, args):
     algoConfig[args.name]["run"] = "PPO"
     # Set Checkpoint Frequency
     algoConfig[args.name]["checkpoint_freq"] = args.checkpoint_freq
+    # Enable/Disable memory use
+    if simConfig['config']['enable-lstm']:
+        algoConfig[args.name]['config']['model']['use_lstm'] = True
+    else:
+        algoConfig[args.name]['config']['model']['use_lstm'] = False
+    
     return algoConfig
 
 if __name__ == "__main__":
@@ -55,11 +61,12 @@ if __name__ == "__main__":
 
     # Read Config Files
     algoConfig = readYaml(args.training_algo_config)
+    simConfig = readYaml(args.sim_config)
     
     # Set essentials
     trainAlgo = args.training_algo_config.split("/")[-1].split('-')[0].upper()
     if trainAlgo == 'PPO':
-        algoConfig = doPPOEssentials(algoConfig, args)
+        algoConfig = doPPOEssentials(algoConfig, simConfig, args)
     elif trainAlgo == 'IMPALA':
         algoConfig == doIMPALAEssentials(algoConfig, args)
     else:
@@ -71,4 +78,3 @@ if __name__ == "__main__":
     # Start the training
     ray.init()
     run_experiments(algoConfig)
-    
