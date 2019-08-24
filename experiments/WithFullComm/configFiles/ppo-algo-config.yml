@@ -24,7 +24,7 @@ EXP_NAME:
     # Whether to rollout "complete_episodes" or "truncate_episodes"
     batch_mode: "truncate_episodes"
     # Forget Factor
-    gamma: 0.99
+    gamma: 0.996
     # ---- PPO Configs ---- #
 
 
@@ -56,10 +56,10 @@ EXP_NAME:
     # ---- Value Function Configs ---- #
     # Share layers for value function. If you set this to True, it's important
     # to tune vf_loss_coeff.
-    vf_share_layers: true
+    vf_share_layers: false
     #Coefficient of the value function loss. It's important to tune this if
-    #you set vf_share_layers: False
-    vf_loss_coeff: 0.001
+    #you set vf_share_layers: True
+    vf_loss_coeff: 0.01
     # Clip param for the value function. Note that this is sensitive to the
     # scale of the rewards. If your expected V is large, increase this.
     vf_clip_param: 1000.0
