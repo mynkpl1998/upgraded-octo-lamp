@@ -24,5 +24,5 @@ config:
   # Enable Traffic Lights
   enable-tf: true
 
-  enable-lstm: false
+  enable-lstm: true
   k-frames: 3
