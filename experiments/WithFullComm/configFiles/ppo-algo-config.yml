@@ -94,7 +94,7 @@ EXP_NAME:
     
     # ---- Neutral Net Configs ---- #
     model:
-      max_seq_len: 16
+      max_seq_len: 8
       lstm_cell_size: 128
       fcnet_hiddens: [128, 128]
       fcnet_activation: "relu"
