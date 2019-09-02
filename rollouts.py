@@ -102,7 +102,7 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                 # Calculate bumber to bumber distance
                 bum2bumdist = getBum2BumDist(localLaneMap, env.agent_lane, agentIDX)
                 #--- Saving data ----#
-                #agentIDX = getAgentID(env.lane_map, env.agent_lane)
+                agentIDX = getAgentID(env.lane_map, env.agent_lane)
                 dataDict["data"][density][episode]["speed"].append(env.lane_map[env.agent_lane][agentIDX]['speed'])
                 dataDict["data"][density][episode]["rewards"].append(reward)
                 dataDict["data"][density][episode]["actions"].append((env.planAct, env.queryAct))
