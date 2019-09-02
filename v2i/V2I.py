@@ -248,6 +248,7 @@ class V2I(gym.Env):
         tmpLaneMap[agentLane] = np.sort(tmpLaneMap[agentLane], order=['pos'])[::-1]
         agentIDX = getAgentID(tmpLaneMap, agentLane)
         bum2bumDist = self.getBum2BumDist(tmpLaneMap, agentLane, agentIDX)
+        #print(bum2bumDist)
         if bum2bumDist < (constants.CAR_LENGTH + 1):
             return (tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue('max-speed')) - (bum2bumDist/(constants.CAR_LENGTH + 1))
         elif planAct == "lane-change":

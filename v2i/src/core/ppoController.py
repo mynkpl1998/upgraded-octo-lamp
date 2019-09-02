@@ -44,6 +44,7 @@ class ppoController:
         if self.lstmEnabled:
             out = self.agent.get_policy(DEFAULT_POLICY_ID).compute_single_action(state, lstm_state)
         else:
+            #print("No")
             out = self.agent.get_policy(DEFAULT_POLICY_ID).compute_single_action(state, [])
         
         actionProbs = softmax(out[2]['behaviour_logits'])
