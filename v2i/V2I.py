@@ -349,8 +349,7 @@ class V2I(gym.Env):
             reward = self.commPenalty(reward, queryAct)
         
         if collision:
-            #reward = self.simArgs.getValue("collision-penalty")
-            reward = 0.0
+            reward = -1 * self.simArgs.getValue("collision-penalty")
         
         #---- Calculate Reward ----#
 
