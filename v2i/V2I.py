@@ -250,7 +250,7 @@ class V2I(gym.Env):
         bum2bumDist = self.getBum2BumDist(tmpLaneMap, agentLane, agentIDX)
         #print(bum2bumDist)
         if bum2bumDist < (constants.CAR_LENGTH + 1):
-            return (tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue('max-speed')) - (bum2bumDist/(constants.CAR_LENGTH + 1))
+            return -1
         elif planAct == "lane-change":
             return (tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue('max-speed'))
         else:

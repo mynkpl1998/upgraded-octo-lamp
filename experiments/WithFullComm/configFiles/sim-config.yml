@@ -11,7 +11,7 @@ config:
   cell-size: 1 # in metres
 
   # Reward Function
-  collision-penalty: 10.0
+  collision-penalty: 0.0
   nocomm-incentive: 0.1
 
   # UI settings
