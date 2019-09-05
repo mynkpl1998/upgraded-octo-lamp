@@ -9,7 +9,7 @@ from v2i.src.core.defaults import DEFAULT_DICT
 
 MAX_CARS_IN_LANE = 31
 LANES = 2 # Don't change this
-DENSITIES_WEIGHTS = [0.2, 0.0, 0.2, 0.0, 0.2, 0.0, 0.2, 0.0, 0.2, 0.0]
+DENSITIES_WEIGHTS = [0.3, 0.2, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625, 0.0625]
 
 # x pixles = 1m, ex: 6 pixels makes up 1 metre
 SCALE = 6
