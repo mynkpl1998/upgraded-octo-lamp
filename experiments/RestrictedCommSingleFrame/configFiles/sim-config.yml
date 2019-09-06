@@ -26,4 +26,4 @@ config:
   enable-tf: true
 
   enable-lstm: false
-  k-frames: 3
+  k-frames: 1
