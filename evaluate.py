@@ -152,7 +152,10 @@ def plot(simData, args):
         FullEpisodesplanDist.append(planDictCountFullEpisodes.copy())
         FullEpisodesQueryDist.append(queryDictCountFullEpisods.copy())
         assert count == numFullEpisodesList[denID] * simData['max-episode-length']
-
+        
+        if actionCounts == 0:
+            actionCounts = 1
+        
         for key in planDictCount.keys():
             planDictCount[key] /= actionCounts
             planDictCount[key] *= 100

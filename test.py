@@ -25,7 +25,8 @@ for i in tqdm(range(0, 1)):
         state, reward, done, info = obj.step(act)
         print(state.shape)
         if done:
-            break
+            #break
+            pass
 '''
 print(info)
 plt.bar(np.arange(0, len(info.keys())), list(info.values()))

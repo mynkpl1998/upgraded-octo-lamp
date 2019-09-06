@@ -4,6 +4,7 @@ EXP_NAME:
   # ---- Checkpoint Frequency ---- #
   checkpoint_freq: 100
   # ---- Checkpoint Frequency ---- #
+  #restore: /home/mayank/ray_results/RestrictedComm/PPO_v2i-v0_0_2019-09-05_13-52-55gruikzwp/checkpoint_2200/checkpoint-2200
   config:
 
     # ---- Generalized Advantage Estimator Parameters ---- #
@@ -24,7 +25,7 @@ EXP_NAME:
     # Whether to rollout "complete_episodes" or "truncate_episodes"
     batch_mode: "truncate_episodes"
     # Forget Factor
-    gamma: 0.996
+    gamma: 0.99
     # ---- PPO Configs ---- #
 
 
@@ -89,6 +90,8 @@ EXP_NAME:
     num_workers: 10
     # Set number of gpus to use
     num_gpus : 1
+    # Number of envs per worker
+    num_envs_per_worker: 3
     # ---- Compute Resources ---- #
     
     
