@@ -248,7 +248,10 @@ class V2I(gym.Env):
         tmpLaneMap[agentLane] = np.sort(tmpLaneMap[agentLane], order=['pos'])[::-1]
         agentIDX = getAgentID(tmpLaneMap, agentLane)
         bum2bumDist = self.getBum2BumDist(tmpLaneMap, agentLane, agentIDX)
+        agentSpeed = tmpLaneMap[agentLane][agentIDX]['speed']
         #print(bum2bumDist)
+        if agentSpeed > self.tfSpeedLimit:
+            return -1
         if bum2bumDist < (constants.CAR_LENGTH + 1):
             return -1
         elif planAct == "lane-change":
@@ -320,7 +323,6 @@ class V2I(gym.Env):
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
 
-
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
             for lane in range(0, constants.LANES):
@@ -351,6 +353,7 @@ class V2I(gym.Env):
         if collision:
             reward = -1 * self.simArgs.getValue("collision-penalty")
         
+        self.collision = collision
         #---- Calculate Reward ----#
 
         # ---- Init variables ----#

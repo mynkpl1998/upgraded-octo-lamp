@@ -5,7 +5,7 @@ import time
 import numpy as np
 from tqdm import tqdm
 
-path = "/home/mayank/Documents/upgraded-octo-lamp/examples/WithFullCommunication/config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/RestrictedCommSingleFrame/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 #print(obj.observation_space.low)
@@ -19,17 +19,12 @@ for i in tqdm(range(0, 1)):
     state = obj.reset(0.2)
     print(state.shape)
     count = 0
-
+    print(obj.tfSpeedLimit* 3.6)
     for i in range(0, 3350):
         act = 0
         state, reward, done, info = obj.step(act)
-        print(state.shape)
+        time.sleep(100)
+        #print(state.shape)
         if done:
             #break
             pass
-'''
-print(info)
-plt.bar(np.arange(0, len(info.keys())), list(info.values()))
-plt.xticks(np.arange(0, len(info.keys())), list(info.keys()), rotation='vertical')
-plt.show()
-'''

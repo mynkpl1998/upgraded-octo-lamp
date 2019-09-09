@@ -32,6 +32,8 @@ def plot(simData, args):
     FullEpisodesplanDist = []
     FullEpisodesQueryDist = []
     FullEpisodesmaxEgoSpeed = []
+    collisionCount = []
+
     #---- Full Epiosdes Data ---- #
 
     for denID, density in enumerate(densitiesList):
@@ -45,6 +47,8 @@ def plot(simData, args):
 
         planDictCountFullEpisodes = buildDictWithKeys(simData["plan-acts"], 0)
         queryDictCountFullEpisods = buildDictWithKeys(simData["query-acts"], 0)
+        
+        collisionCount.append(simData["others"][density]["collision-count"])
 
         actionCounts = 0
         totalNumberSteps = 0
@@ -177,7 +181,15 @@ def plot(simData, args):
         #----- Ego Max Speed Full Episodes-----#
         FullEpisodesmaxEgoSpeed.append(gloablEgoMaxSpeedFullEpisode * 3.6)
         #----- Ego Max Speed Full Episodes-----#
-    
+
+    #---- Plot Collision Count ----#
+    plotCollisionGraph = pygal.Bar()
+    plotCollisionGraph.title = "Number of collisions"
+    for i, count in enumerate(collisionCount):
+        plotCollisionGraph.add(str(densitiesList[i]), count)
+    plotCollisionGraph.render_to_file(args.out_file_path + "/FullEpisodes" + "/countPlot.svg")
+    #---- Plot Collision Count ----#
+
     #---- Plot Avg Speed ----#
     avgSpeedGraph = pygal.Bar()
     avgSpeedGraph.title = "Average Agent Speed (km/hr), (max : %.2f km/hr)"%(simData["maxSpeed"])
@@ -299,6 +311,7 @@ def plot(simData, args):
         numFullEpisodesListGraph.add(str(densitiesList[i]), numEpi)
     numFullEpisodesListGraph.render_to_file(args.out_file_path + "/FullEpisodes" + "/numFullEpisodes.svg")
     #----- Full Epsiodes List Plot----#
+
     
 def createFolders(args):
     if not os.path.exists(args.out_file_path + "/FullEpisodes/"):

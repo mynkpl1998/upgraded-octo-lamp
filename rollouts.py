@@ -50,6 +50,7 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
     dataDict["query-acts"] = env.actionEncoderDecoderHandler.querySpace
     dataDict["max-episode-length"] = args.episode_length
     dataDict["data"] = {}
+    dataDict["others"] = {}
     # ---- Meta-data ----#
 
     if len(densityList) == 0:
@@ -59,10 +60,11 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
     for density in densityList:
         print("Running Simulation for %.1f density : "%(density))
         dataDict["data"][density] = {}
+        dataDict["others"][density] = {}
+        dataDict["others"][density]["collision-count"] = 0
 
         for episode in tqdm(range(0, args.num_episodes)):
 
-            
             dataDict["data"][density][episode] = {}
             dataDict["data"][density][episode]["speed"] = []
             dataDict["data"][density][episode]["rewards"] = []
@@ -94,6 +96,11 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                     render(vf, probs, plotX, acts, fig, ax1, ax2)
 
                 next_state, reward, done, info_dict = env.step(action)
+                
+                # Collision Count
+                if env.collision == True:
+                    dataDict["others"][density]["collision-count"] += 1
+                
                 # Calculate agent IDX
                 localLaneMap = env.lane_map.copy()
                 localLaneMap[env.agent_lane] = np.sort(localLaneMap[env.agent_lane], order=['pos'])[::-1]

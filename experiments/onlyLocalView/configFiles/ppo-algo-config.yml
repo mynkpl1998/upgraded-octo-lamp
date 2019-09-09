@@ -4,7 +4,7 @@ EXP_NAME:
   # ---- Checkpoint Frequency ---- #
   checkpoint_freq: 100
   # ---- Checkpoint Frequency ---- #
-
+  #restore: /home/mayank/ray_results/RestrictedComm/PPO_v2i-v0_0_2019-09-05_13-52-55gruikzwp/checkpoint_2200/checkpoint-2200
   config:
 
     # ---- Generalized Advantage Estimator Parameters ---- #
@@ -17,7 +17,7 @@ EXP_NAME:
 
     # ---- PPO Configs ---- #
     # Initial coefficient for KL divergence
-    kl_coeff: 0.2
+    kl_coeff: 0.1
     # PPO clip parameter
     clip_param: 0.2
     # Target value for KL divergence
@@ -25,17 +25,17 @@ EXP_NAME:
     # Whether to rollout "complete_episodes" or "truncate_episodes"
     batch_mode: "truncate_episodes"
     # Forget Factor
-    gamma: 0.999
+    gamma: 0.99
     # ---- PPO Configs ---- #
 
 
     # ---- SGD Configs ---- #
     # Size of batches collected from each worker
-    sample_batch_size : 200
+    sample_batch_size : 100
     # Total SGD batch size across all devices for SGD
     sgd_minibatch_size: 4086
     # Number of timesteps collected for each SGD round (leave this, script will autofill this according to best value)
-    train_batch_size: 
+    train_batch_size:
     # Whether to shuffle sequences in the batch when training (recommended)
     # shuffle_sequences: true (not implemented in release 0.7.2)
     # Number of SGD iterations in each outer loop
@@ -45,9 +45,9 @@ EXP_NAME:
 
     # ---- Optimizer Configs ---- #
     # Stepsize of SGD
-    lr: 0.00001
+    lr: 0.00005
     # Learning rate schedule
-    lr_schedule: 
+    lr_schedule:
     # Uses the sync samples optimizer instead of the multi-gpu one. This does
     # not support minibatches.
     simple_optimizer: false
@@ -57,19 +57,19 @@ EXP_NAME:
     # ---- Value Function Configs ---- #
     # Share layers for value function. If you set this to True, it's important
     # to tune vf_loss_coeff.
-    vf_share_layers: true
+    vf_share_layers: false
     #Coefficient of the value function loss. It's important to tune this if
     #you set vf_share_layers: True
     vf_loss_coeff: 0.01
     # Clip param for the value function. Note that this is sensitive to the
     # scale of the rewards. If your expected V is large, increase this.
-    vf_clip_param: 10000.0
+    vf_clip_param: 1000.0
     # ---- Value Function Configs ---- #
 
     
     # ---- Policy Entropy Regularizer ---- #
     # Coefficient of the entropy regularizer
-    #entropy_coeff: 0.0 (not implemented in release 0.7.2)
+    entropy_coeff: 0.01
     # Decay schedule for the entropy regularizer
     #entropy_coeff_schedule: None (not implemented in release 0.7.2)
     # ---- Policy Entropy Regularizer ---- #
@@ -81,7 +81,7 @@ EXP_NAME:
     # Which observation filter to apply to the observation
     observation_filter: "NoFilter"
     # Max length of episode
-    horizon: 10000
+    horizon: 3350
     # ---- Misc ---- #
 
 
@@ -90,14 +90,17 @@ EXP_NAME:
     num_workers: 10
     # Set number of gpus to use
     num_gpus : 1
+    # Number of envs per worker
+    num_envs_per_worker: 3
     # ---- Compute Resources ---- #
     
     
     # ---- Neutral Net Configs ---- #
     model:
-      use_lstm: true
-      max_seq_len: 32
-      lstm_cell_size: 256
+      max_seq_len: 8
+      lstm_cell_size: 128
+      fcnet_hiddens: [128, 128]
+      fcnet_activation: "relu"
       lstm_use_prev_action_reward: false
       framestack: false
       grayscale: false
