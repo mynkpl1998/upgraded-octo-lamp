@@ -5,7 +5,7 @@ import time
 import numpy as np
 from tqdm import tqdm
 
-path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/RestrictedCommSingleFrame/configFiles/sim-config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/WithFullCommSingleFrame/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 #print(obj.observation_space.low)
