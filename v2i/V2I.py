@@ -366,4 +366,4 @@ class V2I(gym.Env):
         # state, reward, done, info
         obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)
-        return self.obsWrapper.getObs(), reward, False, self.processInfoDict()
+        return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()

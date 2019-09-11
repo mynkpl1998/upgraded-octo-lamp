@@ -16,15 +16,17 @@ print(obj.action_map)
 
 for i in tqdm(range(0, 1)):
     #print("Starting episode : %d"%(i+1))
-    state = obj.reset(0.2)
+    state = obj.reset(0.1)
     print(state.shape)
     count = 0
+    
     print(obj.tfSpeedLimit* 3.6)
     for i in range(0, 3350):
         act = 0
         state, reward, done, info = obj.step(act)
-        time.sleep(100)
+        
+        print(reward)
         #print(state.shape)
         if done:
-            #break
-            pass
+            break
+            #pass
