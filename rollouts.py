@@ -15,7 +15,7 @@ from v2i.src.core.impalaController import impalaController
 
 parser = argparse.ArgumentParser(description="v2i rollout script")
 parser.add_argument("-n", "--num_episodes", default=10, type=int, help="number of episodes to run, (default: 10)")
-parser.add_argument("-d", "--density", nargs='+', type=float, default=[], help="specify density list to intialize the episodes with, default will pick any density")
+parser.add_argument("-d", "--density", nargs='+', type=str, default=[], help="specify density list to intialize the episodes with, default will pick any density")
 parser.add_argument("-l", "--episode-length", type=int, default=10000, help="maximum length of the episode, (default : 10000)")
 parser.add_argument("-c", "--checkpoint-file", type=str, required=True, help="checkpoint file to load model from")
 parser.add_argument("-tc", "--training-algo-config", type=str, required=True, help="algorithm configuration file")
@@ -38,9 +38,17 @@ def getBum2BumDist(laneMap, agentLane, agentIDX):
     angleDiff %= 360
     return (arcLength(constants.LANE_RADIUS[agentLane], angleDiff) / constants.SCALE) - constants.CAR_LENGTH
 
+def str2Density(argsStr):
+    densities = []
+    for density in argsStr:
+        l1, l2 = density.split(",")
+        epsiodeDensity = [float(l1), float(l2)]
+        densities.append(epsiodeDensity)
+    return densities
+
 def run_rollouts(args, env, fig, ax1, ax2, useLstm):
     dataDict = {}
-    densityList = args.density
+    densityList = str2Density(args.density)
     acts = list(env.actionEncoderDecoderHandler.actMap.values())
     
     # ---- Meta-data ----#
@@ -58,19 +66,20 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
             densityList.append(getRandomDensity())
 
     for density in densityList:
-        print("Running Simulation for %.1f density : "%(density))
-        dataDict["data"][density] = {}
-        dataDict["others"][density] = {}
-        dataDict["others"][density]["collision-count"] = 0
+        print("Running Simulation for , lane 0 : %f, lane 1 : %f densities : "%(density[0], density[1]))
+        densityStr = str(density[0]) + "_" + str(density[1])
+        dataDict["data"][densityStr] = {}
+        dataDict["others"][densityStr] = {}
+        dataDict["others"][densityStr]["collision-count"] = 0
 
         for episode in tqdm(range(0, args.num_episodes)):
 
-            dataDict["data"][density][episode] = {}
-            dataDict["data"][density][episode]["speed"] = []
-            dataDict["data"][density][episode]["rewards"] = []
-            dataDict["data"][density][episode]["actions"] = []
-            dataDict["data"][density][episode]["bum2bumdist"] = []
-            dataDict["data"][density][episode]["EgoMaxSpeed"] = -10
+            dataDict["data"][densityStr][episode] = {}
+            dataDict["data"][densityStr][episode]["speed"] = []
+            dataDict["data"][densityStr][episode]["rewards"] = []
+            dataDict["data"][densityStr][episode]["actions"] = []
+            dataDict["data"][densityStr][episode]["bum2bumdist"] = []
+            dataDict["data"][densityStr][episode]["EgoMaxSpeed"] = -10
             
             prev_state = env.reset(density)
             # Init variables
@@ -110,11 +119,11 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                 bum2bumdist = getBum2BumDist(localLaneMap, env.agent_lane, agentIDX)
                 #--- Saving data ----#
                 agentIDX = getAgentID(env.lane_map, env.agent_lane)
-                dataDict["data"][density][episode]["speed"].append(env.lane_map[env.agent_lane][agentIDX]['speed'])
-                dataDict["data"][density][episode]["rewards"].append(reward)
-                dataDict["data"][density][episode]["actions"].append((env.planAct, env.queryAct))
-                dataDict["data"][density][episode]["EgoMaxSpeed"] = max(dataDict["data"][density][episode]["EgoMaxSpeed"], env.lane_map[env.agent_lane][agentIDX]['speed'])
-                dataDict["data"][density][episode]['bum2bumdist'].append(bum2bumdist)
+                dataDict["data"][densityStr][episode]["speed"].append(env.lane_map[env.agent_lane][agentIDX]['speed'])
+                dataDict["data"][densityStr][episode]["rewards"].append(reward)
+                dataDict["data"][densityStr][episode]["actions"].append((env.planAct, env.queryAct))
+                dataDict["data"][densityStr][episode]["EgoMaxSpeed"] = max(dataDict["data"][densityStr][episode]["EgoMaxSpeed"], env.lane_map[env.agent_lane][agentIDX]['speed'])
+                dataDict["data"][densityStr][episode]['bum2bumdist'].append(bum2bumdist)
                 #--- Saving data ----#
 
                 episodeReward += reward

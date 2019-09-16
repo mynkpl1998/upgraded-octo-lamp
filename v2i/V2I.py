@@ -158,25 +158,31 @@ class V2I(gym.Env):
         return data
 
     def fixIssue2(self, density):
-        if density == 0.3:
-            return self.densities[2]
-        elif density == 0.7:
-            return self.densities[6]
-        else:
-            return density
+        if density != None:
+            if density[0] == 0.3:
+                density[0] = self.densities[2]
+            elif density[0] == 0.7:
+                density[0] = self.densities[6]
+            
+            if density[1] == 0.3:
+                density[1] = self.densities[2]
+            elif density[1] == 0.7:
+                density[1] = self.densities[6]
+        return density
         
-    def reset(self, density=None):
+    def reset(self, density=None): # expects a density list of size 2
         density = self.fixIssue2(density)
 
         # ---- Density Generation ----#
         epsiodeDensity = None
         if density == None:
-            #randomIndex = np.random.randint(0, len(self.densities))
-            #epsiodeDensity = self.densities[randomIndex]
             epsiodeDensity = np.random.choice(self.densities, p=constants.DENSITIES_WEIGHTS)
+            epsiodeDensity = [epsiodeDensity, epsiodeDensity]
         else:
-            if density not in self.densities:
-                raiseValueError("invalid density -> %f"%(density))
+            if density[0] not in self.densities:
+                raiseValueError("invalid density for lane 0 -> %f"%(density[0]))
+            if density[1] not in self.densities:
+                raiseValueError("invalid density for lane 1 -> %f"%(density[1]))
             epsiodeDensity = density
         # ---- Density Generation ----#
         
@@ -186,18 +192,17 @@ class V2I(gym.Env):
         self.num_trajec = {}
         self.num_steps = 0
         self.infoDict['totalEpisodes'] += 1
-        self.infoDict[epsiodeDensity] += 1
         
         for lane in range(0, constants.LANES):
-            self.num_trajec[lane] = len(self.trajecDict[lane][epsiodeDensity])            
+            self.num_trajec[lane] = len(self.trajecDict[lane][epsiodeDensity[lane]])            
         
         self.trajecIndex = {}
         self.num_cars = {}
         for lane in range(0, constants.LANES):
             self.trajecIndex[lane] = np.random.randint(0, self.num_trajec[lane])
-            self.num_cars[lane] = len(self.trajecDict[lane][epsiodeDensity][self.trajecIndex[lane]])
+            self.num_cars[lane] = len(self.trajecDict[lane][epsiodeDensity[lane]][self.trajecIndex[lane]])
         
-        self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity, self.num_cars)
+        self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity[lane], self.num_cars)
         
         ''' 
         Randomly Choose Agent Lane and Agent Car ID

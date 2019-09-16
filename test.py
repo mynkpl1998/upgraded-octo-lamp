@@ -16,7 +16,7 @@ print(obj.action_map)
 
 for i in tqdm(range(0, 1)):
     #print("Starting episode : %d"%(i+1))
-    state = obj.reset(0.1)
+    state = obj.reset([0.1, 0.7])
     print(state.shape)
     count = 0
     
@@ -28,5 +28,5 @@ for i in tqdm(range(0, 1)):
         print(reward)
         #print(state.shape)
         if done:
-            break
-            #pass
+            #break
+            pass
