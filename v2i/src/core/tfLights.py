@@ -165,7 +165,10 @@ class tfController:
 		return laneMap
 	
 	def tfDummyVehicle(self, laneMap, lane):
-		vehicleProp = laneMap[0][0].copy()
+		dummyLane = 0
+		if laneMap[0].shape[0] == 0:
+			dummyLane = 1
+		vehicleProp = laneMap[dummyLane][0].copy()
 		vehicleProp["pos"] = 0.0
 		vehicleProp["speed"] = 0.0
 		vehicleProp["lane"] = lane

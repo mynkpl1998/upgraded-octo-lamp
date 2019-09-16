@@ -54,7 +54,16 @@ class V2I(gym.Env):
         if self.trajecDict == None:
             raiseValueError("no or invalid trajectory file found at v2i/src/data/")
         
+        '''
+        Append a list for 0.0 traffic density
+        '''
+        for lane in self.trajecDict.keys():
+            self.trajecDict[lane][0.0] = []
+        
         self.densities = list(self.trajecDict[0].keys())
+
+        # Fix issue2 for densities
+        self.trainDensities = self.fixIssue2v2(constants.DENSITIES)
 
         # Initializes the required variables
         self.init()
@@ -132,13 +141,22 @@ class V2I(gym.Env):
         
     def buildlaneMap(self, trajecDict, trajecIndex, epsiodeDensity, numCars):
         laneMap = {}
-        for lane in range(0, constants.LANES):
-            carsProperties = []
-            for carID in range(0, numCars[lane]):
-                # Pos, Speed, Lane, Agent, CarID
-                tup = (trajecDict[lane][epsiodeDensity][trajecIndex[lane]][carID], 0.0, 0, 0, carID)
-                carsProperties.append(tup)
-            laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
+        if numCars[0] == 0 and numCars[1] == 0:
+            randomLane = np.random.randint(0, constants.LANES)
+            tup = (np.random.uniform(0, 340), 0.0, randomLane, 0, 0)
+            for lane in range(0, constants.LANES):
+                if lane == randomLane:
+                    laneMap[lane] = np.array([tup], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
+                else:
+                    laneMap[lane] = np.array([], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
+        else:
+            for lane in range(0, constants.LANES):
+                carsProperties = []
+                for carID in range(0, numCars[lane]):
+                    # Pos, Speed, Lane, Agent, CarID
+                    tup = (trajecDict[lane][epsiodeDensity[lane]][trajecIndex[lane]][carID], 0.0, lane, 0, carID)
+                    carsProperties.append(tup)
+                laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
         return laneMap
     
     def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid, planAct, queryAct, agentReward):
@@ -169,6 +187,15 @@ class V2I(gym.Env):
             elif density[1] == 0.7:
                 density[1] = self.densities[6]
         return density
+    
+    def fixIssue2v2(self, l):
+        for idx,density in enumerate(l):
+            if density == 0.3:
+                l[idx] = self.densities[2]
+            elif density == 0.7:
+                l[idx] = self.densities[6]
+        return l
+
         
     def reset(self, density=None): # expects a density list of size 2
         density = self.fixIssue2(density)
@@ -176,8 +203,7 @@ class V2I(gym.Env):
         # ---- Density Generation ----#
         epsiodeDensity = None
         if density == None:
-            epsiodeDensity = np.random.choice(self.densities, p=constants.DENSITIES_WEIGHTS)
-            epsiodeDensity = [epsiodeDensity, epsiodeDensity]
+            epsiodeDensity = np.random.choice(self.trainDensities, size=2)
         else:
             if density[0] not in self.densities:
                 raiseValueError("invalid density for lane 0 -> %f"%(density[0]))
@@ -194,22 +220,36 @@ class V2I(gym.Env):
         self.infoDict['totalEpisodes'] += 1
         
         for lane in range(0, constants.LANES):
-            self.num_trajec[lane] = len(self.trajecDict[lane][epsiodeDensity[lane]])            
-        
+            self.num_trajec[lane] = len(self.trajecDict[lane][epsiodeDensity[lane]])
+
         self.trajecIndex = {}
         self.num_cars = {}
         for lane in range(0, constants.LANES):
-            self.trajecIndex[lane] = np.random.randint(0, self.num_trajec[lane])
-            self.num_cars[lane] = len(self.trajecDict[lane][epsiodeDensity[lane]][self.trajecIndex[lane]])
+            if self.num_trajec[lane] != 0:
+                self.trajecIndex[lane] = np.random.randint(0, self.num_trajec[lane])
+                self.num_cars[lane] = len(self.trajecDict[lane][epsiodeDensity[lane]][self.trajecIndex[lane]])
+            else:
+                self.trajecIndex[lane] = None
+                self.num_cars[lane] = 0
         
-        self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity[lane], self.num_cars)
-        
+        self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity, self.num_cars)
         ''' 
         Randomly Choose Agent Lane and Agent Car ID
         '''
-        self.agent_lane = np.random.randint(0, constants.LANES)
-        self.randomIDX = np.random.randint(0, self.num_cars[self.agent_lane])
-        self.lane_map[self.agent_lane][self.randomIDX]['agent'] = 1
+        if epsiodeDensity[0] == 0.0 and epsiodeDensity[1] == 0.0:
+            for lane in range(0, constants.LANES):
+                if self.lane_map[lane].shape[0] == 1:
+                    self.agent_lane = lane
+                    self.lane_map[self.agent_lane][0]['agent'] = 1
+        else:    
+            if epsiodeDensity[0] == 0.0:
+                self.agent_lane = 1
+            elif epsiodeDensity[1] == 0.0:
+                self.agent_lane = 0
+            else:
+                self.agent_lane = np.random.randint(0, constants.LANES)
+            self.randomIDX = np.random.randint(0, self.num_cars[self.agent_lane])
+            self.lane_map[self.agent_lane][self.randomIDX]['agent'] = 1
         
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
@@ -255,9 +295,11 @@ class V2I(gym.Env):
         bum2bumDist = self.getBum2BumDist(tmpLaneMap, agentLane, agentIDX)
         agentSpeed = tmpLaneMap[agentLane][agentIDX]['speed']
         #print(bum2bumDist)
+        '''
         if agentSpeed > self.tfSpeedLimit:
             return -1
-        if bum2bumDist < (constants.CAR_LENGTH + 1):
+        '''
+        if bum2bumDist < (constants.CAR_LENGTH + 1) and len(tmpLaneMap[agentLane]) > 1:
             return -1
         elif planAct == "lane-change":
             return (tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue('max-speed'))
@@ -352,6 +394,7 @@ class V2I(gym.Env):
 
         #---- Calculate Reward ----#
         reward = self.rewardFunc(self.lane_map, self.agent_lane, planAct)
+
         if self.gridHandler.isCommEnabled:
             reward = self.commPenalty(reward, queryAct)
         

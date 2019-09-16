@@ -9,7 +9,7 @@ from v2i.src.core.defaults import DEFAULT_DICT
 
 MAX_CARS_IN_LANE = 31
 LANES = 2 # Don't change this
-DENSITIES_WEIGHTS = [0.2, 0.0, 0.2, 0.0, 0.2, 0.0, 0.2, 0.0, 0.2, 0.0]
+DENSITIES = [0.0, 0.1, 0.3, 0.5, 0.7, 0.9]
 
 # x pixles = 1m, ex: 6 pixels makes up 1 metre
 SCALE = 6
@@ -53,5 +53,5 @@ OCCGRID_CONSTS = {
 
 # Traffic Light Constants
 TF_CONSTS = {
-    'EPISODE_TF_GEN_PROB': 0.7
+    'EPISODE_TF_GEN_PROB': 0.5
 }

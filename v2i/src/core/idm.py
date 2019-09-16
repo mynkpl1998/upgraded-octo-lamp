@@ -99,48 +99,42 @@ class idm:
         '''
         Each lane has different number of cars. Hence, we need to do seperate function calls on each of them
         '''
+        if laneMap[0].shape[0] == 0:
+            pass
+        else:
+            oldPosLane0 = self.getAllElementbyKeys('pos', laneMap[0])
+            posDiffLane0 = self.angleDiff(laneMap, 0)
+            speedDiffLane0 = self.relativeSpeed(laneMap, 0)
+            speedLane0 = self.getAllElementbyKeys('speed', laneMap[0])
+            sAlphaLane0 = self.vecBumpBumpDistance(posDiffLane0, CAR_LENGTH, 0)
+            accLane0 = self.vecidmAcc(sAlphaLane0, speedDiffLane0, speedLane0)
+            distLane0 = self.vecDistTravelled(speedLane0, accLane0, self.tPeriod)
+            newSpeedLane0 = self.vecNewSpeed(speedLane0, accLane0, self.tPeriod)
+            distLane0[distLane0 < 0] = 0.0
+            newSpeedLane0[newSpeedLane0 < 0] = 0.0
+            distInPixelsLane0 = distLane0 * SCALE
+            distInDegLane0 = self.vecArc2Angle(LANE_RADIUS[0], distInPixelsLane0)
+            newPosLane0 = self.vecNewPos(oldPosLane0, distInDegLane0)
+            self.updateLaneMap(newSpeedLane0, newPosLane0, laneMap[0])
 
-        oldPosLane0 = self.getAllElementbyKeys('pos', laneMap[0])
-        oldPosLane1 = self.getAllElementbyKeys('pos', laneMap[1])
-        
-        posDiffLane0 = self.angleDiff(laneMap, 0)
-        posDiffLane1 = self.angleDiff(laneMap, 1)
 
-        speedDiffLane0 = self.relativeSpeed(laneMap, 0)
-        speedDiffLane1 = self.relativeSpeed(laneMap, 1)
-
-        speedLane0 = self.getAllElementbyKeys('speed', laneMap[0])
-        speedLane1 = self.getAllElementbyKeys('speed', laneMap[1])
-
-        sAlphaLane0 = self.vecBumpBumpDistance(posDiffLane0, CAR_LENGTH, 0)
-        sAlphaLane1 = self.vecBumpBumpDistance(posDiffLane1, CAR_LENGTH, 1)
-
-        accLane0 = self.vecidmAcc(sAlphaLane0, speedDiffLane0, speedLane0)
-        accLane1 = self.vecidmAcc(sAlphaLane1, speedDiffLane1, speedLane1)
-        
-        distLane0 = self.vecDistTravelled(speedLane0, accLane0, self.tPeriod)
-        distLane1 = self.vecDistTravelled(speedLane1, accLane1, self.tPeriod)
-        
-        newSpeedLane0 = self.vecNewSpeed(speedLane0, accLane0, self.tPeriod)
-        newSpeedLane1 = self.vecNewSpeed(speedLane1, accLane1, self.tPeriod)
-
-        # --- Check for invalid distance and new Speed --- #
-        distLane0[distLane0 < 0] = 0.0
-        distLane1[distLane1 < 0] = 0.0
-        
-        newSpeedLane0[newSpeedLane0 < 0] = 0.0
-        newSpeedLane1[newSpeedLane1 < 0] = 0.0
-        # --- Check for invalid distance and new Speed --- #
-        
-        distInPixelsLane0 = distLane0 * SCALE
-        distInPixelsLane1 = distLane1 * SCALE
-
-        distInDegLane0 = self.vecArc2Angle(LANE_RADIUS[0], distInPixelsLane0)
-        distInDegLane1 = self.vecArc2Angle(LANE_RADIUS[1], distInPixelsLane1)
-        
-        newPosLane0 = self.vecNewPos(oldPosLane0, distInDegLane0)
-        newPosLane1 = self.vecNewPos(oldPosLane1, distInDegLane1)
-
-        self.updateLaneMap(newSpeedLane0, newPosLane0, laneMap[0])
-        self.updateLaneMap(newSpeedLane1, newPosLane1, laneMap[1])
+        if laneMap[1].shape[0] == 0:
+            pass
+        else:
+            oldPosLane1 = self.getAllElementbyKeys('pos', laneMap[1])
+            posDiffLane1 = self.angleDiff(laneMap, 1)
+            speedDiffLane1 = self.relativeSpeed(laneMap, 1)
+            speedLane1 = self.getAllElementbyKeys('speed', laneMap[1])
+            sAlphaLane1 = self.vecBumpBumpDistance(posDiffLane1, CAR_LENGTH, 1)
+            accLane1 = self.vecidmAcc(sAlphaLane1, speedDiffLane1, speedLane1)
+            distLane1 = self.vecDistTravelled(speedLane1, accLane1, self.tPeriod)
+            newSpeedLane1 = self.vecNewSpeed(speedLane1, accLane1, self.tPeriod)
+            # --- Check for invalid distance and new Speed --- #
+            distLane1[distLane1 < 0] = 0.0
+            newSpeedLane1[newSpeedLane1 < 0] = 0.0
+            # --- Check for invalid distance and new Speed --- #
+            distInPixelsLane1 = distLane1 * SCALE
+            distInDegLane1 = self.vecArc2Angle(LANE_RADIUS[1], distInPixelsLane1)
+            newPosLane1 = self.vecNewPos(oldPosLane1, distInDegLane1)
+            self.updateLaneMap(newSpeedLane1, newPosLane1, laneMap[1])
         

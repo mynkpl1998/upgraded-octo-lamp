@@ -108,7 +108,7 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                 
                 # Collision Count
                 if env.collision == True:
-                    dataDict["others"][density]["collision-count"] += 1
+                    dataDict["others"][densityStr]["collision-count"] += 1
                 
                 # Calculate agent IDX
                 localLaneMap = env.lane_map.copy()

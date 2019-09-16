@@ -107,18 +107,18 @@ def plot(simData, args):
 
         
         plt.hist(allEpisodesSpeed, bins=200, density=True)
-        plt.title("Density : %.2f, Total Steps : %d"%(density, len(allEpisodesSpeed)))
+        plt.title("Density : %s, Total Steps : %d"%(density, len(allEpisodesSpeed)))
         plt.xlabel("Speed (km/hr), max allowed by LV : %.2f"%(simData["maxViewSpeed"]))
         plt.ylabel("Count (normalized) % ")
-        plt.savefig(args.out_file_path + "/AllEpisodes" + "/speedHist_%.2f.png"%(density))
+        plt.savefig(args.out_file_path + "/AllEpisodes" + "/speedHist_%s.png"%(density))
         plt.cla()
 
         assert len(allEpisodesSpeedFullEpisodes) == numFullEpisodes * simData["max-episode-length"]
         plt.hist(allEpisodesSpeedFullEpisodes, bins=200, density=True)
-        plt.title("Density : %.2f, Total Steps : %d"%(density, len(allEpisodesSpeedFullEpisodes)))
+        plt.title("Density : %s, Total Steps : %d"%(density, len(allEpisodesSpeedFullEpisodes)))
         plt.xlabel("Speed (km/hr), max allowed by LV : %.2f"%(simData["maxViewSpeed"]))
         plt.ylabel("Count (normalized) % ")
-        plt.savefig(args.out_file_path + "/FullEpisodes" + "/speedHist_%.2f.png"%(density))
+        plt.savefig(args.out_file_path + "/FullEpisodes" + "/speedHist_%s.png"%(density))
         plt.cla()
 
         # ---- Avg Speed ---- #
