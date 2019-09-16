@@ -22,18 +22,14 @@ for i in range(0, 10000):
     for i in range(0, 2):
         episodeDensity.append(random.choice(densities))
 
-    state = obj.reset([0.3, 0.1])
+    state = obj.reset([0.0, 0.0])
     #print(state.shape)
     count = 0
     #time.sleep(0.5)
-    print(obj.tfSpeedLimit* 3.6)
-    for i in range(0, 3350):
-        if i > 100:
-            act = 3
-        else:
-            act = 0
-        state, reward, done, info = obj.step(act)
     
+    for i in range(0, 3350):
+        act = 0
+        state, reward, done, info = obj.step(act)
         #print(state.shape)
         if done:
             break
