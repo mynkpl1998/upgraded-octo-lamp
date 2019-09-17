@@ -53,5 +53,5 @@ OCCGRID_CONSTS = {
 
 # Traffic Light Constants
 TF_CONSTS = {
-    'EPISODE_TF_GEN_PROB': 0.5
+    'EPISODE_TF_GEN_PROB': 0.8
 }
