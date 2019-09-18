@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 import random
 
-path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/WithFullCommSingleFrame/configFiles/sim-config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/commWithAge/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 #print(obj.observation_space.low)
@@ -23,7 +23,7 @@ for i in range(0, 10000):
         episodeDensity.append(random.choice(densities))
 
     state = obj.reset([0.0, 0.0])
-    #print(state.shape)
+    print(state.shape)
     count = 0
     #time.sleep(0.5)
     

@@ -14,6 +14,7 @@ from v2i.src.core.common import getAgentID, arcLength, getTfID
 from v2i.src.core.tfLights import tfController
 from v2i.src.core.constants import TF_CONSTS
 from v2i.src.core.obsQueue import obsWrapper
+from v2i.src.core.age import age
 
 
 class V2I(gym.Env):
@@ -109,6 +110,13 @@ class V2I(gym.Env):
 
         # Init Gym Env Properties
         self.initGymProp(self.gridHandler)
+
+        # Initialize only if comm is enable
+        if self.simArgs.getValue("enable-age"):
+            if self.gridHandler.isCommEnabled:
+                self.ageHandler = age(self.gridHandler)
+            else:
+                raiseValueError("age can't be enabled if comm is disabled")
 
         # Initialze Observation Wrapper if lstm is disabled
         self.obsWrapper = obsWrapper(self.simArgs.getValue('k-frames'), int(self.gridHandler.observation_space.shape[0]/self.simArgs.getValue("k-frames")))
@@ -262,6 +270,11 @@ class V2I(gym.Env):
                 self.tfTogglePts = self.tfHandler.expandPts()
             else:
                 self.tfTogglePts = [[], []]
+        
+        # ---- Reset Age Vectors ---- #
+        if self.simArgs.getValue("enable-age"):
+            self.ageHandler.reset()
+        
 
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
@@ -272,12 +285,18 @@ class V2I(gym.Env):
         
         # Reset Observation Queue
         self.obsWrapper.resetQueue()
-        obs = self.buildObservation(occGrid, velGrid)
+        if self.simArgs.getValue('enable-age'):
+            obs = self.buildObservation(occGrid, velGrid, self.ageHandler.getAgentAge())
+        else:
+            obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs()
     
-    def buildObservation(self, occGrid, velGrid):
-        combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
+    def buildObservation(self, occGrid, velGrid, ageVector=None):
+        if ageVector is not None:
+            combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten(), ageVector.flatten()))
+        else:
+            combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
         return combinedObs.copy()
     
     def getBum2BumDist(self, laneMap, agentLane, agentIDX):
@@ -409,6 +428,7 @@ class V2I(gym.Env):
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), self.isLightRed)
             else:
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), None)
+        
         
         # state, reward, done, info
         obs = self.buildObservation(occGrid, velGrid)
