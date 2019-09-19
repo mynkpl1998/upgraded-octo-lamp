@@ -28,4 +28,4 @@ config:
   enable-lstm: false
   k-frames: 1
 
-  enable-age: false
+  enable-age: true

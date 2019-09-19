@@ -11,6 +11,7 @@ class age:
         self.ageStep = 1.0/(self.numSensors * 2)
         self.commMap = self.gridHandler.commMap
         self.commIndexMap = self.gridHandler.commIndexMap
+        print("Num sensors : ", self.numSensors)
 
     def reset(self):
         self.trueAge.fill(1.0)

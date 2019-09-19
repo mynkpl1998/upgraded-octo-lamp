@@ -94,7 +94,7 @@ class V2I(gym.Env):
         self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"), self.simArgs.getValue("local-view"))
 
         # Intialize Grid Handler here
-        self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), self.simArgs.getValue("k-frames"),2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
+        self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), self.simArgs.getValue("k-frames"), self.simArgs.getValue("enable-age"), 2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
         
         # Initialize Traffic Lights
         if self.simArgs.getValue("enable-tf"):
@@ -274,7 +274,6 @@ class V2I(gym.Env):
         # ---- Reset Age Vectors ---- #
         if self.simArgs.getValue("enable-age"):
             self.ageHandler.reset()
-        
 
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
@@ -289,6 +288,7 @@ class V2I(gym.Env):
             obs = self.buildObservation(occGrid, velGrid, self.ageHandler.getAgentAge())
         else:
             obs = self.buildObservation(occGrid, velGrid)
+        
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs()
     

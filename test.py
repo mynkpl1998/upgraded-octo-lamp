@@ -24,12 +24,15 @@ for i in range(0, 10000):
 
     state = obj.reset([0.0, 0.0])
     print(state.shape)
+    print(state)
+    break
     count = 0
     #time.sleep(0.5)
-    
+    '''
     for i in range(0, 3350):
         act = 0
         state, reward, done, info = obj.step(act)
         #print(state.shape)
         if done:
             break
+    '''
