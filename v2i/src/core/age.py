@@ -11,13 +11,43 @@ class age:
         self.ageStep = 1.0/(self.numSensors * 2)
         self.commMap = self.gridHandler.commMap
         self.commIndexMap = self.gridHandler.commIndexMap
+        self.allRegs = list(self.commIndexMap.keys())
 
     def reset(self):
-        self.trueAge.fill(1.0)
-        self.agentAge.fill(1.0)
+        self.trueAge.fill(0.0)
+        self.agentAge.fill(0.0)
     
-    def step(self):
-        return self.trueAge, self.agentAge
+    def step(self, oldOccGrid, newOccGrid, oldVelGrid, newVelGrid, query):
+        # ---- Update true age ---- #
+        for lane in range(0, LANES):
+            for col in range(0, self.gridHandler.numCols):
+                if oldOccGrid[lane][col] != newOccGrid[lane][col] or newVelGrid[lane][col] != oldVelGrid[lane][col]:
+                    self.trueAge[lane][col] = 0.0
+                else:
+                    self.trueAge[lane][col] = np.clip(self.trueAge[lane][col] + self.ageStep, 0.0, 1.0)
+        
+        # ---- update agent age ---- #
+        assert query in list(self.commMap.values())
+        for lane in range(0, LANES):
+            for col in range(0, self.gridHandler.numCols):
+                if col in self.commIndexMap[query]:
+                    self.agentAge[lane][col] = self.trueAge[lane][col]
+                else:
+                    self.agentAge[lane][col] = np.clip(self.agentAge[lane][col] + self.ageStep, 0.0, 1.0)
+        
+        occGrid = newOccGrid.copy()
+        velGrid = newVelGrid.copy()
+        
+        for key in self.allRegs:
+            if key == query:
+                for col in self.commIndexMap[key]:
+                    pass
+            else:
+                for col in self.commIndexMap[key]:
+                    occGrid[:, col] = newOccGrid[:, col]
+                    velGrid[:, col] = newVelGrid[:, col]
+        
+        return occGrid, velGrid, self.getAgentAge()
     
     def getAgeValues(self, ageVector):
         assert ageVector.shape[0] == 2

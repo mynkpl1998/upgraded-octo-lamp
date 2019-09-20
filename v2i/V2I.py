@@ -261,6 +261,7 @@ class V2I(gym.Env):
         
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
+        self.prevOccGrid, self.prevVelGrid = occGrid.copy(), velGrid.copy()
         #---- Get Occupancy & Velocity Grids ----#
 
         # ---- Set Traffic Light ----#
@@ -346,7 +347,8 @@ class V2I(gym.Env):
     def frame(self, action):
         
         self.num_steps += 1
-        
+        oldOccGrid = self.prevOccGrid.copy()
+        oldVelGrid = self.prevVelGrid.copy()
         # Check for turing tf to green or red
         '''
         if self.simArgs.getValue("enable-tf"):
@@ -410,6 +412,9 @@ class V2I(gym.Env):
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, queryAct)
         #---- Get Occupancy & Velocity Grids ----#
 
+        if self.simArgs.getValue('enable-age'):
+            occ, vel, age = self.ageHandler.step(oldOccGrid, occGrid, oldVelGrid, velGrid, queryAct)
+
         #---- Calculate Reward ----#
         reward = self.rewardFunc(self.lane_map, self.agent_lane, planAct)
 
@@ -431,6 +436,9 @@ class V2I(gym.Env):
         
         
         # state, reward, done, info
-        obs = self.buildObservation(occGrid, velGrid)
+        if self.simArgs.getValue('enable-age'):
+            obs = self.buildObservation(occ, vel, age)
+        else: 
+            obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()

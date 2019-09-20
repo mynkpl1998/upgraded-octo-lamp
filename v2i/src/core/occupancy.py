@@ -334,7 +334,7 @@ class Grid:
         occGrid, velGrid = self.getOccupancyGrid(laneMap, agentLane)
         self.verifyGrids(occGrid, velGrid)
 
-        if self.isCommEnabled:
+        if self.isCommEnabled and self.isAgeEnabled == False:
             for key in self.commMap:
                     if self.commMap[key] == queryAct:
                         pass
