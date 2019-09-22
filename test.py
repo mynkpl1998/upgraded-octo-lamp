@@ -22,7 +22,7 @@ for i in range(0, 10000):
     for i in range(0, 2):
         episodeDensity.append(random.choice(densities))
 
-    state = obj.reset([0.7, 0.3])
+    state = obj.reset([0.0, 0.0])
     print(state.shape)
     count = 0
     #time.sleep(0.5)
