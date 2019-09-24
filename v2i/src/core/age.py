@@ -31,6 +31,7 @@ class age:
         for lane in range(0, LANES):
             for col in range(0, self.gridHandler.numCols):
                 if col in self.commIndexMap[query]:
+                    # Copy true age of the queried region
                     self.agentAge[lane][col] = self.trueAge[lane][col]
                 else:
                     self.agentAge[lane][col] = np.clip(self.agentAge[lane][col] + self.ageStep, 0.0, 1.0)
@@ -44,8 +45,8 @@ class age:
                     pass
             else:
                 for col in self.commIndexMap[key]:
-                    occGrid[:, col] = newOccGrid[:, col]
-                    velGrid[:, col] = newVelGrid[:, col]
+                    occGrid[:, col] = oldOccGrid[:, col]
+                    velGrid[:, col] = oldVelGrid[:, col]
         
         return occGrid, velGrid, self.getAgentAge()
     

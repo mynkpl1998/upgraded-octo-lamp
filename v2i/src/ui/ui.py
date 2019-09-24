@@ -49,7 +49,7 @@ class ui:
         self.colorGrey = (192, 192, 192, 80)
         self.colorLime = (128, 250, 0)
         self.colorDarkGreen = (0, 120, 0)
-        self.colorBlack = (0, 0, 0)
+        self.colorBlack = (0, 0, 0, 255)
     
     def initScreen(self):
         extraSpace = 100
@@ -192,7 +192,10 @@ class ui:
         self.infoBoardCurY += constants.INFO_BOARD_GAP
         #---- Agent Reward ----#
 
-    def drawGrids(self, screen, color, occGrid, agentID, extendedViewInMetre, laneMap, agentLane):
+    def drawGrids(self, screen, color, occGrid, agentID, extendedViewInMetre, laneMap, agentLane, agentAge):
+        assert agentAge.shape[0] == occGrid.shape[0]
+        assert agentAge.shape[1] == occGrid.shape[1]
+
         agentPos = laneMap[agentLane][agentID]['pos']
         self.startAngleDeg = []
         for lane in range(0, constants.LANES):
@@ -251,7 +254,7 @@ class ui:
         
         # Draw Grids
         agentID = getAgentID(data["allData"], data["agentLane"])
-        self.drawGrids(self.screen, self.colorWhite, data["occGrid"], agentID, data["extendedViewRange"], data["allData"], data["agentLane"])
+        self.drawGrids(self.screen, self.colorWhite, data["occGrid"], agentID, data["extendedViewRange"], data["allData"], data["agentLane"], data['agentAge'])
 
         # Draw Cars in the lane
         self.drawAllCars(data["allData"])

@@ -167,7 +167,7 @@ class V2I(gym.Env):
                 laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
         return laneMap
     
-    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid, planAct, queryAct, agentReward):
+    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid, planAct, queryAct, agentReward, agentAge):
         data = {}
         agentID = np.where(self.lane_map[agentLane]['agent'] == 1)[0]
         data["allData"] = laneMap
@@ -181,6 +181,7 @@ class V2I(gym.Env):
         data["planAct"] = planAct
         data["queryAct"] = queryAct
         data["agentReward"] = agentReward
+        data['agentAge'] = agentAge
         return data
 
     def fixIssue2(self, density):
@@ -275,13 +276,16 @@ class V2I(gym.Env):
         # ---- Reset Age Vectors ---- #
         if self.simArgs.getValue("enable-age"):
             self.ageHandler.reset()
+            agentAge = self.ageHandler.agentAge
+        else:
+            agentAge = None
 
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
             if self.simArgs.getValue("enable-tf"):
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"), self.isLightRed)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none", agentAge), self.isLightRed, )
             else:
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"), None)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none", agentAge), None)
         
         # Reset Observation Queue
         self.obsWrapper.resetQueue()
@@ -414,6 +418,12 @@ class V2I(gym.Env):
 
         if self.simArgs.getValue('enable-age'):
             occ, vel, age = self.ageHandler.step(oldOccGrid, occGrid, oldVelGrid, velGrid, queryAct)
+            self.prevOccGrid = occ.copy()
+            self.prevVelGrid = vel.copy()
+            self.ageHandler.reset()
+            agentAge = self.ageHandler.agentAge
+        else:
+            agentAge = None
 
         #---- Calculate Reward ----#
         reward = self.rewardFunc(self.lane_map, self.agent_lane, planAct)
@@ -430,9 +440,9 @@ class V2I(gym.Env):
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
             if self.simArgs.getValue("enable-tf"):
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), self.isLightRed)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occ, planAct, queryAct, round(reward, 3), agentAge), self.isLightRed)
             else:
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), None)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occ, planAct, queryAct, round(reward, 3), agentAge), None)
         
         
         # state, reward, done, info
