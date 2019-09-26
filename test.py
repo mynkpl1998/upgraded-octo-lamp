@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 import random
 
-path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/commWithAge/configFiles/sim-config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/commWithAgeObsFullComm/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 #print(obj.observation_space.low)
@@ -40,6 +40,6 @@ for i in range(0, 1):
         act = 7
         state, reward, done, info = obj.step(act)
         #verifyState(state, obj.prevOccGrid , obj.prevVelGrid, obj.ageHandler.agentAge, obj.gridHandler)
-        print(obj.ageHandler.getAgentAge())
+        #print(obj.ageHandler.getAgentAge())
         if done:
             break
