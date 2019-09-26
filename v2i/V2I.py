@@ -425,12 +425,10 @@ class V2I(gym.Env):
         self.occGrid = occGrid.copy()
         self.velGrid = velGrid.copy()
         #---- Get Occupancy & Velocity Grids ----#
-
     
         if self.simArgs.getValue('enable-age'):
             agentAge = self.ageHandler.frame(prevOcc, occGrid, prevVel, velGrid, queryAct)
             self.occTrack, self.velTrack = self.ageHandler.buildState(self.occTrack, self.velTrack, occGrid, velGrid, queryAct)
-
         else:
             agentAge = None
 
