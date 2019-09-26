@@ -31,8 +31,8 @@ for i in range(0, 1):
     for i in range(0, 2):
         episodeDensity.append(random.choice(densities))
 
-    state = obj.reset([0.1, 0.3])
-    verifyState(state, obj.prevOccGrid , obj.prevVelGrid, obj.ageHandler.agentAge, obj.gridHandler)
+    state = obj.reset([0.1, 0.1])
+    #verifyState(state, obj.prevOccGrid , obj.prevVelGrid, obj.ageHandler.agentAge, obj.gridHandler)
     
     count = 0
     #time.sleep(100)
@@ -40,5 +40,6 @@ for i in range(0, 1):
         act = 7
         state, reward, done, info = obj.step(act)
         #verifyState(state, obj.prevOccGrid , obj.prevVelGrid, obj.ageHandler.agentAge, obj.gridHandler)
+        print(obj.ageHandler.getAgentAge())
         if done:
             break

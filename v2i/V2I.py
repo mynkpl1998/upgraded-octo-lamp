@@ -15,6 +15,7 @@ from v2i.src.core.tfLights import tfController
 from v2i.src.core.constants import TF_CONSTS
 from v2i.src.core.obsQueue import obsWrapper
 from v2i.src.core.age import age
+from v2i.src.core.maintainer import maintainer
 
 
 class V2I(gym.Env):
@@ -117,6 +118,10 @@ class V2I(gym.Env):
                 self.ageHandler = age(self.gridHandler)
             else:
                 raiseValueError("age can't be enabled if comm is disabled")
+        
+        # Initialize state keeper if age is enabled
+        if self.simArgs.getValue("enable-age"):
+            self.obsKeeper = maintainer(self.observation_space)
 
         # Initialze Observation Wrapper if lstm is disabled
         self.obsWrapper = obsWrapper(self.simArgs.getValue('k-frames'), int(self.gridHandler.observation_space.shape[0]/self.simArgs.getValue("k-frames")))
@@ -262,7 +267,10 @@ class V2I(gym.Env):
         
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
-        self.prevOccGrid, self.prevVelGrid = occGrid.copy(), velGrid.copy()
+        self.occTrack = occGrid.copy()
+        self.velTrack = velGrid.copy()
+        self.occGrid = occGrid.copy()
+        self.velGrid = velGrid.copy()
         #---- Get Occupancy & Velocity Grids ----#
 
         # ---- Set Traffic Light ----#
@@ -351,8 +359,8 @@ class V2I(gym.Env):
     def frame(self, action):
         
         self.num_steps += 1
-        oldOccGrid = self.prevOccGrid.copy()
-        oldVelGrid = self.prevVelGrid.copy()
+        prevOcc = self.occGrid.copy()
+        prevVel = self.velGrid.copy()
         # Check for turing tf to green or red
         '''
         if self.simArgs.getValue("enable-tf"):
@@ -414,14 +422,15 @@ class V2I(gym.Env):
 
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, queryAct)
+        self.occGrid = occGrid.copy()
+        self.velGrid = velGrid.copy()
         #---- Get Occupancy & Velocity Grids ----#
 
+    
         if self.simArgs.getValue('enable-age'):
-            occ, vel, age = self.ageHandler.step(oldOccGrid, occGrid, oldVelGrid, velGrid, queryAct)
-            self.prevOccGrid = occ.copy()
-            self.prevVelGrid = vel.copy()
-            self.ageHandler.reset()
-            agentAge = self.ageHandler.agentAge
+            agentAge = self.ageHandler.frame(prevOcc, occGrid, prevVel, velGrid, queryAct)
+            self.occTrack, self.velTrack = self.ageHandler.buildState(self.occTrack, self.velTrack, occGrid, velGrid, queryAct)
+
         else:
             agentAge = None
 
@@ -440,14 +449,14 @@ class V2I(gym.Env):
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
             if self.simArgs.getValue("enable-tf"):
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occ, planAct, queryAct, round(reward, 3), agentAge), self.isLightRed)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, self.occTrack, planAct, queryAct, round(reward, 3), self.ageHandler.agentAge), self.isLightRed)
             else:
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occ, planAct, queryAct, round(reward, 3), agentAge), None)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, self.occTrack, planAct, queryAct, round(reward, 3), self.ageHandler.agentAge), None)
         
         
         # state, reward, done, info
         if self.simArgs.getValue('enable-age'):
-            obs = self.buildObservation(occ, vel, age)
+            obs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten(), agentAge)
         else: 
             obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)
