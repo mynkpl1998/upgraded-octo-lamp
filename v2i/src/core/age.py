@@ -56,9 +56,9 @@ class age:
                     self.agentAge[lane][col] = self.trueAge[lane][col]
     
     def frame(self, prevOcc, newOcc, prevVel, newVel, query):
+        self.updateAgentAge(query)
         sensorsChange = self.detectChange(prevOcc, newOcc, prevVel, newVel)
         self.updateTrueAge(sensorsChange)
-        self.updateAgentAge(query)
         age = self.getsensorsAgentAge()
         return age
     

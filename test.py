@@ -33,7 +33,6 @@ for i in range(0, 1):
 
     state = obj.reset([0.1, 0.1])
     #verifyState(state, obj.prevOccGrid , obj.prevVelGrid, obj.ageHandler.agentAge, obj.gridHandler)
-    
     count = 0
     #time.sleep(100)
     for i in range(0, 3350):

@@ -284,6 +284,10 @@ class V2I(gym.Env):
         # ---- Reset Age Vectors ---- #
         if self.simArgs.getValue("enable-age"):
             self.ageHandler.reset()
+            '''
+            print(self.ageHandler.agentAge)
+            print(self.ageHandler.trueAge)
+            '''
             agentAge = self.ageHandler.agentAge
         else:
             agentAge = None
@@ -400,7 +404,12 @@ class V2I(gym.Env):
         # Update Agent Location and Speed
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
-        self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
+        self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed
+
+
+        #---- Get Occupancy and velocity grids just after agent action execution ----#
+        beforeOcc, beforeVel = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
+        #---- Get Occupancy and velocity grids just after agent action execution ----#     
 
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
@@ -428,7 +437,7 @@ class V2I(gym.Env):
     
         if self.simArgs.getValue('enable-age'):
             agentAge = self.ageHandler.frame(prevOcc, occGrid, prevVel, velGrid, queryAct)
-            self.occTrack, self.velTrack = self.ageHandler.buildState(self.occTrack, self.velTrack, occGrid, velGrid, queryAct)
+            self.occTrack, self.velTrack = self.ageHandler.buildState(self.occTrack.copy(), self.velTrack.copy(), beforeOcc, beforeVel, queryAct)
         else:
             agentAge = None
 
