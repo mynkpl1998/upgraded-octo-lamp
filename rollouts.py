@@ -80,8 +80,12 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
             dataDict["data"][densityStr][episode]["actions"] = []
             dataDict["data"][densityStr][episode]["bum2bumdist"] = []
             dataDict["data"][densityStr][episode]["EgoMaxSpeed"] = -10
+            dataDict["data"][densityStr][episode]["allSensorsAge"] = []
+            dataDict["data"][densityStr][episode]["allSensorsTrueAge"] = []
             
             prev_state = env.reset(density)
+            
+            
             # Init variables
             if useLstm:
                 lstm_state = [np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"]), np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"])]
@@ -106,6 +110,10 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
 
                 next_state, reward, done, info_dict = env.step(action)
                 
+                # All sensors age
+                dataDict["data"][densityStr][episode]["allSensorsAge"].append(env.ageHandler.getAgentAge().mean())
+                dataDict["data"][densityStr][episode]["allSensorsTrueAge"].append(env.ageHandler.getTrueAge().mean())
+
                 # Collision Count
                 if env.collision == True:
                     dataDict["others"][densityStr]["collision-count"] += 1

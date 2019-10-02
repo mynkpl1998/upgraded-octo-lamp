@@ -25,6 +25,8 @@ def plot(simData, args):
     queryDist = []
     EpisodeLength = []
     maxEgoSpeed = []
+    allSensorsAge = []
+    allSensorsTrueAge = []
 
     #---- Full Epiosdes Data ---- #
     numFullEpisodesList = []
@@ -33,6 +35,8 @@ def plot(simData, args):
     FullEpisodesQueryDist = []
     FullEpisodesmaxEgoSpeed = []
     collisionCount = []
+    FullEpisodesallSensorsAge = []
+    FullEpisodesallSensorsTrueAge = []
 
     #---- Full Epiosdes Data ---- #
 
@@ -41,6 +45,10 @@ def plot(simData, args):
         densityFullEpisodeAvgSpeed = []
         allEpisodesSpeed = []
         allEpisodesSpeedFullEpisodes = []
+        densityAgentAge = []
+        FullEpisodeDensityAgentAge = []
+        FullEpisodesDensityTrueAge = []
+        densityTrueAge = []
         
         planDictCount = buildDictWithKeys(simData["plan-acts"], 0)
         queryDictCount = buildDictWithKeys(simData["query-acts"], 0)
@@ -64,6 +72,8 @@ def plot(simData, args):
 
             #----- Episode Avg Speed -----#
             episodeAvgSpeed = 0.0
+            episodeAgentAgeSum = 0.0
+            episodeTrueAgeSum = 0.0
             
             if len(simData["data"][density][episode]['speed']) == simData["max-episode-length"]:
                 numFullEpisodes += 1
@@ -76,6 +86,12 @@ def plot(simData, args):
                 episodeLength += 1
                 totalNumberSteps += 1
             #----- Episode Avg Speed -----#
+
+            for agentAge in simData["data"][density][episode]['allSensorsAge']:
+                episodeAgentAgeSum += agentAge
+            
+            for trueage in simData["data"][density][episode]['allSensorsTrueAge']:
+                episodeTrueAgeSum += trueage
 
             #----- Ego Max Speed -----#
             gloablEgoMaxSpeed = max(gloablEgoMaxSpeed, simData["data"][density][episode]['EgoMaxSpeed'])
@@ -93,18 +109,23 @@ def plot(simData, args):
                     planDictCountFullEpisodes[planAct] += 1
                     queryDictCountFullEpisods[queryAct] += 1
                     actionCountsFullEpisodes += 1
-            else:
-                for action in simData["data"][density][episode]["actions"]:
-                    planAct, queryAct = action[0], action[1]
-                    planDictCount[planAct] += 1
-                    queryDictCount[queryAct] += 1
-                    actionCounts += 1
+
+            for action in simData["data"][density][episode]["actions"]:
+                planAct, queryAct = action[0], action[1]
+                planDictCount[planAct] += 1
+                queryDictCount[queryAct] += 1
+                actionCounts += 1
 
             #----- Action Percentages -----#        
             densityAvgSpeed.append((episodeAvgSpeed/episodeLength) * 3.6)
+            densityAgentAge.append((episodeAgentAgeSum/episodeLength))
+            densityTrueAge.append((episodeTrueAgeSum/episodeLength))
             if len(simData["data"][density][episode]['speed']) == simData["max-episode-length"]:
                 densityFullEpisodeAvgSpeed.append((episodeAvgSpeed/episodeLength) * 3.6)
-
+            if len(simData["data"][density][episode]['allSensorsAge']) == simData["max-episode-length"]:
+                FullEpisodeDensityAgentAge.append((episodeAgentAgeSum/episodeLength))
+            if len(simData["data"][density][episode]['allSensorsTrueAge']) == simData["max-episode-length"]:
+                FullEpisodesDensityTrueAge.append((episodeTrueAgeSum/episodeLength))
         
         plt.hist(allEpisodesSpeed, bins=200, density=True)
         plt.title("Density : %s, Total Steps : %d"%(density, len(allEpisodesSpeed)))
@@ -121,18 +142,50 @@ def plot(simData, args):
         plt.savefig(args.out_file_path + "/FullEpisodes" + "/speedHist_%s.png"%(density))
         plt.cla()
 
+        #--- Avg agent age ---#
+        agentAgeSum = 0.0
+        #--- Avg agent age ---#
+
         # ---- Avg Speed ---- #
         speedSum = 0.0
         for avg in densityAvgSpeed:
             speedSum += avg
         avgSpeed.append(speedSum/numEpisodes)
         # ---- Avg Speed ---- #
+        
+        # ---- Avg Agent Age ---- #
+        avgAgentSum = 0.0
+        for avg in densityAgentAge:
+            avgAgentSum += avg
+        allSensorsAge.append(avgAgentSum/numEpisodes)
+        # ---- Avg Agent Age ---- #
+
+        # ---- Avg True Age -----#
+        avgTrueAge = 0.0
+        for avg in densityTrueAge:
+            avgTrueAge += avg
+        allSensorsTrueAge.append(avgTrueAge/numEpisodes)
+        # ---- Avg True Age -----#
+
+        # ---- Avg Agent Age Full Episode ----#
+        avgAgentSumFullEpisode = 0.0
+        for avg in FullEpisodeDensityAgentAge:
+            avgAgentSumFullEpisode += avg
+        FullEpisodesallSensorsAge.append(avgAgentSumFullEpisode)
+        # ---- Avg Agent Age Full Episode ----#
+
+        # ---- Avg True Age Full Episode ----#
+        avgTrueSumFullEpisode = 0.0
+        for avg in FullEpisodesDensityTrueAge:
+            avgTrueSumFullEpisode += avg
+        FullEpisodesallSensorsTrueAge.append(avgTrueSumFullEpisode)
+        # ---- Avg True Age Full Episode ----#
 
         # ---- Avg Speed Full Episode ---- #
         speedSum = 0.0
         for avg in densityFullEpisodeAvgSpeed:
             speedSum += avg
-        FullEpisodesavgSpeed.append(speedSum/numFullEpisodes)
+        FullEpisodesavgSpeed.append(speedSum/(numFullEpisodes))
         # ---- Avg Speed Full Episode ---- #                
 
         #----- Full Epsiodes List ----#
@@ -144,14 +197,14 @@ def plot(simData, args):
         count = 0
         for key in planDictCountFullEpisodes.keys():
             count += planDictCountFullEpisodes[key]
-            planDictCountFullEpisodes[key] /= actionCountsFullEpisodes
+            planDictCountFullEpisodes[key] /= (actionCountsFullEpisodes)
             planDictCountFullEpisodes[key] *= 100
         assert count == numFullEpisodesList[denID] * simData['max-episode-length']
 
-        count = -0
+        count = 0
         for key in queryDictCountFullEpisods.keys():
             count += queryDictCountFullEpisods[key]
-            queryDictCountFullEpisods[key] /= actionCountsFullEpisodes
+            queryDictCountFullEpisods[key] /= (actionCountsFullEpisodes)
             queryDictCountFullEpisods[key] *= 100
         FullEpisodesplanDist.append(planDictCountFullEpisodes.copy())
         FullEpisodesQueryDist.append(queryDictCountFullEpisods.copy())
@@ -168,6 +221,7 @@ def plot(simData, args):
             queryDictCount[key] *= 100
         planDist.append(planDictCount.copy())
         queryDist.append(queryDictCount.copy())
+        
     #---- Action Percentages ----#
 
         #---- Episode Length ----#
@@ -182,6 +236,24 @@ def plot(simData, args):
         FullEpisodesmaxEgoSpeed.append(gloablEgoMaxSpeedFullEpisode * 3.6)
         #----- Ego Max Speed Full Episodes-----#
 
+    #---- Plot All Sensors age ----#
+    agentAgeGraph = pygal.Bar()
+    agentAgeGraph.title = "All Sensors Age"
+    agentAgeGraph.x_labels = map(str, densitiesList)
+    agentAgeGraph.add('Avg Agent Age', allSensorsAge)
+    agentAgeGraph.add('Avg True Age', allSensorsTrueAge)
+    agentAgeGraph.render_to_file(args.out_file_path + "/AllEpisodes" + "/allSensorsAge.svg")
+    #---- Plot All Sensors age ----#
+
+    #---- Plot All Sensors age Full Episodes ----#
+    agentAgeGraph = pygal.Bar()
+    agentAgeGraph.title = "All Sensors Age (Full Episodes only)"
+    agentAgeGraph.x_labels = map(str, densitiesList)
+    agentAgeGraph.add('Avg Agent Age', FullEpisodesallSensorsAge)
+    agentAgeGraph.add('Avg True Age', FullEpisodesallSensorsTrueAge)
+    agentAgeGraph.render_to_file(args.out_file_path + "/FullEpisodes" + "/allSensorsAge.svg")
+    #---- Plot All Sensors age Full Episodes ----#
+    
     #---- Plot Collision Count ----#
     plotCollisionGraph = pygal.Bar()
     plotCollisionGraph.title = "Number of collisions"

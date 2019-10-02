@@ -291,7 +291,7 @@ class V2I(gym.Env):
             agentAge = self.ageHandler.agentAge
         else:
             agentAge = None
-
+        
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
             if self.simArgs.getValue("enable-tf"):
@@ -305,7 +305,6 @@ class V2I(gym.Env):
             obs = self.buildObservation(occGrid, velGrid, self.ageHandler.getAgentAge())
         else:
             obs = self.buildObservation(occGrid, velGrid)
-        
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs()
     
@@ -440,7 +439,7 @@ class V2I(gym.Env):
             self.occTrack, self.velTrack = self.ageHandler.buildState(self.occTrack.copy(), self.velTrack.copy(), beforeOcc, beforeVel, queryAct)
         else:
             agentAge = None
-
+        
         #---- Calculate Reward ----#
         reward = self.rewardFunc(self.lane_map, self.agent_lane, planAct)
 
