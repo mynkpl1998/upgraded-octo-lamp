@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import sys
 import gym
@@ -16,9 +20,11 @@ from v2i.src.core.constants import TF_CONSTS
 from v2i.src.core.obsQueue import obsWrapper
 from v2i.src.core.age import age
 from v2i.src.core.maintainer import maintainer
+from ray.rllib.env.multi_agent_env import MultiAgentEnv
+from gym.spaces import Discrete
 
 
-class V2I(gym.Env):
+class V2I(MultiAgentEnv):
 
     '''
     Input Params :
@@ -31,6 +37,8 @@ class V2I(gym.Env):
     '''
 
     def __init__(self, config, mode, params=None):
+        
+        self.agents = ['planner', 'query']
 
         # Parse Config file and return the handle
         self.simArgs = configParser(config)
@@ -118,28 +126,23 @@ class V2I(gym.Env):
                 self.ageHandler = age(self.gridHandler)
             else:
                 raiseValueError("age can't be enabled if comm is disabled")
-        
-        # Initialize state keeper if age is enabled
-        if self.simArgs.getValue("enable-age"):
-            self.obsKeeper = maintainer(self.observation_space)
 
         # Initialze Observation Wrapper if lstm is disabled
-        self.obsWrapper = obsWrapper(self.simArgs.getValue('k-frames'), int(self.gridHandler.observation_space.shape[0]/self.simArgs.getValue("k-frames")))
+        self.obsWrapperPlanner = obsWrapper(self.simArgs.getValue('k-frames'), int(self.gridHandler.planner_observation_space.shape[0]/self.simArgs.getValue("k-frames")))
+        self.obsWrapperQuery = obsWrapper(self.simArgs.getValue('k-frames'), int(self.query_observation_space.shape[0]/self.simArgs.getValue("k-frames")))
 
     def initGymProp(self, obsHandler):
-        self.observation_space = obsHandler.observation_space
-        
-        # Intialize Action Encoder and Decoder
-        self.actionEncoderDecoderHandler = ActionEncoderDecoder(self.egoControllerHandler.planSpace(), self.gridHandler.querySpace())
-        
-        # Encode Actions
-        self.actionEncoderDecoderHandler.encodeActions()
+        # Initialize Observation Space
+        self.planner_observation_space = obsHandler.planner_observation_space
+        self.query_observation_space = obsHandler.query_observation_space
 
-        # Get Action Space
-        self.action_space = self.actionEncoderDecoderHandler.getActionSpace()
-
-        # Get Action Map
-        self.action_map = self.actionEncoderDecoderHandler.actMap
+        # Intialize Action Space
+        self.planner_action_space = Discrete(len(self.egoControllerHandler.planSpace()))
+        self.query_action_space = Discrete(len(self.gridHandler.querySpace()))
+        
+        # Action Map
+        self.planner_action_map = self.egoControllerHandler.planMap
+        self.query_action_map = self.gridHandler.commIndexMap
 
         # Init TF Speed Limit
         self.tfSpeedLimit = self.initTfSpeedLimit()
@@ -300,21 +303,25 @@ class V2I(gym.Env):
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none", agentAge), None)
         
         # Reset Observation Queue
-        self.obsWrapper.resetQueue()
+        self.obsWrapperPlanner.resetQueue()
+        self.obsWrapperQuery.resetQueue()
         if self.simArgs.getValue('enable-age'):
-            obs = self.buildObservation(occGrid, velGrid, self.ageHandler.getAgentAge())
+            plannerObs, queryObs = self.buildObservation(occGrid, velGrid, self.ageHandler.getAgentAge())
         else:
-            obs = self.buildObservation(occGrid, velGrid)
+            raiseValueError("age should be enabled")
         
-        self.obsWrapper.addObs(obs)
-        return self.obsWrapper.getObs()
+        self.obsWrapperPlanner.addObs(plannerObs)
+        self.obsWrapperQuery.addObs(queryObs)
+        obsDict = {}
+        obsDict[self.agents[0]] = self.obsWrapperPlanner.getObs()
+        obsDict[self.agents[1]] = self.obsWrapperQuery.getObs()
+        
+        return obsDict
     
     def buildObservation(self, occGrid, velGrid, ageVector=None):
-        if ageVector is not None:
-            combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten(), ageVector.flatten()))
-        else:
-            combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
-        return combinedObs.copy()
+        plannerObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
+        queryObs = ageVector.flatten()
+        return plannerObs, queryObs
     
     def getBum2BumDist(self, laneMap, agentLane, agentIDX):
         if agentIDX == 0:
@@ -384,7 +391,10 @@ class V2I(gym.Env):
         
 
         # Decodes Action -> Plan Action, Query Action
-        planAct, queryAct = self.actionEncoderDecoderHandler.decodeAction(action)
+        planAct = self.planner_action_map[action[self.agents[0]]]
+        print(self.query_action_map)
+        queryAct = self.query_action_map[action[self.agents[1]]]
+        print(self.planAct, self.queryAct)
         
         self.planAct = planAct
         self.queryAct = queryAct
@@ -465,6 +475,6 @@ class V2I(gym.Env):
         if self.simArgs.getValue('enable-age'):
             obs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten(), agentAge)
         else: 
-            obs = self.buildObservation(occGrid, velGrid)
+            raiseValueError("age should be enabled for this scenario")
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()

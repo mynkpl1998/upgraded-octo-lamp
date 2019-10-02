@@ -47,10 +47,9 @@ class Grid:
         
         velGridBoundLow = np.ones((LANES, self.numCols)) * 0.0
         velGridBoundHigh = np.ones((LANES, self.numCols)) * self.maxSpeed
-
-        if self.isAgeEnabled:
-            ageVectorLow = np.zeros((LANES, int(self.totalCommView/self.cellSize)))
-            ageVectorHigh = np.ones((LANES, int(self.totalCommView/self.cellSize)))
+        
+        ageVectorLow = np.zeros((LANES, int(self.totalCommView/self.cellSize)))
+        ageVectorHigh = np.ones((LANES, int(self.totalCommView/self.cellSize)))
 
         mergedBoundlow = []
         mergedBoundHigh = []
@@ -68,12 +67,11 @@ class Grid:
         obsLowBound = mergedBoundlow.flatten().astype(np.float)
         obsHighBound = mergedBoundHigh.flatten().astype(np.float)
         
-        if self.isAgeEnabled:
-            obsLowBound = np.concatenate((obsLowBound, ageVectorLow.flatten().astype(np.float)))
-            obsHighBound = np.concatenate((obsHighBound, ageVectorHigh.flatten().astype(np.float)))
+        AgeobsLowBound = ageVectorLow.flatten().astype(np.float)
+        AgeobsHighBound = ageVectorHigh.flatten().astype(np.float)
 
-        self.observation_space = Box(low=obsLowBound, high=obsHighBound, dtype=np.float)
-
+        self.planner_observation_space = Box(low=obsLowBound, high=obsHighBound, dtype=np.float)
+        self.query_observation_space = Box(low=AgeobsLowBound, high=AgeobsHighBound, dtype=np.float)
         
     def initComm(self):
         numRegs = int(self.totalCommView / self.regWidthInMetres)
