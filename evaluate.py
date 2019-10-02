@@ -93,12 +93,12 @@ def plot(simData, args):
                     planDictCountFullEpisodes[planAct] += 1
                     queryDictCountFullEpisods[queryAct] += 1
                     actionCountsFullEpisodes += 1
-            else:
-                for action in simData["data"][density][episode]["actions"]:
-                    planAct, queryAct = action[0], action[1]
-                    planDictCount[planAct] += 1
-                    queryDictCount[queryAct] += 1
-                    actionCounts += 1
+
+            for action in simData["data"][density][episode]["actions"]:
+                planAct, queryAct = action[0], action[1]
+                planDictCount[planAct] += 1
+                queryDictCount[queryAct] += 1
+                actionCounts += 1
 
             #----- Action Percentages -----#        
             densityAvgSpeed.append((episodeAvgSpeed/episodeLength) * 3.6)
