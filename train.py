@@ -7,10 +7,12 @@ import ray
 from ray.tune import run_experiments
 from ray.tune.registry import register_env
 from ray import tune
+from  ray.rllib.agents.ppo.ppo_policy import PPOTFPolicy
 
 from v2i import V2I
 from v2i.src.core.common import readYaml, raiseValueError
 import argparse
+from ray import tune
 
 parser = argparse.ArgumentParser(description="Training Script for v2i simulator")
 parser.add_argument("-sc", "--sim-config", type=str, required=True, help="v2i simulation configuration file")
@@ -56,6 +58,27 @@ def doPPOEssentials(algoConfig, simConfig, args):
     
     return algoConfig
 
+def policyMapper(agentID):
+    if agentID == "planner":
+        return "plan_policy"
+    else:
+        return "query_policy"
+
+def genPolicyGraph(policyName, planObs, queryObs, planAct, queryAct):
+    if policyName == "plan_policy":
+        obs = planObs
+        acts = planAct
+    else:
+        obs = queryObs
+        acts = queryAct
+    return (None, obs, acts, {})
+
+def getpolicyGraphs(planObs, queryObs, planAct, queryAct):
+    policyGraphs = {}
+    policyGraphs["plan_policy"] = genPolicyGraph("plan_policy", planObs, queryObs, planAct, queryAct)
+    policyGraphs["query_policy"] = genPolicyGraph("query_policy", planObs, queryObs, planAct, queryAct)
+    return policyGraphs
+
 if __name__ == "__main__":
     args = parser.parse_args()
 
@@ -71,12 +94,29 @@ if __name__ == "__main__":
         algoConfig == doIMPALAEssentials(algoConfig, args)
     else:
         raiseValueError("invalid training algo %s"%(trainAlgo))
-    
-    # Multi Agent Set-Up
 
     # Register Environment
     register_env("v2i-v0", lambda config: V2I.V2I(args.sim_config, "train"))
+    tmpEnv = V2I.V2I(args.sim_config, mode="train")
+    
+    # --- Set Up Observation Space --- #
+    plannerObsSpace = tmpEnv.planner_observation_space
+    queryObsSpace = tmpEnv.query_observation_space
+    
+    # --- Set Up Action Space --- #
+    plannerActSpace = tmpEnv.planner_action_space
+    queryActSpace = tmpEnv.query_action_space
 
+    # ---- Build Policy graphs ---- #
+    policyGraphs = getpolicyGraphs(plannerObsSpace, queryObsSpace, plannerActSpace, queryActSpace)
+
+    # ---- Policies IDs ---- #
+    policiesIds = list(policyGraphs.keys())
+
+    # ---- Enable Multi-Agent ----#
+    algoConfig[args.name]["config"]["multiagent"]["policies"] = policyGraphs
+    algoConfig[args.name]["config"]["multiagent"]["policy_mapping_fn"] = tune.function(policyMapper)
+    
     # Start the training
     ray.init()
     run_experiments(algoConfig)
