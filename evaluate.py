@@ -7,16 +7,23 @@ import numpy as np
 import pygal
 import os
 import matplotlib.pyplot as plt
+import math
 
 # Ray Imports
 from v2i import V2I
-from v2i.src.core.common import readYaml, loadPKL, buildDictWithKeys
+from v2i.src.core.common import readYaml, loadPKL, buildDictWithKeys, raiseValueError
 from v2i.src.core.ppoController import ppoController
 
 parser = argparse.ArgumentParser(description="script to generate graphs from data")
 parser.add_argument("-file", type=str, required=True, help="file to load data from")
 parser.add_argument("-out", "--out-file-path", type=str, required=True, help="path to save generated graphs")
 
+
+def createDictofList(keys):
+    d = {}
+    for key in keys:
+        d[key] = []
+    return d
 
 def plot(simData, args):
     densitiesList = list(simData["data"].keys())
@@ -38,6 +45,8 @@ def plot(simData, args):
     FullEpisodesallSensorsAge = []
     FullEpisodesallSensorsTrueAge = []
 
+    queryRefreshRate = []
+
     #---- Full Epiosdes Data ---- #
 
     for denID, density in enumerate(densitiesList):
@@ -52,6 +61,9 @@ def plot(simData, args):
         
         planDictCount = buildDictWithKeys(simData["plan-acts"], 0)
         queryDictCount = buildDictWithKeys(simData["query-acts"], 0)
+
+        densityQueryRefreshRate = buildDictWithKeys(simData["query-acts"], 0)
+        densityQueryRefreshCount = 0
 
         planDictCountFullEpisodes = buildDictWithKeys(simData["plan-acts"], 0)
         queryDictCountFullEpisods = buildDictWithKeys(simData["query-acts"], 0)
@@ -74,6 +86,9 @@ def plot(simData, args):
             episodeAvgSpeed = 0.0
             episodeAgentAgeSum = 0.0
             episodeTrueAgeSum = 0.0
+            lastRefreshTimeStep = buildDictWithKeys(simData["query-acts"], 0)
+            localdensityrefreshRate = createDictofList(simData["query-acts"])
+            localdensityrefreshRateallEpisodes = createDictofList(simData["query-acts"])
             
             if len(simData["data"][density][episode]['speed']) == simData["max-episode-length"]:
                 numFullEpisodes += 1
@@ -110,12 +125,32 @@ def plot(simData, args):
                     queryDictCountFullEpisods[queryAct] += 1
                     actionCountsFullEpisodes += 1
 
+            for timeStep, action in enumerate(simData["data"][density][episode]["actions"]):
+                _ , query = action[0], action[1]
+                timeStepDiff = timeStep - lastRefreshTimeStep[query]
+                if timeStepDiff < 0:
+                    raiseValueError("timeStep can't be negative")
+                lastRefreshTimeStep[query] = timeStep
+                localdensityrefreshRate[query].append(timeStepDiff)
+            
+            safeToAdd = True
+            for key in localdensityrefreshRate.keys():
+                localdensityrefreshRate[key] = np.array(localdensityrefreshRate[key]).mean()
+                if math.isnan(localdensityrefreshRate[key]):
+                    safeToAdd = False
+                
+            if safeToAdd:
+                for key in localdensityrefreshRate.keys():
+                    densityQueryRefreshRate[key] += localdensityrefreshRate[key]
+                densityQueryRefreshCount += 1
+            
+
             for action in simData["data"][density][episode]["actions"]:
                 planAct, queryAct = action[0], action[1]
                 planDictCount[planAct] += 1
                 queryDictCount[queryAct] += 1
                 actionCounts += 1
-
+            
             #----- Action Percentages -----#        
             densityAvgSpeed.append((episodeAvgSpeed/episodeLength) * 3.6)
             densityAgentAge.append((episodeAgentAgeSum/episodeLength))
@@ -191,6 +226,12 @@ def plot(simData, args):
         #----- Full Epsiodes List ----#
         numFullEpisodesList.append(numFullEpisodes)
         #----- Full Epsiodes List ----#
+
+        # ---- Query Refresh Rate ----#
+        for key in densityQueryRefreshRate.keys():
+            densityQueryRefreshRate[key] /= densityQueryRefreshCount
+        queryRefreshRate.append(densityQueryRefreshRate)
+        # ---- Query Refresh Rate ----#
 
         #---- Action Percentages ----#
         #print(actionCountsFullEpisodes)
@@ -296,6 +337,23 @@ def plot(simData, args):
     EgoMaxSpeedGraphFullEpisodes.render_to_file(args.out_file_path + "/FullEpisodes" + "/egoMaxSpeedFullEpisodes.svg")
     #----- Plot Ego Max Speed Full Episode-----#
 
+    #---- Plot refresh dist ----#
+    refreshRateGraph = pygal.Bar()
+    refreshRateGraph.title = "Refresh Rate"
+    refreshRateGraph.x_labels = map(str, densitiesList)
+    rate = {}
+    for query in simData["query-acts"]:
+        rate[query] = []
+    
+    for data in queryRefreshRate:
+        for key in data.keys():
+            rate[key].append(data[key])
+    
+    for q in rate.keys():
+        refreshRateGraph.add(q, rate[q])
+    refreshRateGraph.render_to_file(args.out_file_path + "/AllEpisodes" + "/refreshRate.svg")
+    #---- Plot refresh dist ----#
+    
     #---- Plot plan distribution ----#
     planActGraph = pygal.StackedBar()
     planActGraph.title = "Planning Action Distribution"
