@@ -2,7 +2,7 @@ import yaml
 from copy import deepcopy
 from gym.spaces import Discrete
 
-from v2i.src.core.common import checkFileExists, readYaml, raiseValueError
+from v2i.src.core.common import checkFileExists, readYaml, raiseValueError, reverseDict
 from v2i.src.core.defaults import DEFAULT_DICT
 
 class configParser:
@@ -65,3 +65,12 @@ class ActionEncoderDecoder:
         action = self.actMap[actionKey]
         planAct, commAct = action.split(",")
         return planAct, commAct
+
+
+def mapKeys(keys):
+    mappedDict = {}
+    index = 0
+    for key in keys:
+        mappedDict[index] = key
+        index += 1
+    return mappedDict, reverseDict(mappedDict)

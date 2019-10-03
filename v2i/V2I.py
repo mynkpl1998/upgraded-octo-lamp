@@ -8,7 +8,7 @@ import gym
 import numpy as np
 
 import v2i.src.core.constants as constants
-from v2i.src.core.utils import configParser, ActionEncoderDecoder
+from v2i.src.core.utils import configParser, ActionEncoderDecoder, mapKeys
 from v2i.src.core.common import loadPKL, raiseValueError
 from v2i.src.core.occupancy import Grid
 from v2i.src.ui.ui import ui
@@ -142,8 +142,9 @@ class V2I(MultiAgentEnv):
         
         # Action Map
         self.planner_action_map = self.egoControllerHandler.planMap
-        self.query_action_map = self.gridHandler.commIndexMap
-
+        self.query_region_sensors_map = self.gridHandler.commIndexMap
+        self.query_action_map, self.query_action_map_reversed = mapKeys(list(self.query_region_sensors_map.keys()))
+        
         # Init TF Speed Limit
         self.tfSpeedLimit = self.initTfSpeedLimit()
 
@@ -392,9 +393,7 @@ class V2I(MultiAgentEnv):
 
         # Decodes Action -> Plan Action, Query Action
         planAct = self.planner_action_map[action[self.agents[0]]]
-        print(self.query_action_map)
         queryAct = self.query_action_map[action[self.agents[1]]]
-        print(self.planAct, self.queryAct)
         
         self.planAct = planAct
         self.queryAct = queryAct
@@ -470,11 +469,42 @@ class V2I(MultiAgentEnv):
             else:
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, self.occTrack, planAct, queryAct, round(reward, 3), self.ageHandler.agentAge), None)
         
+        # ---- Build reward dictionary ---- #
+        rewardDict = {}
+        rewardDict[self.agents[0]] = reward
+        rewardDict[self.agents[1]] = -agentAge.mean()
+        # ---- Build reward dictionary ---- #
+
+        # ---- Build info dictionary ---- #
+        infoDict = {}
+        infoDict[self.agents[0]] = {}
+        infoDict[self.agents[1]] = {}
+        # ---- Build info dictionary ---- #
         
+        # ---- build the done dictionary ---- #
+        done = {}
+        if collision:
+            done[self.agents[0]] = True
+            done[self.agents[1]] = True
+            done["__all__"] = True
+        else:
+            done[self.agents[0]] = False
+            done[self.agents[1]] = False
+            done["__all__"] = False
+        # ---- build the done dictionary ---- #
+
         # state, reward, done, info
         if self.simArgs.getValue('enable-age'):
-            obs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten(), agentAge)
+            plannerObs, queryObs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten(), agentAge)
         else: 
             raiseValueError("age should be enabled for this scenario")
-        self.obsWrapper.addObs(obs)
-        return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()
+        
+        # ---- Build the observation dict ----#
+        self.obsWrapperPlanner.addObs(plannerObs)
+        self.obsWrapperQuery.addObs(queryObs)
+        obsDict = {}
+        obsDict[self.agents[0]] = self.obsWrapperPlanner.getObs()
+        obsDict[self.agents[1]] = self.obsWrapperQuery.getObs()
+        # ---- Build the observation dict ----#
+
+        return obsDict, rewardDict, done, infoDict

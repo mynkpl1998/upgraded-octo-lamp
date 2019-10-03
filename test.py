@@ -47,5 +47,5 @@ for i in range(0, 1):
         state, reward, done, info = obj.step(act)
         #verifyState(state, obj.prevOccGrid , obj.prevVelGrid, obj.ageHandler.agentAge, obj.gridHandler)
         #print(obj.ageHandler.getAgentAge())
-        if done:
+        if done["__all__"]:
             break

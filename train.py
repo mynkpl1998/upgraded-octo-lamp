@@ -71,6 +71,8 @@ if __name__ == "__main__":
         algoConfig == doIMPALAEssentials(algoConfig, args)
     else:
         raiseValueError("invalid training algo %s"%(trainAlgo))
+    
+    # Multi Agent Set-Up
 
     # Register Environment
     register_env("v2i-v0", lambda config: V2I.V2I(args.sim_config, "train"))
