@@ -6,12 +6,12 @@ import numpy as np
 from tqdm import tqdm
 import random
 
-path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/commWithAgeObsFullComm/configFiles/sim-config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/joint-comm-no-age-full-comm/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
-#print(obj.observation_space.low)
-#print(obj.observation_space.high)
-#print(obj.observation_space)
+print(obj.observation_space.low)
+print(obj.observation_space.high)
+print(obj.observation_space)
 print(obj.action_space)
 print(obj.action_map)
 densities = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]

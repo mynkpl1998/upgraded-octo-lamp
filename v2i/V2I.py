@@ -310,7 +310,7 @@ class V2I(gym.Env):
     
     def buildObservation(self, occGrid, velGrid, ageVector=None):
         if ageVector is not None:
-            combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten(), ageVector.flatten()))
+            combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
         else:
             combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
         return combinedObs.copy()
