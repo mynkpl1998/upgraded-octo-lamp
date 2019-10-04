@@ -459,7 +459,6 @@ class V2I(gym.Env):
             else:
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, self.occTrack, planAct, queryAct, round(reward, 3), self.ageHandler.agentAge), None)
         
-        
         # state, reward, done, info
         if self.simArgs.getValue('enable-age'):
             obs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten(), agentAge)
