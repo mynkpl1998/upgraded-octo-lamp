@@ -45,6 +45,7 @@ class ui:
         self.colorBG = (30, 132, 73)
         self.colorWhite = (255, 255, 255)
         self.colorRed = (236, 112, 99)
+        self.colorDarkRed = (255, 0, 0)
         self.colorYellow = (247, 220, 111)
         self.colorGrey = (192, 192, 192, 80)
         self.colorLime = (128, 250, 0)
@@ -92,6 +93,7 @@ class ui:
     
     def initFonts(self):
         self.font = pygame.font.Font("v2i/src/data/fonts/RobotoSlab-Bold.ttf", constants.FONT_SIZE)
+        self.smallFont = pygame.font.Font("v2i/src/data/fonts/RobotoSlab-Bold.ttf", constants.SMALL_FONT_SIZE)
     
     def initClock(self):
         self.clock = pygame.time.Clock()
@@ -113,7 +115,10 @@ class ui:
         Y = centre[1] + (np.sin(np.deg2rad(angle)) * radius)
         return X,Y
     
-    def drawAllCars(self, carsData):
+    def carInfo(self, carId, lane, sucessorID, followerID):
+        return self.smallFont.render("ID:%d,L:%d\nS:%d,F:%d"%(carId, lane, sucessorID, followerID), False, self.colorRed)
+    
+    def drawAllCars(self, carsData, followerList, successorList):
         for laneID in carsData.keys():
             for car in carsData[laneID]:
                 X, Y = self.getCoordinates(car['pos'], constants.LANE_RADIUS[laneID], constants.CENTRE)
@@ -121,6 +126,13 @@ class ui:
                 if car['agent'] == 1:
                     carColor = self.colorLime
                 self.drawCar(self.screen, (int(X), int(Y)), carColor)
+                if followerList == "none":
+                    pass
+                else:
+                    idTup = (car['id'], laneID)
+                    followerID = followerList[laneID][idTup]
+                    successorID = successorList[laneID][idTup]
+                    self.screen.blit(self.carInfo(car['id'], laneID, successorID, followerID), (int(X)-5, int(Y)-5))
     
     def str2font(self, msgStr):
         return self.font.render(msgStr, False, (0, 0, 0))
@@ -234,6 +246,7 @@ class ui:
                 self.screen.blit(self.greenLightImage, self.tfCoordinates[lane])
                 
     def updateScreen(self, data, lightStat):
+        
         self.screen.fill(self.colorBG)
         
         #---- lane 1----#
@@ -254,7 +267,7 @@ class ui:
         self.drawGrids(self.screen, self.colorWhite, data["occGrid"], agentID, data["extendedViewRange"], data["allData"], data["agentLane"])
 
         # Draw Cars in the lane
-        self.drawAllCars(data["allData"])
+        self.drawAllCars(data["allData"], data["followerList"], data["successorList"])
         
         # Update Information Board data
         self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["extendedViewRange"], data["agentLane"], data["planAct"], data["queryAct"], data["agentReward"])

@@ -30,7 +30,8 @@ for i in range(0, 1):
     for i in range(0, 3350):
         act = 0
         state, reward, done, info = obj.step(act)
-        break
+        time.sleep(100)
+        #break
         #print(state.shape)
         if done:
             break

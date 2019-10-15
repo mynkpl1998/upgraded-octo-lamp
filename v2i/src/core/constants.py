@@ -32,6 +32,7 @@ LANE_WIDTH = 30
 INFO_BOARD_DIM = (250, 200)
 INFO_BOARD_GAP = 22
 FONT_SIZE = 15
+SMALL_FONT_SIZE = 15
 LANE_BOUNDARIES = [[248, 218], [216, 186]]
 
 # Intelligent Driver Model constants
