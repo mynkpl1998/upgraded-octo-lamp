@@ -55,3 +55,8 @@ OCCGRID_CONSTS = {
 TF_CONSTS = {
     'EPISODE_TF_GEN_PROB': 0.8
 }
+
+# MOBIL model constants
+MOBIL_CONST = {
+    'POLITENESS': 0.5
+}

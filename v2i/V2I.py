@@ -9,6 +9,7 @@ from v2i.src.core.common import loadPKL, raiseValueError
 from v2i.src.core.occupancy import Grid
 from v2i.src.ui.ui import ui
 from v2i.src.core.idm import idm
+from v2i.src.core.mobil import mobil
 from v2i.src.core.controller import egoController
 from v2i.src.core.common import getAgentID, arcLength, getTfID
 from v2i.src.core.tfLights import tfController
@@ -94,6 +95,9 @@ class V2I(gym.Env):
 
         # Intialize Grid Handler here
         self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), self.simArgs.getValue("k-frames"),2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
+
+        # Lane Change Handler
+        self.laneChangeHandler = mobil()
         
         # Initialize Traffic Lights
         if self.simArgs.getValue("enable-tf"):
@@ -143,20 +147,20 @@ class V2I(gym.Env):
         laneMap = {}
         if numCars[0] == 0 and numCars[1] == 0:
             randomLane = np.random.randint(0, constants.LANES)
-            tup = (np.random.uniform(0, 340), 0.0, randomLane, 0, 0)
+            tup = (np.random.uniform(0, 340), 0.0, randomLane, 0, 0, 0)
             for lane in range(0, constants.LANES):
                 if lane == randomLane:
-                    laneMap[lane] = np.array([tup], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
+                    laneMap[lane] = np.array([tup], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8')])
                 else:
-                    laneMap[lane] = np.array([], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
+                    laneMap[lane] = np.array([], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8')])
         else:
             for lane in range(0, constants.LANES):
                 carsProperties = []
                 for carID in range(0, numCars[lane]):
                     # Pos, Speed, Lane, Agent, CarID
-                    tup = (trajecDict[lane][epsiodeDensity[lane]][trajecIndex[lane]][carID], 0.0, lane, 0, carID)
+                    tup = (trajecDict[lane][epsiodeDensity[lane]][trajecIndex[lane]][carID], 0.0, lane, 0, carID, 0.0)
                     carsProperties.append(tup)
-                laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8')])
+                laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8')])
         return laneMap
     
     def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid, planAct, queryAct, agentReward):
@@ -269,7 +273,8 @@ class V2I(gym.Env):
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"), self.isLightRed)
             else:
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none"), None)
-        
+
+        #print(self.lane_map)
         # Reset Observation Queue
         self.obsWrapper.resetQueue()
         obs = self.buildObservation(occGrid, velGrid)
@@ -378,6 +383,9 @@ class V2I(gym.Env):
         # IDM Update Step
         self.idmHandler.step(self.lane_map)
 
+        # Lane Change Update Step
+        self.laneChangeHandler.step(self.lane_map)
+
         # Remove Dummy Vehicle if added
         if self.simArgs.getValue("enable-tf"):
             for lane in range(0, constants.LANES):
@@ -410,6 +418,7 @@ class V2I(gym.Env):
             else:
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3)), None)
         
+        #print(self.lane_map)
         # state, reward, done, info
         obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)

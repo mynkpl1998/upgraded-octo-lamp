@@ -174,6 +174,7 @@ class tfController:
 		vehicleProp["lane"] = lane
 		vehicleProp["agent"] = 2 # Used to identify tf vehicle
 		vehicleProp["id"] = -1
+		vehicleProp["acc"] = -1
 		return vehicleProp
 
 	
