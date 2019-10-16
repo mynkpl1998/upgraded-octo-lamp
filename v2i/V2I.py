@@ -163,7 +163,7 @@ class V2I(gym.Env):
                 laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8')])
         return laneMap
     
-    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid, planAct, queryAct, agentReward, followerList, sucessorList):
+    def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid, planAct, queryAct, agentReward, followerList, otherLaneFollowerList):
         data = {}
         agentID = np.where(self.lane_map[agentLane]['agent'] == 1)[0]
         data["allData"] = laneMap
@@ -178,7 +178,7 @@ class V2I(gym.Env):
         data["queryAct"] = queryAct
         data["agentReward"] = agentReward
         data["followerList"] = followerList
-        data["successorList"] = sucessorList
+        data["otherLaneFollowerList"] = otherLaneFollowerList
         return data
 
     def fixIssue2(self, density):
@@ -386,7 +386,7 @@ class V2I(gym.Env):
         self.idmHandler.step(self.lane_map)
 
         # Lane Change Update Step
-        followerList, sucessorList = self.laneChangeHandler.step(self.lane_map)
+        followerList, otherLaneFollowerList = self.laneChangeHandler.step(self.lane_map)
         
         # Remove Dummy Vehicle if added
         if self.simArgs.getValue("enable-tf"):
@@ -416,9 +416,9 @@ class V2I(gym.Env):
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
             if self.simArgs.getValue("enable-tf"):
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3), followerList, sucessorList), self.isLightRed)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3), followerList, otherLaneFollowerList), self.isLightRed)
             else:
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3), followerList, sucessorList), None)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3), followerList, otherLaneFollowerList), None)
         
         #print(self.lane_map)
         # state, reward, done, info

@@ -21,15 +21,15 @@ class mobil:
             l[(laneList[i], lane)] = laneList[index]
         return l
     
-    def successorList(self, targetlane, otherLane, currLaneNum, otherLaneNum):
+    def otherLaneFollower(self, targetlane, otherLane, currLaneNum, otherLaneNum):
         s = {}
         for vehicle in targetlane:
             tmpNewLane = np.append(otherLane, (vehicle))
             #tmpNewLane[-1]['lane'] = otherLaneNum
             tmpNewLane = np.sort(tmpNewLane, order=['pos'])
             vehID = np.where(tmpNewLane['pos'] == vehicle['pos'])[0]
-            index =  (vehID[0] + 1) % len(otherLane)
-            s[(vehicle['id'], currLaneNum)] = index
+            index =  (vehID[0] - 1) % len(tmpNewLane)
+            s[(vehicle['id'], currLaneNum)] = tmpNewLane[index]['id']
         return s
 
     def oldAndNewFollower(self, laneMap):
@@ -37,10 +37,10 @@ class mobil:
         lane1List = self.buildlist(1, laneMap, 'id')
         lane0FollowerList = self.followerList(lane0List, 0)
         lane1FollowerList = self.followerList(lane1List, 1)
-        lane0SuccessorList = self.successorList(laneMap[0], laneMap[1], 0, 1)
-        lane1successorList = self.successorList(laneMap[1], laneMap[0], 1, 0)
+        lane0otherLaneFollowerList = self.otherLaneFollower(laneMap[0], laneMap[1], 0, 1)
+        lane1otherLaneFollowerList = self.otherLaneFollower(laneMap[1], laneMap[0], 1, 0)
 
-        return (lane0FollowerList, lane1FollowerList), (lane0SuccessorList, lane1successorList)
+        return (lane0FollowerList, lane1FollowerList), (lane0otherLaneFollowerList, lane1otherLaneFollowerList)
     
     def sortLaneMap(self, laneMap):
         for lane in range(0, LANES):

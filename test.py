@@ -34,4 +34,5 @@ for i in range(0, 1):
         #break
         #print(state.shape)
         if done:
+            print("Collision")
             break

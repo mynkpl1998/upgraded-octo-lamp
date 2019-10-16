@@ -115,10 +115,10 @@ class ui:
         Y = centre[1] + (np.sin(np.deg2rad(angle)) * radius)
         return X,Y
     
-    def carInfo(self, carId, lane, sucessorID, followerID):
-        return self.smallFont.render("ID:%d,L:%d\nS:%d,F:%d"%(carId, lane, sucessorID, followerID), False, self.colorRed)
+    def carInfo(self, carId, lane, otherLaneFollowerID, followerID):
+        return self.smallFont.render("ID:%d,L:%d\nOF:%d,F:%d"%(carId, lane, otherLaneFollowerID, followerID), False, self.colorDarkRed)
     
-    def drawAllCars(self, carsData, followerList, successorList):
+    def drawAllCars(self, carsData, followerList, otherLaneFollowerList):
         for laneID in carsData.keys():
             for car in carsData[laneID]:
                 X, Y = self.getCoordinates(car['pos'], constants.LANE_RADIUS[laneID], constants.CENTRE)
@@ -131,8 +131,8 @@ class ui:
                 else:
                     idTup = (car['id'], laneID)
                     followerID = followerList[laneID][idTup]
-                    successorID = successorList[laneID][idTup]
-                    self.screen.blit(self.carInfo(car['id'], laneID, successorID, followerID), (int(X)-5, int(Y)-5))
+                    otherLaneFollowerID = otherLaneFollowerList[laneID][idTup]
+                    self.screen.blit(self.carInfo(car['id'], laneID, otherLaneFollowerID, followerID), (int(X)-5, int(Y)-5))
     
     def str2font(self, msgStr):
         return self.font.render(msgStr, False, (0, 0, 0))
@@ -267,7 +267,7 @@ class ui:
         self.drawGrids(self.screen, self.colorWhite, data["occGrid"], agentID, data["extendedViewRange"], data["allData"], data["agentLane"])
 
         # Draw Cars in the lane
-        self.drawAllCars(data["allData"], data["followerList"], data["successorList"])
+        self.drawAllCars(data["allData"], data["followerList"], data["otherLaneFollowerList"])
         
         # Update Information Board data
         self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["extendedViewRange"], data["agentLane"], data["planAct"], data["queryAct"], data["agentReward"])
