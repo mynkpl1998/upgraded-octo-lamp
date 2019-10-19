@@ -9,7 +9,7 @@ from v2i.src.core.defaults import DEFAULT_DICT
 
 MAX_CARS_IN_LANE = 31
 LANES = 2 # Don't change this
-DENSITIES = [0.0, 0.1, 0.3, 0.5, 0.7, 0.9]
+DENSITIES = [0.1, 0.3, 0.5, 0.7, 0.9]
 
 # x pixles = 1m, ex: 6 pixels makes up 1 metre
 SCALE = 6
@@ -59,8 +59,7 @@ TF_CONSTS = {
 
 # MOBIL model constants
 MOBIL_CONST = {
-    'POLITENESS': 0.5,
     'B_SAFE' : -4,
-    'GAIN': 0.1,
+    'GAIN': 0.2,
     'RANDOMIZE_PROB': 0.5
 }
