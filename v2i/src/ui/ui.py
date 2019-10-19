@@ -7,12 +7,13 @@ from v2i.src.core.common import arcAngle, getAgentID
 
 class ui:
 
-    def __init__(self, fps, extendedViewInMetre, cellSizeInMetre, isTFEnabled):
+    def __init__(self, fps, extendedViewInMetre, cellSizeInMetre, isTFEnabled, isCarDetailsEnabled):
 
         self.fps = fps
         self.extendedViewInMetre = extendedViewInMetre
         self.cellSizeInMetre = cellSizeInMetre
         self.isTFEnabled = isTFEnabled
+        self.isCarDetailsEnabled = isCarDetailsEnabled
 
         # Init Graphics Library - PyGame
         pygame.init()
@@ -115,10 +116,10 @@ class ui:
         Y = centre[1] + (np.sin(np.deg2rad(angle)) * radius)
         return X,Y
     
-    def carInfo(self, carId, lane, otherLaneFollowerID, followerID):
-        return self.smallFont.render("ID:%d,L:%d\nOF:%d,F:%d"%(carId, lane, otherLaneFollowerID, followerID), False, self.colorDarkRed)
+    def carInfo(self, carId, lane, frontID, followerID):
+        return self.smallFont.render("ID:%d,L:%d\nF:%d,B:%d"%(carId, lane, frontID, followerID), False, self.colorDarkRed)
     
-    def drawAllCars(self, carsData, followerList, otherLaneFollowerList):
+    def drawAllCars(self, carsData, followerList, frontList):
         for laneID in carsData.keys():
             for car in carsData[laneID]:
                 X, Y = self.getCoordinates(car['pos'], constants.LANE_RADIUS[laneID], constants.CENTRE)
@@ -126,13 +127,14 @@ class ui:
                 if car['agent'] == 1:
                     carColor = self.colorLime
                 self.drawCar(self.screen, (int(X), int(Y)), carColor)
-                if followerList == "none":
-                    pass
-                else:
-                    idTup = (car['id'], laneID)
-                    followerID = followerList[laneID][idTup]
-                    otherLaneFollowerID = otherLaneFollowerList[laneID][idTup]
-                    self.screen.blit(self.carInfo(car['id'], laneID, otherLaneFollowerID, followerID), (int(X)-5, int(Y)-5))
+                if self.isCarDetailsEnabled:
+                    if followerList == "none":
+                        pass
+                    else:
+                        idTup = car['id']
+                        followerID = followerList[idTup]
+                        frontID = frontList[idTup]
+                        self.screen.blit(self.carInfo(car['id'], laneID, frontID, followerID), (int(X)-5, int(Y)-5))
     
     def str2font(self, msgStr):
         return self.font.render(msgStr, False, (0, 0, 0))
@@ -267,7 +269,7 @@ class ui:
         self.drawGrids(self.screen, self.colorWhite, data["occGrid"], agentID, data["extendedViewRange"], data["allData"], data["agentLane"])
 
         # Draw Cars in the lane
-        self.drawAllCars(data["allData"], data["followerList"], data["otherLaneFollowerList"])
+        self.drawAllCars(data["allData"], data["followerList"], data["frontList"])
         
         # Update Information Board data
         self.updateInfoBoard(self.screen, data["agentSpeed"], data["maxSpeed"], data["timeElapsed"], data["viewRange"], data["extendedViewRange"], data["agentLane"], data["planAct"], data["queryAct"], data["agentReward"])

@@ -77,3 +77,15 @@ def buildDictWithKeys(keys, initValue):
     for key in keys:
         d[key] = initValue
     return d.copy()
+
+def mergeDicts(d1, d2):
+    d = {}
+    for key in d1.keys():
+        d[key] = d1[key]
+    
+    for key in d2.keys():
+        d[key] = d2[key]
+    
+    assert len(d) == len(d1) + len(d2)
+    
+    return d

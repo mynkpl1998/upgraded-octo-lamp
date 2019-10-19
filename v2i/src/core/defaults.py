@@ -17,6 +17,7 @@ DEFAULT_DICT = {
 
     # UI settings
     'render': True,
+    'render_car_details': True, 
     'fps': 120,
 
     # Frame Skip

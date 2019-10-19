@@ -56,6 +56,7 @@ class idm:
     
     def idmAcc(self, sAlpha, speedDiff, speed):
         '''
+        Make sure to edit function at utils.py if you change anything here
         IDM Equation : https://en.wikipedia.org/wiki/Intelligent_driver_model
         
         Modified IDM Equation includes the sense of local view to non-Ego vehicles

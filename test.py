@@ -22,13 +22,13 @@ for i in range(0, 1):
     for i in range(0, 2):
         episodeDensity.append(random.choice(densities))
 
-    state = obj.reset([0.3, 0.3])
+    state = obj.reset([0.3, 0.9])
     #print(state.shape)
     count = 0
     #time.sleep(0.5)
     
     for i in range(0, 3350):
-        act = 2
+        act = 0
         state, reward, done, info = obj.step(act)
         #time.sleep(100)
         #break
