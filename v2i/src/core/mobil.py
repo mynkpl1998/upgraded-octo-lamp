@@ -45,8 +45,88 @@ class mobil:
     def sortLaneMap(self, laneMap):
         for lane in range(0, LANES):
             laneMap[lane] = np.sort(laneMap[lane], order=['pos'])
+    
+    def execLaneChange(self, currLane, targetLane, currLaneMap, targetLaneMap, idmHandler, planAct, oldAccs, followerList, otherLaneFollowerList):
+        laneRes = {}
+        for idx, vehicle in enumerate(currLaneMap):
+            # --- target lane --- #
+            newTmpLaneMap = np.append(targetLaneMap, vehicle)
+            newTmpLaneMap = np.sort(newTmpLaneMap, order=['pos'])
+            vehIndex = np.where(newTmpLaneMap['id'] == vehicle['id'])[0][0]
+            newTmpLaneMap[vehIndex]['lane'] = targetLane
 
-    def step(self, laneMap):
+            # --- current lane --- #
+            newCurrLane = np.delete(currLaneMap, idx)
+            newCurrLane = np.sort(newCurrLane, order=['pos'])
+            
+            newLaneMap = np.array([newCurrLane, newTmpLaneMap])
+            idmHandler.step(newLaneMap, planAct)
+            newAccs = self.getVehiclesAccels(newLaneMap)
+            
+            newFollowerAcc = newAccs[followerList[(vehicle['id'], vehicle['lane'])]]
+            newOtherFollowerAcc = newAccs[otherLaneFollowerList[(vehicle['id'], vehicle['lane'])]]
+            newVehicleAcc = newAccs[vehicle['id']]
+            
+            oldFollowerAcc = oldAccs[followerList[(vehicle['id'], vehicle['lane'])]]
+            oldOtherFollowerAcc = oldAccs[otherLaneFollowerList[(vehicle['id'], vehicle['lane'])]]
+            oldVehicleAcc = oldAccs[vehicle['id']]
+
+            res = self.checkValidLaneChange(oldVehicleAcc, oldOtherFollowerAcc, oldFollowerAcc, newVehicleAcc, newOtherFollowerAcc, newFollowerAcc)
+            laneRes[vehicle['id']] = res
+        return laneRes
+    
+
+    def checkValidLaneChange(self, oldVehicleAcc, oldOtherFollowerAcc, oldFollowerAcc, newVehicleAcc, newOtherFollowerAcc, newFollowerAcc):
+        
+        if (newOtherFollowerAcc - oldOtherFollowerAcc) >= -4.0:
+            pass
+        else:
+            return False
+        
+        if (newVehicleAcc - oldVehicleAcc) + 0.1*((newFollowerAcc - oldFollowerAcc) + (newOtherFollowerAcc - oldOtherFollowerAcc)) > 0.1:
+            return True
+        else:
+            return False
+
+    def getVehiclesAccels(self, laneMap):
+        accs = {} # id - acc
+        for lane in range(0, LANES):
+            for vehicle in laneMap[lane]:
+                accs[vehicle['id']] = vehicle['acc']
+        return accs
+    
+    def list2Dict(self, l):
+        d = {}
+        for lane in range(0, LANES):
+            for key in l[lane].keys():
+                d[key] = l[lane][key]
+        return d
+    
+    def merge2Dict(self, l1, l2):
+        d = {}
+        for key in l1.keys():
+            d[key] = l1[key]
+        
+        for key in l2.keys():
+            d[key] = l2[key]
+        return d
+
+
+    def step(self, laneMap, idmHandler, planAct):
         self.sortLaneMap(laneMap)
-        followerList, sucessorList = self.oldAndNewFollower(laneMap)
-        return followerList, sucessorList
+        followerList, otherLaneFollowerList = self.oldAndNewFollower(laneMap)
+        oldAccs = self.getVehiclesAccels(laneMap)
+        lanechangeres0 = self.execLaneChange(0, 1, laneMap[0], laneMap[1], idmHandler, planAct, oldAccs, self.list2Dict(followerList) , self.list2Dict(otherLaneFollowerList))
+        lanechangeres1 = self.execLaneChange(1, 0, laneMap[1], laneMap[0], idmHandler, planAct, oldAccs, self.list2Dict(followerList), self.list2Dict(otherLaneFollowerList))
+        res = self.merge2Dict(lanechangeres0, lanechangeres1)
+        return followerList, otherLaneFollowerList, res
+    
+    def exec(self, laneMap, res, laneNum): 
+        newData = {}
+        newData[0] = []
+        newData[1] = []
+
+        for vehicle in laneMap:
+            print(vehicle['id'])
+
+

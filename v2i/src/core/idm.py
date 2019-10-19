@@ -82,10 +82,15 @@ class idm:
     def newPos(self, oldPos, angleDiff):
         return (oldPos + angleDiff)% 360
     
-    def updateLaneMap(self, speed, pos, laneMap, acc):
+    def updateLaneMap(self, speed, pos, laneMap, acc, planAct):
         for i in range(laneMap.shape[0]):
             if laneMap[i]['agent'] == 1:
-                laneMap[i]['acc'] = IDM_CONSTS['MAX_ACC']
+                if planAct == "acc":
+                    laneMap[i]['acc'] = IDM_CONSTS['MAX_ACC']
+                elif planAct == "dec":
+                    laneMap[i]['acc'] = -IDM_CONSTS['DECELERATION_RATE']
+                else:
+                    laneMap[i]['acc'] = 0.0
             else:
                 laneMap[i]['pos'] = pos[i]
                 laneMap[i]['speed'] = speed[i]
@@ -95,7 +100,7 @@ class idm:
         for lane in range(0, LANES):
             laneMap[lane] = np.sort(laneMap[lane], order=['pos'])
 
-    def step(self, laneMap):
+    def step(self, laneMap, planAct):
         self.sortLaneMap(laneMap)
         '''
         Each lane has different number of cars. Hence, we need to do seperate function calls on each of them
@@ -116,7 +121,7 @@ class idm:
             distInPixelsLane0 = distLane0 * SCALE
             distInDegLane0 = self.vecArc2Angle(LANE_RADIUS[0], distInPixelsLane0)
             newPosLane0 = self.vecNewPos(oldPosLane0, distInDegLane0)
-            self.updateLaneMap(newSpeedLane0, newPosLane0, laneMap[0], accLane0)
+            self.updateLaneMap(newSpeedLane0, newPosLane0, laneMap[0], accLane0, planAct)
 
 
         if laneMap[1].shape[0] == 0:
@@ -137,5 +142,5 @@ class idm:
             distInPixelsLane1 = distLane1 * SCALE
             distInDegLane1 = self.vecArc2Angle(LANE_RADIUS[1], distInPixelsLane1)
             newPosLane1 = self.vecNewPos(oldPosLane1, distInDegLane1)
-            self.updateLaneMap(newSpeedLane1, newPosLane1, laneMap[1], accLane1)
+            self.updateLaneMap(newSpeedLane1, newPosLane1, laneMap[1], accLane1, planAct)
         

@@ -145,9 +145,11 @@ class V2I(gym.Env):
         
     def buildlaneMap(self, trajecDict, trajecIndex, epsiodeDensity, numCars):
         laneMap = {}
+        count  = 0
         if numCars[0] == 0 and numCars[1] == 0:
             randomLane = np.random.randint(0, constants.LANES)
-            tup = (np.random.uniform(0, 340), 0.0, randomLane, 0, 0, 0)
+            tup = (np.random.uniform(0, 340), 0.0, randomLane, 0, count, 0)
+            count += 1
             for lane in range(0, constants.LANES):
                 if lane == randomLane:
                     laneMap[lane] = np.array([tup], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8')])
@@ -158,7 +160,8 @@ class V2I(gym.Env):
                 carsProperties = []
                 for carID in range(0, numCars[lane]):
                     # Pos, Speed, Lane, Agent, CarID
-                    tup = (trajecDict[lane][epsiodeDensity[lane]][trajecIndex[lane]][carID], 0.0, lane, 0, carID, 0.0)
+                    tup = (trajecDict[lane][epsiodeDensity[lane]][trajecIndex[lane]][carID], 0.0, lane, 0, count, 0.0)
+                    count += 1
                     carsProperties.append(tup)
                 laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8')])
         return laneMap
@@ -382,12 +385,15 @@ class V2I(gym.Env):
                 if self.isLightRed[lane]:
                     self.lane_map = self.tfHandler.addDummytfVehicle(self.lane_map, lane)
         
-        # IDM Update Step
-        self.idmHandler.step(self.lane_map)
-
         # Lane Change Update Step
-        followerList, otherLaneFollowerList = self.laneChangeHandler.step(self.lane_map)
-        
+        followerList, otherLaneFollowerList, laneChangeRes = self.laneChangeHandler.step(self.lane_map, self.idmHandler, planAct)
+
+        # Perform laneChange
+        self.laneChangeHandler.exec(self.lane_map, laneChangeRes, 0)
+
+        # IDM Update Step
+        self.idmHandler.step(self.lane_map, planAct)
+
         # Remove Dummy Vehicle if added
         if self.simArgs.getValue("enable-tf"):
             for lane in range(0, constants.LANES):
@@ -420,7 +426,6 @@ class V2I(gym.Env):
             else:
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3), followerList, otherLaneFollowerList), None)
         
-        #print(self.lane_map)
         # state, reward, done, info
         obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)

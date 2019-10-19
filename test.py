@@ -28,9 +28,9 @@ for i in range(0, 1):
     #time.sleep(0.5)
     
     for i in range(0, 3350):
-        act = 0
+        act = 2
         state, reward, done, info = obj.step(act)
-        time.sleep(100)
+        #time.sleep(100)
         #break
         #print(state.shape)
         if done:
