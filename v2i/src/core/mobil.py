@@ -101,16 +101,19 @@ class mobil:
             acc = self.idmHandler.idmAcc(sAlpha, speedDiff, otherSpeed)
         return acc
     
-    def laneChangeRules(self, newVehIDAccAfterLaneChange, oldVehIDAccBeforeLaneChange, newOtherIDAccAfterLaneChange):
+    def laneChangeRules(self, newVehIDAccAfterLaneChange, oldVehIDAccBeforeLaneChange, newOtherIDAccAfterLaneChange, oldOtherIDAccBeforeLaneChange):
         vehAccDiff = newVehIDAccAfterLaneChange - oldVehIDAccBeforeLaneChange
     
         if newOtherIDAccAfterLaneChange < MOBIL_CONST["B_SAFE"]:
             return False
         
-        if (newVehIDAccAfterLaneChange - oldVehIDAccBeforeLaneChange) < MOBIL_CONST['GAIN']:
+        mobilCondition = (newVehIDAccAfterLaneChange - oldVehIDAccBeforeLaneChange) + MOBIL_CONST['POLITENESS'] * (newOtherIDAccAfterLaneChange - oldOtherIDAccBeforeLaneChange)
+
+        if mobilCondition < MOBIL_CONST['GAIN']:
             return False
         
         if np.random.rand() <= MOBIL_CONST['RANDOMIZE_PROB']:
+            #print(vehAccDiff)
             return True
         else:
             return False
@@ -144,8 +147,8 @@ class mobil:
             # Find accleration of vehicles required to check for valid lane change
             followerAcc = self.getFollowerAcc(laneMap, vehLane, otherLane, vehID, followerID) # This is the accleration of the follower vehicle if vehID switches lane
             frontAcc = self.getFrontAcc(laneMap, vehLane, otherLane, vehID, frontID) # This is acceleration of vehID if it switches lane
-            
-            res = self.laneChangeRules(frontAcc, idmAccs[vehID], followerAcc)
+
+            res = self.laneChangeRules(frontAcc, idmAccs[vehID], followerAcc, idmAccs[followerID])
 
             vehIndex = np.where(laneMap[vehLane]['id'] == vehID)[0][0]
             isEgoVehicle = laneMap[vehLane][vehIndex]['agent']
