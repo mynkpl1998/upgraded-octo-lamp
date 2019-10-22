@@ -65,7 +65,12 @@ class mobil:
     
     def getFollowerAcc(self, laneMap, vehLane, otherLane, vehID, otherID):
         vehIndex = np.where(laneMap[vehLane]['id'] == vehID)[0][0]
-        otherIndex = np.where(laneMap[otherLane]['id'] == otherID)[0][0]
+        try:
+            otherIndex = np.where(laneMap[otherLane]['id'] == otherID)[0][0]
+        except:
+            print(laneMap)
+            print(otherIndex)
+            print(vehLane, otherLane)
     
         vehPos = laneMap[vehLane][vehIndex]['pos']
         vehSpeed = laneMap[vehLane][vehIndex]['speed']
@@ -84,7 +89,13 @@ class mobil:
     
     def getFrontAcc(self, laneMap, vehLane, otherLane, vehID, otherID):
         vehIndex = np.where(laneMap[vehLane]['id'] == vehID)[0][0]
-        otherIndex = np.where(laneMap[otherLane]['id'] == otherID)[0][0]
+        try:
+            otherIndex = np.where(laneMap[otherLane]['id'] == otherID)[0][0]
+        except:
+            print(laneMap)
+            print(otherIndex)
+            print(vehLane, otherLane)
+
     
         vehPos = laneMap[vehLane][vehIndex]['pos']
         vehSpeed = laneMap[vehLane][vehIndex]['speed']
@@ -101,9 +112,15 @@ class mobil:
             acc = self.idmHandler.idmAcc(sAlpha, speedDiff, otherSpeed)
         return acc
     
-    def laneChangeRules(self, newVehIDAccAfterLaneChange, oldVehIDAccBeforeLaneChange, newOtherIDAccAfterLaneChange, oldOtherIDAccBeforeLaneChange):
+    def laneChangeRules(self, newVehIDAccAfterLaneChange, oldVehIDAccBeforeLaneChange, newOtherIDAccAfterLaneChange, oldOtherIDAccBeforeLaneChange, numCarsVehLane):
         vehAccDiff = newVehIDAccAfterLaneChange - oldVehIDAccBeforeLaneChange
-    
+
+        '''
+        Checks for minimum of two cars in current lane
+        '''
+        if numCarsVehLane <= 2:
+            return False
+        
         if newOtherIDAccAfterLaneChange < MOBIL_CONST["B_SAFE"]:
             return False
         
@@ -113,7 +130,6 @@ class mobil:
             return False
         
         if np.random.rand() <= MOBIL_CONST['RANDOMIZE_PROB']:
-            #print(vehAccDiff)
             return True
         else:
             return False
@@ -136,11 +152,13 @@ class mobil:
         for vehID in visited.keys():
             vehLane = self.searchLane(laneMap, vehID)
             otherLane = self.getTargetLane(vehLane)
+            numCarsVehLane = laneMap[vehLane].shape[0]
+            
             assert otherLane != vehLane
 
             frontID = self.findForward(vehLane, otherLane, laneMap[vehLane], laneMap[otherLane], vehID)
             followerID = self.findFollower(vehLane, otherLane, laneMap[vehLane], laneMap[otherLane], vehID)
-
+        
             followerList[vehID] = followerID
             frontList[vehID] = frontID
 
@@ -148,7 +166,7 @@ class mobil:
             followerAcc = self.getFollowerAcc(laneMap, vehLane, otherLane, vehID, followerID) # This is the accleration of the follower vehicle if vehID switches lane
             frontAcc = self.getFrontAcc(laneMap, vehLane, otherLane, vehID, frontID) # This is acceleration of vehID if it switches lane
 
-            res = self.laneChangeRules(frontAcc, idmAccs[vehID], followerAcc, idmAccs[followerID])
+            res = self.laneChangeRules(frontAcc, idmAccs[vehID], followerAcc, idmAccs[followerID], numCarsVehLane)
 
             vehIndex = np.where(laneMap[vehLane]['id'] == vehID)[0][0]
             isEgoVehicle = laneMap[vehLane][vehIndex]['agent']

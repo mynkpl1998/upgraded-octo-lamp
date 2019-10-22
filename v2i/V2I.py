@@ -242,6 +242,8 @@ class V2I(gym.Env):
                 self.num_cars[lane] = 0
         
         self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity, self.num_cars)
+        #print("Before Else : ")
+        #print(self.lane_map)
         ''' 
         Randomly Choose Agent Lane and Agent Car ID
         '''
