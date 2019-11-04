@@ -76,6 +76,7 @@ class mobil:
         vehSpeed = laneMap[vehLane][vehIndex]['speed']
         otherPos = laneMap[otherLane][otherIndex]['pos']
         otherSpeed = laneMap[otherLane][otherIndex]['speed']
+        maxSpeed = laneMap[vehLane][vehIndex]['max-speed']
 
         distDeg = vehPos - otherPos
         distDeg %= 360
@@ -84,7 +85,7 @@ class mobil:
         if sAlpha <= 0.0:
             acc = MOBIL_CONST['B_SAFE'] - 1
         else:
-            acc = self.idmHandler.idmAcc(sAlpha, speedDiff, otherSpeed)
+            acc = self.idmHandler.idmAcc(sAlpha, speedDiff, otherSpeed, maxSpeed)
         return acc
     
     def getFrontAcc(self, laneMap, vehLane, otherLane, vehID, otherID):
@@ -101,15 +102,17 @@ class mobil:
         vehSpeed = laneMap[vehLane][vehIndex]['speed']
         otherPos = laneMap[otherLane][otherIndex]['pos']
         otherSpeed = laneMap[otherLane][otherIndex]['speed']
+        maxSpeed = laneMap[otherLane][otherIndex]['max-speed']
 
         distDeg = otherPos - vehPos
         distDeg %= 360
         sAlpha = self.bumper2bumperDist(distDeg, CAR_LENGTH, otherLane)
         speedDiff = vehSpeed - otherSpeed
+        
         if sAlpha <= 0.0:
             acc = MOBIL_CONST['B_SAFE'] - 1
         else:
-            acc = self.idmHandler.idmAcc(sAlpha, speedDiff, otherSpeed)
+            acc = self.idmHandler.idmAcc(sAlpha, speedDiff, otherSpeed, maxSpeed)
         return acc
     
     def laneChangeRules(self, newVehIDAccAfterLaneChange, oldVehIDAccBeforeLaneChange, newOtherIDAccAfterLaneChange, oldOtherIDAccBeforeLaneChange, numCarsVehLane):

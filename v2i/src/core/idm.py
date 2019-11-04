@@ -54,7 +54,7 @@ class idm:
         return np.sqrt(2 * distanceInMetre * decelerationRate)
 
     
-    def idmAcc(self, sAlpha, speedDiff, speed):
+    def idmAcc(self, sAlpha, speedDiff, speed, maxSpeed):
         '''
         Make sure to edit function at utils.py if you change anything here
         IDM Equation : https://en.wikipedia.org/wiki/Intelligent_driver_model
@@ -62,11 +62,8 @@ class idm:
         Modified IDM Equation includes the sense of local view to non-Ego vehicles
         Modified IDM Details : https://github.com/mynkpl1998/single-ring-road-with-light/blob/master/SingleLaneIDM/Results%20Analysis.ipynb
         '''
-        if sAlpha > self.viewRange:
-            sAlpha = np.clip(sAlpha, a_min=0, a_max=self.viewRange)
-            speedDiff = speed - self.nonEgoMaxVel
         sStar = IDM_CONSTS['MIN_SPACING'] + (speed * IDM_CONSTS['HEADWAY_TIME']) + ((speed * speedDiff)/(2 * np.sqrt(IDM_CONSTS['MAX_ACC'] * IDM_CONSTS['DECELERATION_RATE'])))
-        acc = IDM_CONSTS['MAX_ACC'] * (1 - ((speed / self.maxVel)**IDM_CONSTS['DELTA']) - ((sStar/sAlpha)**2))
+        acc = IDM_CONSTS['MAX_ACC'] * (1 - ((speed / maxSpeed)**IDM_CONSTS['DELTA']) - ((sStar/sAlpha)**2))
         return acc
     
     def distTravelled(self, speed, acc, tPeriod):
@@ -85,14 +82,6 @@ class idm:
     
     def updateLaneMap(self, speed, pos, laneMap, acc, planAct):
         for i in range(laneMap.shape[0]):
-            if laneMap[i]['agent'] == 1:
-                if planAct == "acc":
-                    laneMap[i]['acc'] = IDM_CONSTS['MAX_ACC']
-                elif planAct == "dec":
-                    laneMap[i]['acc'] = -IDM_CONSTS['DECELERATION_RATE']
-                else:
-                    laneMap[i]['acc'] = 0.0
-            else:
                 laneMap[i]['pos'] = pos[i]
                 laneMap[i]['speed'] = speed[i]
                 laneMap[i]['acc'] = acc[i]
@@ -110,11 +99,12 @@ class idm:
             pass
         else:
             oldPosLane0 = self.getAllElementbyKeys('pos', laneMap[0])
+            carsMaxSpeeds = self.getAllElementbyKeys('max-speed', laneMap[0])
             posDiffLane0 = self.angleDiff(laneMap, 0)
             speedDiffLane0 = self.relativeSpeed(laneMap, 0)
             speedLane0 = self.getAllElementbyKeys('speed', laneMap[0])
             sAlphaLane0 = self.vecBumpBumpDistance(posDiffLane0, CAR_LENGTH, 0)
-            accLane0 = self.vecidmAcc(sAlphaLane0, speedDiffLane0, speedLane0)
+            accLane0 = self.vecidmAcc(sAlphaLane0, speedDiffLane0, speedLane0, carsMaxSpeeds)
             distLane0 = self.vecDistTravelled(speedLane0, accLane0, self.tPeriod)
             newSpeedLane0 = self.vecNewSpeed(speedLane0, accLane0, self.tPeriod)
             distLane0[distLane0 < 0] = 0.0
@@ -129,11 +119,12 @@ class idm:
             pass
         else:
             oldPosLane1 = self.getAllElementbyKeys('pos', laneMap[1])
+            carsMaxSpeeds = self.getAllElementbyKeys('max-speed', laneMap[1])
             posDiffLane1 = self.angleDiff(laneMap, 1)
             speedDiffLane1 = self.relativeSpeed(laneMap, 1)
             speedLane1 = self.getAllElementbyKeys('speed', laneMap[1])
             sAlphaLane1 = self.vecBumpBumpDistance(posDiffLane1, CAR_LENGTH, 1)
-            accLane1 = self.vecidmAcc(sAlphaLane1, speedDiffLane1, speedLane1)
+            accLane1 = self.vecidmAcc(sAlphaLane1, speedDiffLane1, speedLane1, carsMaxSpeeds)
             distLane1 = self.vecDistTravelled(speedLane1, accLane1, self.tPeriod)
             newSpeedLane1 = self.vecNewSpeed(speedLane1, accLane1, self.tPeriod)
             # --- Check for invalid distance and new Speed --- #

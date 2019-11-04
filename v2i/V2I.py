@@ -5,13 +5,13 @@ import numpy as np
 
 import v2i.src.core.constants as constants
 from v2i.src.core.utils import configParser, ActionEncoderDecoder, laneMap2Dict
-from v2i.src.core.common import loadPKL, raiseValueError
+from v2i.src.core.common import loadPKL, raiseValueError, buildMaxSpeeds
 from v2i.src.core.occupancy import Grid
 from v2i.src.ui.ui import ui
 from v2i.src.core.idm import idm
 from v2i.src.core.mobil import mobil
 from v2i.src.core.controller import egoController
-from v2i.src.core.common import getAgentID, arcLength, getTfID
+from v2i.src.core.common import getAgentID, arcLength, getTfID, randomizeSpeeds
 from v2i.src.core.tfLights import tfController
 from v2i.src.core.constants import TF_CONSTS
 from v2i.src.core.obsQueue import obsWrapper
@@ -96,6 +96,9 @@ class V2I(gym.Env):
         # Intialize Grid Handler here
         self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), self.simArgs.getValue("k-frames"),2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
 
+        # Init possible max speed of vehicles
+        self.maxSpeeds = buildMaxSpeeds(self.gridHandler.totalExtendedView, self.gridHandler.totalLocalView)
+
         # Lane Change Handler
         self.laneChangeHandler = mobil(self.simArgs.getValue('t-period'), self.idmHandler)
         
@@ -152,18 +155,20 @@ class V2I(gym.Env):
             count += 1
             for lane in range(0, constants.LANES):
                 if lane == randomLane:
-                    laneMap[lane] = np.array([tup], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8')])
+                    laneMap[lane] = np.array([tup], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8'), ('max-speed', 'f8')])
                 else:
-                    laneMap[lane] = np.array([], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8')])
+                    laneMap[lane] = np.array([], dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8'), ('max-speed', 'f8')])
         else:
             for lane in range(0, constants.LANES):
                 carsProperties = []
                 for carID in range(0, numCars[lane]):
                     # Pos, Speed, Lane, Agent, CarID
-                    tup = (trajecDict[lane][epsiodeDensity[lane]][trajecIndex[lane]][carID], 0.0, lane, 0, count, 0.0)
+                    randomSpeedIndex = np.random.randint(0, len(self.maxSpeeds))
+                    randomSpeed = self.maxSpeeds[randomSpeedIndex]
+                    tup = (trajecDict[lane][epsiodeDensity[lane]][trajecIndex[lane]][carID], 0.0, lane, 0, count, 0.0, randomSpeed)
                     count += 1
                     carsProperties.append(tup)
-                laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8')])
+                laneMap[lane] = np.array(carsProperties, dtype=[('pos', 'f8'), ('speed', 'f8'), ('lane', 'f8'), ('agent', 'f8'), ('id', 'f8'), ('acc', 'f8'), ('max-speed', 'f8')])
         return laneMap
     
     def packRenderData(self, laneMap, timeElapsed, agentLane, maxSpeed, viewRange, extendedRange, occGrid, planAct, queryAct, agentReward, followerList, otherLaneFollowerList):
@@ -261,6 +266,7 @@ class V2I(gym.Env):
                 self.agent_lane = np.random.randint(0, constants.LANES)
             self.randomIDX = np.random.randint(0, self.num_cars[self.agent_lane])
             self.lane_map[self.agent_lane][self.randomIDX]['agent'] = 1
+            self.lane_map[self.agent_lane][self.randomIDX]['max-speed'] = self.simArgs.getValue('max-speed')
         
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
@@ -281,7 +287,6 @@ class V2I(gym.Env):
             else:
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none", "none", "none"), None)
 
-        #print(self.lane_map)
         # Reset Observation Queue
         self.obsWrapper.resetQueue()
         obs = self.buildObservation(occGrid, velGrid)
@@ -339,6 +344,11 @@ class V2I(gym.Env):
     def frame(self, action):
         
         self.num_steps += 1
+
+        # Randomize vehicles max Speed
+        if self.num_steps % 100 == 0:
+            self.lane_map = randomizeSpeeds(self.lane_map, self.maxSpeeds)
+            
         
         # Check for turing tf to green or red
         '''
@@ -363,7 +373,8 @@ class V2I(gym.Env):
         
         self.planAct = planAct
         self.queryAct = queryAct
-
+        
+        '''
         # Perform the required planing action
         egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(planAct, self.lane_map, self.agent_lane)
         
@@ -380,12 +391,15 @@ class V2I(gym.Env):
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
+        '''
 
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
             for lane in range(0, constants.LANES):
                 if self.isLightRed[lane]:
                     self.lane_map = self.tfHandler.addDummytfVehicle(self.lane_map, lane)
+        
+        self.idmHandler.step(self.lane_map, planAct)
         
         # IDM Acc without lane changes
         tmpLaneMap0 = self.lane_map.copy()
@@ -394,11 +408,14 @@ class V2I(gym.Env):
 
         # Get follower and front vehicle in other lane
         followerList, frontList, self.lane_map = self.laneChangeHandler.step(self.lane_map, idmAccs)
-
+        
         self.idmHandler.step(self.lane_map, planAct)
         
         #followerList, frontList = self.laneChangeHandler.findFrontandBack(self.lane_map)
         assert len(followerList) == len(frontList)
+        agentID = getAgentID(self.lane_map, self.agent_lane)
+        
+        #followerList, frontList = {}, {}
 
         # Remove Dummy Vehicle if added
         if self.simArgs.getValue("enable-tf"):
@@ -419,6 +436,7 @@ class V2I(gym.Env):
         if self.gridHandler.isCommEnabled:
             reward = self.commPenalty(reward, queryAct)
         
+        collision = False
         if collision:
             reward = -1 * self.simArgs.getValue("collision-penalty")
         

@@ -1,7 +1,7 @@
 config:
 
   # Simulation Parameters
-  t-period: 0.3 # in secs
+  t-period: 0.4 # in secs
   seed: 1
 
   # IDM settings
@@ -16,7 +16,7 @@ config:
   nocomm-incentive: 0.0
 
   # UI settings
-  render: true
+  render: false
   render_car_details: false
   fps: 30
 

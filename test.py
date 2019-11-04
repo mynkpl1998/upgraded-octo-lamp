@@ -18,24 +18,68 @@ print(obj.action_space)
 print(obj.action_map)
 densities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-for episode in range(0, 1000):
+maxSteps = 1200
+
+simDensities = [0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
+fig, ax = plt.subplots(nrows=2, ncols=3)
+finalSpeedList = []
+
+for density in simDensities:
+    print("Running for density : ", density)
+    speedDict = {}
+    for episode in range(0, 1):
+        episodeDensity = [density, density]
+        state = obj.reset(episodeDensity)
+
+        for lane in range(0, 2):
+            for car in obj.lane_map[lane]:
+                carID = car['id']
+                carSpeed = car['speed']
+                speedDict[carID] = []
+                speedDict[carID].append(carSpeed)
+
+        for i in range(0, maxSteps):
+            obj.step(0)
+
+            for lane in range(0, 2):
+                for car in obj.lane_map[lane]:
+                    carID = car['id']
+                    speedDict[carID].append(car['speed'])
+    finalSpeedList.append(speedDict)
+
+for i, r in enumerate(ax):
+    for j, c in enumerate(r):
+        index = i*3 + j
+        for car in finalSpeedList[index].keys():
+            c.plot(finalSpeedList[index][car])
+        c.set_ylim([0, 11.11])
+        c.set_xlabel('time')
+        c.set_ylabel('speed (m/s)')
+        c.set_title('Traffic Density : %.1f'%(simDensities[index]))
+
+plt.show()
+
+
+'''
+for episode in range(0, 1):
     #print("Starting episode : %d"%(i+1))
     episodeDensity = []
     for i in range(0, 2):
         episodeDensity.append(random.choice(densities))
     print("Episode Density : ", episodeDensity)
-    state = obj.reset([0.5, 0.5])
-
+    state = obj.reset([0.3, 0.5]) 
     #print(state.shape)
     count = 0
     #time.sleep(0.5)
-    print(episode)
-    for i in range(0, 10000):
+    
+    for i in range(0, maxSteps):
         act = 2
         state, reward, done, info = obj.step(act)
+        #print(obj.idmHandler.getAllElementbyKeys('speed', obj.lane_map[0]))
         #time.sleep(100)
         #break
         #print(state.shape)
         if done:
             print("Collision")
             break
+'''

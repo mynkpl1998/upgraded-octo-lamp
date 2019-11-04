@@ -4,6 +4,8 @@ import pickle
 import numpy as np
 from huepy import bad, bold, red
 
+from v2i.src.core.constants import IDM_CONSTS, LANES
+
 def checkFileExists(file):
     return os.path.isfile(file)
 
@@ -89,3 +91,25 @@ def mergeDicts(d1, d2):
     assert len(d) == len(d1) + len(d2)
     
     return d
+
+def getMaxSpeed(speed, deceleration, distance):
+    return np.sqrt(2 * deceleration * distance)
+
+def buildMaxSpeeds(extendedViewinMetres, localViewinMetres):
+    extendedViewinMetres /= 2.0
+    extendedViewinMetres /= 2.0
+    size = extendedViewinMetres/4.0
+    possibleDist = [size, 2*size, 3*size , 4*size]
+    possibleMaxSpeeds = []
+    for dist in possibleDist:
+        possibleMaxSpeeds.append(getMaxSpeed(0.0, IDM_CONSTS['DECELERATION_RATE'], dist))
+    return possibleMaxSpeeds
+
+def randomizeSpeeds(laneMap, maxSpeeds):
+    for lane in range(0, LANES):
+        for car in laneMap[lane]:
+            randomSpeedIndex = np.random.randint(0, len(maxSpeeds))
+            randomMaxSpeed = maxSpeeds[randomSpeedIndex]
+            car['speed'] = randomMaxSpeed
+    print("Switched")
+    return laneMap
