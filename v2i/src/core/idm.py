@@ -82,6 +82,14 @@ class idm:
     
     def updateLaneMap(self, speed, pos, laneMap, acc, planAct):
         for i in range(laneMap.shape[0]):
+            if laneMap[i]['agent'] == 1:
+                if planAct == "acc":
+                    laneMap[i]['acc'] = IDM_CONSTS['MAX_ACC']
+                elif planAct == "dec":
+                    laneMap[i]['acc'] = -IDM_CONSTS['DECELERATION_RATE']
+                else:
+                    laneMap[i]['acc'] = 0.0
+            else:
                 laneMap[i]['pos'] = pos[i]
                 laneMap[i]['speed'] = speed[i]
                 laneMap[i]['acc'] = acc[i]

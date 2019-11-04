@@ -97,7 +97,6 @@ def getMaxSpeed(speed, deceleration, distance):
 
 def buildMaxSpeeds(extendedViewinMetres, localViewinMetres):
     extendedViewinMetres /= 2.0
-    extendedViewinMetres /= 2.0
     size = extendedViewinMetres/4.0
     possibleDist = [size, 2*size, 3*size , 4*size]
     possibleMaxSpeeds = []

@@ -98,8 +98,11 @@ class V2I(gym.Env):
 
         # Init possible max speed of vehicles
         self.maxSpeeds = buildMaxSpeeds(self.gridHandler.totalExtendedView, self.gridHandler.totalLocalView)
+        lastValue = self.maxSpeeds[-1]
+        self.maxSpeeds = []
+        self.maxSpeeds.append(lastValue)
 
-        # Lane Change Handler
+        # Lane Change Handle
         self.laneChangeHandler = mobil(self.simArgs.getValue('t-period'), self.idmHandler)
         
         # Initialize Traffic Lights
@@ -247,8 +250,7 @@ class V2I(gym.Env):
                 self.num_cars[lane] = 0
         
         self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity, self.num_cars)
-        #print("Before Else : ")
-        #print(self.lane_map)
+        
         ''' 
         Randomly Choose Agent Lane and Agent Car ID
         '''
@@ -313,11 +315,13 @@ class V2I(gym.Env):
         agentSpeed = tmpLaneMap[agentLane][agentIDX]['speed']
         #print(bum2bumDist)
         
+        '''
         if agentSpeed > self.tfSpeedLimit:
             return -1
         if bum2bumDist < (constants.CAR_LENGTH + 1) and len(tmpLaneMap[agentLane]) > 1:
             return -1
-        elif planAct == "lane-change":
+        '''
+        if planAct == "lane-change":
             return (tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue('max-speed'))
         else:
             return tmpLaneMap[agentLane][agentIDX]['speed'] / self.simArgs.getValue("max-speed") + 0.1
@@ -345,10 +349,11 @@ class V2I(gym.Env):
         
         self.num_steps += 1
 
+        '''
         # Randomize vehicles max Speed
         if self.num_steps % 100 == 0:
             self.lane_map = randomizeSpeeds(self.lane_map, self.maxSpeeds)
-            
+        ''' 
         
         # Check for turing tf to green or red
         '''
@@ -374,7 +379,6 @@ class V2I(gym.Env):
         self.planAct = planAct
         self.queryAct = queryAct
         
-        '''
         # Perform the required planing action
         egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(planAct, self.lane_map, self.agent_lane)
         
@@ -391,7 +395,7 @@ class V2I(gym.Env):
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
-        '''
+        
 
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
@@ -408,10 +412,6 @@ class V2I(gym.Env):
 
         # Get follower and front vehicle in other lane
         followerList, frontList, self.lane_map = self.laneChangeHandler.step(self.lane_map, idmAccs)
-        
-        self.idmHandler.step(self.lane_map, planAct)
-        
-        #followerList, frontList = self.laneChangeHandler.findFrontandBack(self.lane_map)
         assert len(followerList) == len(frontList)
         agentID = getAgentID(self.lane_map, self.agent_lane)
         
@@ -436,7 +436,6 @@ class V2I(gym.Env):
         if self.gridHandler.isCommEnabled:
             reward = self.commPenalty(reward, queryAct)
         
-        collision = False
         if collision:
             reward = -1 * self.simArgs.getValue("collision-penalty")
         

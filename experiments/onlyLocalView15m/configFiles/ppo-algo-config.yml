@@ -1,6 +1,10 @@
 # To set value to None for a parameter. Leave it blank
 
 EXP_NAME:
+  # ---- Stopping Condition ----#
+  stop:
+    training_iteration: 500 
+  # ---- Stopping Condition ----# 
   # ---- Checkpoint Frequency ---- #
   checkpoint_freq: 100
   # ---- Checkpoint Frequency ---- #
@@ -88,7 +92,9 @@ EXP_NAME:
     # Set number of workers to spawn
     num_workers: 10
     # Set number of gpus to use
-    num_gpus : 1
+    num_gpus : 0
+    # Number of envs per worker
+    num_envs_per_worker: 3
     # ---- Compute Resources ---- #
     
     

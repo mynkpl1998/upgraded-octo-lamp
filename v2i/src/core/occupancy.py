@@ -12,6 +12,7 @@ class Grid:
         self.totalLocalView = localView # in metre
         self.cellSize = cellSize # in metre
         self.totalExtendedView = extendedView
+
         self.maxSpeed = maxSpeed
         self.regWidthInMetres = regionWidth
         self.k = k

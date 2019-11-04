@@ -8,7 +8,7 @@ import random
 np.random.seed(10)
 random.seed(10)
 
-path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/onlyLocalView30m/configFiles/sim-config.yml"
+path = "experiments/onlyLocalView15m/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 #print(obj.observation_space.low)
@@ -20,6 +20,7 @@ densities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
 maxSteps = 1200
 
+'''
 simDensities = [0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
 fig, ax = plt.subplots(nrows=2, ncols=3)
 finalSpeedList = []
@@ -67,14 +68,14 @@ for episode in range(0, 1):
     for i in range(0, 2):
         episodeDensity.append(random.choice(densities))
     print("Episode Density : ", episodeDensity)
-    state = obj.reset([0.3, 0.5]) 
+    state = obj.reset([0.4, 0.4]) 
     #print(state.shape)
     count = 0
     #time.sleep(0.5)
     
     for i in range(0, maxSteps):
         act = 2
-        state, reward, done, info = obj.step(act)
+        state, reward, done, info = obj.step(0)
         #print(obj.idmHandler.getAllElementbyKeys('speed', obj.lane_map[0]))
         #time.sleep(100)
         #break
@@ -82,4 +83,3 @@ for episode in range(0, 1):
         if done:
             print("Collision")
             break
-'''
