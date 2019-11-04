@@ -6,7 +6,7 @@ EXP_NAME:
     training_iteration: 500 
   # ---- Stopping Condition ----# 
   # ---- Checkpoint Frequency ---- #
-  checkpoint_freq: 100
+  checkpoint_freq: 99
   # ---- Checkpoint Frequency ---- #
   config:
 
