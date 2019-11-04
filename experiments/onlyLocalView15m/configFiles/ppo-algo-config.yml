@@ -28,7 +28,7 @@ EXP_NAME:
     # Whether to rollout "complete_episodes" or "truncate_episodes"
     batch_mode: "truncate_episodes"
     # Forget Factor
-    gamma: 0.99
+    gamma: 0.91
     # ---- PPO Configs ---- #
 
 
@@ -92,7 +92,7 @@ EXP_NAME:
     # Set number of workers to spawn
     num_workers: 10
     # Set number of gpus to use
-    num_gpus : 0
+    num_gpus : 1
     # Number of envs per worker
     num_envs_per_worker: 3
     # ---- Compute Resources ---- #
