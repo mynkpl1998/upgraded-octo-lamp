@@ -8,7 +8,7 @@ import random
 np.random.seed(10)
 random.seed(10)
 
-path = "experiments/onlyLocalView15m/configFiles/sim-config.yml"
+path = "experiments/fullCommLV15mComm15m/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 #print(obj.observation_space.low)
@@ -75,7 +75,7 @@ for episode in range(0, 1):
     
     for i in range(0, maxSteps):
         act = 2
-        state, reward, done, info = obj.step(0)
+        state, reward, done, info = obj.step(8)
         #print(obj.idmHandler.getAllElementbyKeys('speed', obj.lane_map[0]))
         #time.sleep(100)
         #break
