@@ -98,9 +98,6 @@ class V2I(gym.Env):
 
         # Init possible max speed of vehicles
         self.maxSpeeds = buildMaxSpeeds(self.gridHandler.totalExtendedView, self.gridHandler.totalLocalView)
-        lastValue = self.maxSpeeds[-1]
-        self.maxSpeeds = []
-        self.maxSpeeds.append(lastValue)
 
         # Lane Change Handle
         self.laneChangeHandler = mobil(self.simArgs.getValue('t-period'), self.idmHandler)
@@ -356,12 +353,10 @@ class V2I(gym.Env):
         
         self.num_steps += 1
 
-        '''
         # Randomize vehicles max Speed
         if self.num_steps % 100 == 0:
-            self.lane_map = randomizeSpeeds(self.lane_map, self.maxSpeeds)
-        ''' 
-        
+            self.lane_map = randomizeSpeeds(self.lane_map, self.maxSpeeds) 
+
         # Check for turing tf to green or red
         '''
         if self.simArgs.getValue("enable-tf"):
@@ -403,7 +398,6 @@ class V2I(gym.Env):
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
         
-
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
             for lane in range(0, constants.LANES):
@@ -443,6 +437,7 @@ class V2I(gym.Env):
         if self.gridHandler.isCommEnabled:
             reward = self.commPenalty(reward, queryAct)
         
+        collision = False
         if collision:
             reward = -1 * self.simArgs.getValue("collision-penalty")
         

@@ -80,6 +80,14 @@ class idm:
     def newPos(self, oldPos, angleDiff):
         return (oldPos + angleDiff)% 360
     
+    '''
+    def updateLaneMap(self, speed, pos, laneMap, acc, planAct):
+        for i in range(laneMap.shape[0]):
+                laneMap[i]['pos'] = pos[i]
+                laneMap[i]['speed'] = speed[i]
+                laneMap[i]['acc'] = acc[i]
+    '''
+    
     def updateLaneMap(self, speed, pos, laneMap, acc, planAct):
         for i in range(laneMap.shape[0]):
             if laneMap[i]['agent'] == 1:

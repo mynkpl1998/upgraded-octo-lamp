@@ -59,8 +59,8 @@ TF_CONSTS = {
 
 # MOBIL model constants
 MOBIL_CONST = {
-    'POLITENESS': 0.5,
+    'POLITENESS': 0.2,
     'B_SAFE' : -4,
     'GAIN': 0.2,
-    'RANDOMIZE_PROB': 0.5
+    'RANDOMIZE_PROB': 1.0
 }

@@ -18,7 +18,7 @@ config:
   # UI settings
   render: true
   render_car_details: false
-  fps: 20
+  fps: 60
 
   # Frame Skip
   frame-skip-value: 1

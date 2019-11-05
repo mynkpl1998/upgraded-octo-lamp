@@ -110,5 +110,5 @@ def randomizeSpeeds(laneMap, maxSpeeds):
             randomSpeedIndex = np.random.randint(0, len(maxSpeeds))
             randomMaxSpeed = maxSpeeds[randomSpeedIndex]
             car['speed'] = randomMaxSpeed
-    print("Switched")
+    #print("Switched")
     return laneMap
