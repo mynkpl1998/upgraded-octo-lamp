@@ -28,5 +28,8 @@ DEFAULT_DICT = {
 
     # Memory Configuration
     'enable-lstm': False,
-    'k-frames': 3
+    'k-frames': 3,
+
+    # Density Config
+    'density': None
 }

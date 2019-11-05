@@ -120,6 +120,9 @@ class V2I(gym.Env):
         # Init Gym Env Properties
         self.initGymProp(self.gridHandler)
 
+        # Init episode densities from config files
+        self.epiosdeDensity = self.simArgs.getValue('density')
+
         # Initialze Observation Wrapper if lstm is disabled
         self.obsWrapper = obsWrapper(self.simArgs.getValue('k-frames'), int(self.gridHandler.observation_space.shape[0]/self.simArgs.getValue("k-frames")))
 
@@ -227,6 +230,10 @@ class V2I(gym.Env):
             if density[1] not in self.densities:
                 raiseValueError("invalid density for lane 1 -> %f"%(density[1]))
             epsiodeDensity = density
+        
+        if self.epiosdeDensity != None:
+            epsiodeDensity[0] = self.epiosdeDensity[0]
+            epsiodeDensity[1] = self.epiosdeDensity[1]
         # ---- Density Generation ----#
         
         # ---- Init variables ----#
