@@ -19,7 +19,7 @@ print(obj.action_map)
 densities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
 maxSteps = 1200
-
+'''
 simDensities = [0.4]
 fig, ax = plt.subplots(nrows=2, ncols=3)
 finalSpeedList = []
@@ -58,9 +58,8 @@ for i, r in enumerate(ax):
         c.set_title('Traffic Density : %.1f'%(simDensities[index]))
 
 plt.show()
-
-
 '''
+
 for episode in range(0, 1):
     #print("Starting episode : %d"%(i+1))
     episodeDensity = []
@@ -80,6 +79,5 @@ for episode in range(0, 1):
         #break
         #print(state.shape)
         if done:
-            print("Collision")
-            break
-'''
+            #print("Collision")
+            #break
