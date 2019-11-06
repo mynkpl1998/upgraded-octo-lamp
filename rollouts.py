@@ -1,3 +1,4 @@
+import time
 import random
 import argparse
 import numpy as np
@@ -82,6 +83,7 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
             dataDict["data"][densityStr][episode]["EgoMaxSpeed"] = -10
             dataDict['data'][densityStr][episode]['agentCarID'] = None
             
+            time.sleep(20)
             prev_state = env.reset(density)
             agentIDX = getAgentID(env.lane_map, env.agent_lane)
 
