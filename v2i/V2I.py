@@ -443,6 +443,7 @@ class V2I(gym.Env):
         if self.gridHandler.isCommEnabled:
             reward = self.commPenalty(reward, queryAct)
         
+        #collision = False
         if collision:
             reward = -1 * self.simArgs.getValue("collision-penalty")
         

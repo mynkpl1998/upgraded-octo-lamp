@@ -75,13 +75,25 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
         for episode in tqdm(range(0, args.num_episodes)):
 
             dataDict["data"][densityStr][episode] = {}
-            dataDict["data"][densityStr][episode]["speed"] = []
+            dataDict["data"][densityStr][episode]["speed"] = {}
             dataDict["data"][densityStr][episode]["rewards"] = []
             dataDict["data"][densityStr][episode]["actions"] = []
             dataDict["data"][densityStr][episode]["bum2bumdist"] = []
             dataDict["data"][densityStr][episode]["EgoMaxSpeed"] = -10
+            dataDict['data'][densityStr][episode]['agentCarID'] = None
             
             prev_state = env.reset(density)
+            agentIDX = getAgentID(env.lane_map, env.agent_lane)
+
+            dataDict['data'][densityStr][episode]['agentCarID'] = env.lane_map[env.agent_lane][agentIDX]['id']
+            
+            for lane in range(0, 2):
+                for car in env.lane_map[lane]:
+                    carId = car['id']
+                    carSpeed = car['speed']
+                    dataDict["data"][densityStr][episode]['speed'][carId] = []
+                    dataDict["data"][densityStr][episode]['speed'][carId].append(carSpeed)
+            
             # Init variables
             if useLstm:
                 lstm_state = [np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"]), np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"])]
@@ -119,7 +131,13 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                 bum2bumdist = getBum2BumDist(localLaneMap, env.agent_lane, agentIDX)
                 #--- Saving data ----#
                 agentIDX = getAgentID(env.lane_map, env.agent_lane)
-                dataDict["data"][densityStr][episode]["speed"].append(env.lane_map[env.agent_lane][agentIDX]['speed'])
+                for lane in range(0, 2):
+                    for car in env.lane_map[lane]:
+                        carID = car['id']
+                        carSpeed = car['speed']
+                        dataDict['data'][densityStr][episode]['speed'][carID].append(carSpeed)
+                    
+                #dataDict["data"][densityStr][episode]["speed"].append(env.lane_map[env.agent_lane][agentIDX]['speed'])
                 dataDict["data"][densityStr][episode]["rewards"].append(reward)
                 dataDict["data"][densityStr][episode]["actions"].append((env.planAct, env.queryAct))
                 dataDict["data"][densityStr][episode]["EgoMaxSpeed"] = max(dataDict["data"][densityStr][episode]["EgoMaxSpeed"], env.lane_map[env.agent_lane][agentIDX]['speed'])

@@ -16,7 +16,7 @@ config:
   nocomm-incentive: 0.0
 
   # UI settings
-  render: true
+  render: false
   render_car_details: false
   fps: 20
 
