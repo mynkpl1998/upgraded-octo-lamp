@@ -3,7 +3,7 @@
 EXP_NAME:
   # ---- Stopping Condition ----#
   stop:
-    training_iteration: 500 
+    training_iteration: 1000
   # ---- Stopping Condition ----# 
   # ---- Checkpoint Frequency ---- #
   checkpoint_freq: 99
