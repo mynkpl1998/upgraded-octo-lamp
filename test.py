@@ -9,7 +9,7 @@ import random
 np.random.seed(10)
 random.seed(10)
 
-path = "experiments/onlyLocalView15m/configFiles/sim-config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/fullCommLV15mComm25m/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 #print(obj.observation_space.low)
@@ -67,7 +67,7 @@ for i, r in enumerate(ax):
 plt.show()
 
 '''
-time.sleep(20)
+#time.sleep(20)
 for episode in range(0, 1):
     #print("Starting episode : %d"%(i+1))
     episodeDensity = []
@@ -75,6 +75,7 @@ for episode in range(0, 1):
         episodeDensity.append(random.choice(densities))
     print("Episode Density : ", episodeDensity)
     state = obj.reset() 
+    time.sleep(100)
     #print(state.shape)
     count = 0
     #time.sleep(0.5)
