@@ -21,7 +21,7 @@ densities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
 maxSteps = 1200
 
-
+'''
 simDensities = [0.4]
 fig, ax = plt.subplots(nrows=2, ncols=3)
 finalSpeedList = []
@@ -67,6 +67,7 @@ for i, r in enumerate(ax):
 plt.show()
 
 '''
+time.sleep(20)
 for episode in range(0, 1):
     #print("Starting episode : %d"%(i+1))
     episodeDensity = []
@@ -80,7 +81,7 @@ for episode in range(0, 1):
     
     for i in range(0, maxSteps):
         act = 2
-        state, reward, done, info = obj.step(8)
+        state, reward, done, info = obj.step(0)
         #print(obj.idmHandler.getAllElementbyKeys('speed', obj.lane_map[0]))
         #time.sleep(100)
         #break
@@ -88,4 +89,3 @@ for episode in range(0, 1):
         if done:
             print("Collision")
             break
-'''

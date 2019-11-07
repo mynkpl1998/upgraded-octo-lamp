@@ -83,7 +83,6 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
             dataDict["data"][densityStr][episode]["EgoMaxSpeed"] = -10
             dataDict['data'][densityStr][episode]['agentCarID'] = None
             
-            time.sleep(20)
             prev_state = env.reset(density)
             agentIDX = getAgentID(env.lane_map, env.agent_lane)
 
@@ -185,6 +184,7 @@ def paramDict(args):
 
 if __name__ == "__main__":
     
+
     # Parse arguments
     args = parser.parse_args()
 
@@ -220,6 +220,7 @@ if __name__ == "__main__":
         useLstm = True
 
     # Start rolling out :)...
+    time.sleep(7)
     simData = run_rollouts(args, env, fig, ax1, ax2, useLstm)
 
     # Dump Data to file
