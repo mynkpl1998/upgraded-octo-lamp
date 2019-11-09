@@ -319,8 +319,10 @@ class V2I(gym.Env):
         agentSpeed = tmpLaneMap[agentLane][agentIDX]['speed']
         #print(bum2bumDist)
         #print(self.tfSpeedLimit)
+        '''
         if agentSpeed > self.tfSpeedLimit:
             return -1
+        '''
         if bum2bumDist < (constants.CAR_LENGTH + 1) and len(tmpLaneMap[agentLane]) > 1:
             return -1
         if planAct == "lane-change":
