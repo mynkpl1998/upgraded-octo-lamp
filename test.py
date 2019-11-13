@@ -74,7 +74,7 @@ for episode in range(0, 1):
     for i in range(0, 2):
         episodeDensity.append(random.choice(densities))
     print("Episode Density : ", episodeDensity)
-    state = obj.reset() 
+    state = obj.reset()
     time.sleep(100)
     #print(state.shape)
     count = 0

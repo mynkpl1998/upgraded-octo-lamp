@@ -126,6 +126,12 @@ class idm:
             newSpeedLane0[newSpeedLane0 < 0] = 0.0
             distInPixelsLane0 = distLane0 * SCALE
             distInDegLane0 = self.vecArc2Angle(LANE_RADIUS[0], distInPixelsLane0)
+
+            for idx, car in enumerate(laneMap[0]):
+                if car['agent'] == 1:
+                    distInDegLane0[idx] = 0.0
+            
+            carIDsLane0 = self.getAllElementbyKeys('id', laneMap[0])
             newPosLane0 = self.vecNewPos(oldPosLane0, distInDegLane0)
             self.updateLaneMap(newSpeedLane0, newPosLane0, laneMap[0], accLane0, planAct)
 
@@ -148,6 +154,14 @@ class idm:
             # --- Check for invalid distance and new Speed --- #
             distInPixelsLane1 = distLane1 * SCALE
             distInDegLane1 = self.vecArc2Angle(LANE_RADIUS[1], distInPixelsLane1)
+
+            for idx, car in enumerate(laneMap[1]):
+                if car['agent'] == 1:
+                    distInDegLane1[idx] = 0.0
+            
+            carIDsLane1 = self.getAllElementbyKeys('id', laneMap[1])
             newPosLane1 = self.vecNewPos(oldPosLane1, distInDegLane1)
             self.updateLaneMap(newSpeedLane1, newPosLane1, laneMap[1], accLane1, planAct)
+        
+        return (carIDsLane0.copy(), carIDsLane1.copy(), distInDegLane0.copy(), distInDegLane1.copy())
         
