@@ -257,6 +257,9 @@ class V2I(gym.Env):
                 self.num_cars[lane] = 0
         
         self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity, self.num_cars)
+        
+        '''
+        # Data Collection part
         self.agentPos = 0.0
         self.carPos = {}
         
@@ -268,7 +271,7 @@ class V2I(gym.Env):
                     self.carPos[carID] = carPos
                 self.carPos[carID] = carPos
                 #self.carPos[carID].append(carPos)
-        
+        '''
         ''' 
         Randomly Choose Agent Lane and Agent Car ID
         '''
@@ -390,13 +393,13 @@ class V2I(gym.Env):
                 if self.num_steps in self.tfTogglePts[lane]:
                     self.isLightRed[lane] = self.tfHandler.toggle(self.isLightRed, lane)
         
-
         # Decodes Action -> Plan Action, Query Action
         planAct, queryAct = self.actionEncoderDecoderHandler.decodeAction(action)
         
         self.planAct = planAct
         self.queryAct = queryAct
 
+        
         # Perform the required planing action
         egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(planAct, self.lane_map, self.agent_lane)
         
@@ -408,17 +411,22 @@ class V2I(gym.Env):
             self.lane_map[laneToChange] = np.append(egoVehicleProp, self.lane_map[laneToChange])
             self.agent_lane = laneToChange
             egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction("do-nothing", self.lane_map, self.agent_lane)
+        
 
+        '''
+        # Data collection part
         #self.agentPos += egodistTravelledInDeg
         agentIDX = getAgentID(self.lane_map, self.agent_lane)
         agentCarID = self.lane_map[self.agent_lane][agentIDX]['id']
         self.carPos[agentCarID] += egodistTravelledInDeg
         #print(self.agentPos)
-
+        '''
+        
         # Update Agent Location and Speed
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
+        
 
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
@@ -426,7 +434,11 @@ class V2I(gym.Env):
                 if self.isLightRed[lane]:
                     self.lane_map = self.tfHandler.addDummytfVehicle(self.lane_map, lane)
         
+        
         carIDslane0, carIdslane1, difflane0, difflane1 = self.idmHandler.step(self.lane_map, planAct)
+        
+        '''
+        # Data collection part
         for idx, carID in enumerate(carIDslane0):
             self.carPos[carID] += difflane0[idx]
         for idx, carID in enumerate(carIdslane1):
@@ -454,7 +466,8 @@ class V2I(gym.Env):
         self.front_diff -= constants.CAR_LENGTH
         self.back_diff = (np.deg2rad(backDiff) * constants.LANE_RADIUS[self.agent_lane]) * (1.0/constants.SCALE)
         self.back_diff -= constants.CAR_LENGTH
-                
+        '''
+        
         # IDM Acc without lane changes
         tmpLaneMap0 = self.lane_map.copy()
         self.idmHandler.step(tmpLaneMap0, planAct)

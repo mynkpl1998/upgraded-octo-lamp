@@ -38,7 +38,7 @@ LANE_BOUNDARIES = [[248, 218], [216, 186]]
 # Intelligent Driver Model constants
 IDM_CONSTS = {
     'MAX_ACC': 0.73,
-    'HEADWAY_TIME': 1.5,
+    'HEADWAY_TIME': 0.0,
     'DECELERATION_RATE': 1.67,
     'MIN_SPACING': 2,
     'DELTA': 4 

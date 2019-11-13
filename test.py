@@ -9,7 +9,7 @@ import random
 np.random.seed(10)
 random.seed(10)
 
-path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/fullCommLV15mComm25m/configFiles/sim-config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/onlyLocalView15m/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 #print(obj.observation_space.low)
@@ -50,9 +50,8 @@ for density in simDensities:
                     speedDict[episode][carID].append(car['speed'])
     finalSpeedList.append(speedDict)
 
-savePath = "/home/mayank/ray_results/homogeneous-only-local-view-15m/PPO_v2i-v0_0_2019-11-05_12-18-55grg60_zo/idmData.pkl"
+savePath = "/home/mayank/ray_results/homogeneous-no-reaction-time-only-local-view-15m/idmData.pkl"
 savePKL(finalSpeedList, savePath)
-
 
 for i, r in enumerate(ax):
     for j, c in enumerate(r):
@@ -75,7 +74,7 @@ for episode in range(0, 1):
         episodeDensity.append(random.choice(densities))
     print("Episode Density : ", episodeDensity)
     state = obj.reset()
-    time.sleep(100)
+    #time.sleep(100)
     #print(state.shape)
     count = 0
     #time.sleep(0.5)
