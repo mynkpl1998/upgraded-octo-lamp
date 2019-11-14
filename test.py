@@ -21,8 +21,8 @@ densities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
 maxSteps = 1200
 
-'''
-simDensities = [0.4]
+
+simDensities = [0.5]
 fig, ax = plt.subplots(nrows=2, ncols=3)
 finalSpeedList = []
 
@@ -52,7 +52,7 @@ for density in simDensities:
 
 savePath = "/home/mayank/ray_results/homogeneous-no-reaction-time-only-local-view-15m/idmData.pkl"
 savePKL(finalSpeedList, savePath)
-
+'''
 for i, r in enumerate(ax):
     for j, c in enumerate(r):
         index = 0
@@ -65,7 +65,7 @@ for i, r in enumerate(ax):
 
 plt.show()
 
-'''
+
 #time.sleep(20)
 for episode in range(0, 1):
     #print("Starting episode : %d"%(i+1))
@@ -89,3 +89,4 @@ for episode in range(0, 1):
         if done:
             print("Collision")
             break
+'''

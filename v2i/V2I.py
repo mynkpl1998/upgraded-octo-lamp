@@ -395,11 +395,11 @@ class V2I(gym.Env):
         
         # Decodes Action -> Plan Action, Query Action
         planAct, queryAct = self.actionEncoderDecoderHandler.decodeAction(action)
-        
+
+        '''        
         self.planAct = planAct
         self.queryAct = queryAct
 
-        
         # Perform the required planing action
         egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(planAct, self.lane_map, self.agent_lane)
         
@@ -412,7 +412,7 @@ class V2I(gym.Env):
             self.agent_lane = laneToChange
             egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction("do-nothing", self.lane_map, self.agent_lane)
         
-
+        '''
         '''
         # Data collection part
         #self.agentPos += egodistTravelledInDeg
@@ -421,12 +421,12 @@ class V2I(gym.Env):
         self.carPos[agentCarID] += egodistTravelledInDeg
         #print(self.agentPos)
         '''
-        
+        '''
         # Update Agent Location and Speed
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
-        
+        '''
 
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
@@ -467,7 +467,7 @@ class V2I(gym.Env):
         self.back_diff = (np.deg2rad(backDiff) * constants.LANE_RADIUS[self.agent_lane]) * (1.0/constants.SCALE)
         self.back_diff -= constants.CAR_LENGTH
         '''
-        
+        '''
         # IDM Acc without lane changes
         tmpLaneMap0 = self.lane_map.copy()
         self.idmHandler.step(tmpLaneMap0, planAct)
@@ -477,8 +477,8 @@ class V2I(gym.Env):
         followerList, frontList, self.lane_map = self.laneChangeHandler.step(self.lane_map, idmAccs)
         assert len(followerList) == len(frontList)
         agentID = getAgentID(self.lane_map, self.agent_lane)
-        
-        #followerList, frontList = {}, {}
+        '''
+        followerList, frontList = {}, {}
 
         # Remove Dummy Vehicle if added
         if self.simArgs.getValue("enable-tf"):
@@ -499,7 +499,7 @@ class V2I(gym.Env):
         if self.gridHandler.isCommEnabled:
             reward = self.commPenalty(reward, queryAct)
         
-        #collision = False
+        collision = False
         if collision:
             reward = -1 * self.simArgs.getValue("collision-penalty")
         
