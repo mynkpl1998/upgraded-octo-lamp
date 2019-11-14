@@ -80,6 +80,7 @@ class idm:
     def newPos(self, oldPos, angleDiff):
         return (oldPos + angleDiff)% 360
     
+    '''
     def updateLaneMap(self, speed, pos, laneMap, acc, planAct):
         for i in range(laneMap.shape[0]):
             laneMap[i]['pos'] = pos[i]
@@ -100,7 +101,6 @@ class idm:
                 laneMap[i]['pos'] = pos[i]
                 laneMap[i]['speed'] = speed[i]
                 laneMap[i]['acc'] = acc[i]
-    '''
 
     def sortLaneMap(self, laneMap):
         for lane in range(0, LANES):
@@ -128,12 +128,10 @@ class idm:
             distInPixelsLane0 = distLane0 * SCALE
             distInDegLane0 = self.vecArc2Angle(LANE_RADIUS[0], distInPixelsLane0)
 
-            '''
             for idx, car in enumerate(laneMap[0]):
                 if car['agent'] == 1:
                     distInDegLane0[idx] = 0.0
-            '''
-            
+
             carIDsLane0 = self.getAllElementbyKeys('id', laneMap[0])
             newPosLane0 = self.vecNewPos(oldPosLane0, distInDegLane0)
             self.updateLaneMap(newSpeedLane0, newPosLane0, laneMap[0], accLane0, planAct)
@@ -158,11 +156,9 @@ class idm:
             distInPixelsLane1 = distLane1 * SCALE
             distInDegLane1 = self.vecArc2Angle(LANE_RADIUS[1], distInPixelsLane1)
 
-            '''
             for idx, car in enumerate(laneMap[1]):
                 if car['agent'] == 1:
                     distInDegLane1[idx] = 0.0
-            '''
 
             carIDsLane1 = self.getAllElementbyKeys('id', laneMap[1])
             newPosLane1 = self.vecNewPos(oldPosLane1, distInDegLane1)
