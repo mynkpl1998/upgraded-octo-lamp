@@ -90,7 +90,7 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
             prev_state = env.reset(density)
             agentIDX = getAgentID(env.lane_map, env.agent_lane)
 
-            '''
+            
             dataDict['data'][densityStr][episode]['agentCarID'] = env.lane_map[env.agent_lane][agentIDX]['id']
             dataDict['data'][densityStr][episode]['Pos'].append(env.carPos.copy())
             for lane in range(0, 2):
@@ -102,7 +102,7 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                     #dataDict["data"][densityStr][episode]['pos'][carId] = []
                     dataDict["data"][densityStr][episode]['speed'][carId].append(carSpeed)
                     #dataDict["data"][densityStr][episode]['pos'][carId].append(carPos)
-            '''
+            
 
             # Init variables
             if useLstm:
@@ -140,7 +140,7 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                 # Calculate bumber to bumber distance
                 bum2bumdist = getBum2BumDist(localLaneMap, env.agent_lane, agentIDX)
                 #--- Saving data ----#
-                '''
+                
                 agentIDX = getAgentID(env.lane_map, env.agent_lane)
                 for lane in range(0, 2):
                     for car in env.lane_map[lane]:
@@ -150,9 +150,9 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                         dataDict['data'][densityStr][episode]['speed'][carID].append(carSpeed)
                         #dataDict['data'][densityStr][episode]['pos'][carID].append(carPos)
                 dataDict['data'][densityStr][episode]['Pos'].append(env.carPos.copy())
-                #dataDict['data'][densityStr][episode]['frontDiff'].append(env.front_diff)
-                #dataDict['data'][densityStr][episode]['backDiff'].append(env.back_diff)
-                '''
+                dataDict['data'][densityStr][episode]['frontDiff'].append(env.front_diff)
+                dataDict['data'][densityStr][episode]['backDiff'].append(env.back_diff)
+                
                  
                 #dataDict["data"][densityStr][episode]["speed"].append(env.lane_map[env.agent_lane][agentIDX]['speed'])
                 dataDict["data"][densityStr][episode]["rewards"].append(reward)
@@ -236,7 +236,7 @@ if __name__ == "__main__":
         useLstm = True
 
     # Start rolling out :)...
-    #time.sleep(7)
+    time.sleep(7)
     simData = run_rollouts(args, env, fig, ax1, ax2, useLstm)
 
     # Dump Data to file

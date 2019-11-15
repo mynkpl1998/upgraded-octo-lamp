@@ -334,6 +334,6 @@ class Grid:
                         indexs = self.commIndexMap[self.commMap[key]]
                         for index in indexs:
                             occGrid[:, index] = OCCGRID_CONSTS['UNKNOWN']
-                            velGrid[:, index] = 0
+                            velGrid[:, index] = 0.0
         
         return occGrid, velGrid

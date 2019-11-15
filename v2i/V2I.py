@@ -304,6 +304,7 @@ class V2I(gym.Env):
             else:
                 self.tfTogglePts = [[], []]
 
+        
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
             if self.simArgs.getValue("enable-tf"):
@@ -389,6 +390,7 @@ class V2I(gym.Env):
                 for lane in range(0, constants.LANES):
                     self.isLightRed[lane] = False
         '''
+
         if self.simArgs.getValue("enable-tf"):
             for lane in range(0, constants.LANES):
                 if self.num_steps in self.tfTogglePts[lane]:
@@ -412,7 +414,7 @@ class V2I(gym.Env):
             self.agent_lane = laneToChange
             egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction("do-nothing", self.lane_map, self.agent_lane)
 
-        '''
+        '''        
         # Data collection part
         #self.agentPos += egodistTravelledInDeg
         agentIDX = getAgentID(self.lane_map, self.agent_lane)
@@ -434,6 +436,13 @@ class V2I(gym.Env):
         
         
         carIDslane0, carIdslane1, difflane0, difflane1 = self.idmHandler.step(self.lane_map, planAct)
+        
+        # Remove Dummy Vehicle if added
+        if self.simArgs.getValue("enable-tf"):
+            for lane in range(0, constants.LANES):
+                if self.isLightRed[lane]:
+                    tfIDX = getTfID(self.lane_map, lane)
+                    self.lane_map[lane] = np.delete(self.lane_map[lane], tfIDX)
         
         '''
         # Data collection part
@@ -478,17 +487,11 @@ class V2I(gym.Env):
         
         #followerList, frontList = {}, {}
 
-        # Remove Dummy Vehicle if added
-        if self.simArgs.getValue("enable-tf"):
-            for lane in range(0, constants.LANES):
-                if self.isLightRed[lane]:
-                    tfIDX = getTfID(self.lane_map, lane)
-                    self.lane_map[lane] = np.delete(self.lane_map[lane], tfIDX)
-
         self.time_elapsed += self.simArgs.getValue("t-period")
 
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, queryAct)
+        #print(velGrid)
         #---- Get Occupancy & Velocity Grids ----#
 
         #---- Calculate Reward ----#

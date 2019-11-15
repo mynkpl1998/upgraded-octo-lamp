@@ -24,7 +24,7 @@ config:
   frame-skip-value: 1
 
   # Enable Traffic Lights
-  enable-tf: false
+  enable-tf: true
 
   # Episode density:
   density: [0.4, 0.4]
