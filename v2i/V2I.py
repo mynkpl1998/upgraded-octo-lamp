@@ -265,7 +265,10 @@ class V2I(gym.Env):
         
         self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity, self.num_cars)
         self.tfLoc = np.random.uniform(0, 350, size=2)
-        self.tfHandler.reset(self.tfLoc)
+        if self.simArgs.getValue('tf-points') is not None:
+            self.tfHandler.reset(np.array(self.simArgs.getValue('tf-points')))
+        else:
+            self.tfHandler.reset(self.tfLoc)
         
         # Data Collection part
         self.agentPos = 0.0
@@ -406,7 +409,7 @@ class V2I(gym.Env):
         # Decodes Action -> Plan Action, Query Action
         planAct, queryAct = self.actionEncoderDecoderHandler.decodeAction(action)
 
-        '''
+        
         self.planAct = planAct
         self.queryAct = queryAct
 
@@ -433,7 +436,7 @@ class V2I(gym.Env):
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
-        '''
+        
 
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):

@@ -142,8 +142,7 @@ class tfController:
 			raiseValueError("time-period doesn't match")
 	
 	def sample(self):
-		sampleTrajecs = list(np.random.randint(0, self.tfTrajecDict["numTrajecs"], size=1))
-		sampleTrajecs.append(sampleTrajecs[0])
+		sampleTrajecs = list(np.random.randint(0, self.tfTrajecDict["numTrajecs"], size=2))
 		trajecs = []
 		for tid in sampleTrajecs:
 			trajecs.append(self.tfTrajecDict["data"][tid])

@@ -54,7 +54,7 @@ OCCGRID_CONSTS = {
 
 # Traffic Light Constants
 TF_CONSTS = {
-    'EPISODE_TF_GEN_PROB': 0.7
+    'EPISODE_TF_GEN_PROB': 1.0
 }
 
 # MOBIL model constants

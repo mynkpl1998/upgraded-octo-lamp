@@ -6,8 +6,8 @@ config:
 
   # IDM settings
   max-speed: 20.0 # in m/s
-  local-view: 15 # in metres (one side)
-  extended-view: 15 # in metres (one side)
+  local-view: 10 # in metres (one side)
+  extended-view: 10 # in metres (one side)
   reg-size: 15 # in metres
   cell-size: 1 # in metres
 
@@ -32,6 +32,9 @@ config:
 
   enable-lstm: false
   k-frames: 1
+
+  # Tf Points:
+  tf-points:
 
 
   

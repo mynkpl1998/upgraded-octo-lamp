@@ -31,5 +31,7 @@ DEFAULT_DICT = {
     'k-frames': 3,
 
     # Density Config
-    'density': None
+    'density': None,
+
+    'tf-points': None
 }
