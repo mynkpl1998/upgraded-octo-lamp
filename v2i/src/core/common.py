@@ -107,8 +107,15 @@ def buildMaxSpeeds(extendedViewinMetres, localViewinMetres):
 def randomizeSpeeds(laneMap, maxSpeeds):
     for lane in range(0, LANES):
         for car in laneMap[lane]:
+            
+            if car['agent'] != 1:
+                randomSpeedIndex = np.random.randint(0, len(maxSpeeds))
+                randomMaxSpeed = maxSpeeds[randomSpeedIndex]
+                car['speed'] = randomMaxSpeed
+            '''
             randomSpeedIndex = np.random.randint(0, len(maxSpeeds))
             randomMaxSpeed = maxSpeeds[randomSpeedIndex]
             car['speed'] = randomMaxSpeed
-    print("Switched")
+            '''
+    #print("Switched")
     return laneMap

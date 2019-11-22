@@ -89,8 +89,7 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
             
             prev_state = env.reset(density)
             agentIDX = getAgentID(env.lane_map, env.agent_lane)
-
-            
+    
             dataDict['data'][densityStr][episode]['agentCarID'] = env.lane_map[env.agent_lane][agentIDX]['id']
             dataDict['data'][densityStr][episode]['Pos'].append(env.carPos.copy())
             for lane in range(0, 2):
@@ -103,7 +102,6 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                     dataDict["data"][densityStr][episode]['speed'][carId].append(carSpeed)
                     #dataDict["data"][densityStr][episode]['pos'][carId].append(carPos)
             
-
             # Init variables
             if useLstm:
                 lstm_state = [np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"]), np.zeros(algoConfig["EXP_NAME"]["config"]["model"]["lstm_cell_size"])]
@@ -160,7 +158,7 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                 dataDict["data"][densityStr][episode]["EgoMaxSpeed"] = max(dataDict["data"][densityStr][episode]["EgoMaxSpeed"], env.lane_map[env.agent_lane][agentIDX]['speed'])
                 dataDict["data"][densityStr][episode]['bum2bumdist'].append(bum2bumdist)
                 #--- Saving data ----#
-
+                
                 episodeReward += reward
                 prev_state = next_state
                 if done:
@@ -236,7 +234,7 @@ if __name__ == "__main__":
         useLstm = True
 
     # Start rolling out :)...
-    time.sleep(7)
+    #time.sleep(7)
     simData = run_rollouts(args, env, fig, ax1, ax2, useLstm)
 
     # Dump Data to file

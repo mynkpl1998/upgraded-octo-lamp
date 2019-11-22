@@ -62,6 +62,7 @@ class V2I(gym.Env):
             self.trajecDict[lane][0.0] = []
         
         self.densities = list(self.trajecDict[0].keys())
+        print(self.densities)
 
         # Fix issue2 for densities
         self.trainDensities = self.fixIssue2v2(constants.DENSITIES)
@@ -97,10 +98,15 @@ class V2I(gym.Env):
         self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), self.simArgs.getValue("k-frames"),2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
 
         # Init possible max speed of vehicles
-        self.maxSpeeds = buildMaxSpeeds(self.gridHandler.totalExtendedView, self.gridHandler.totalLocalView)
-        lastValue = self.maxSpeeds[-1]
+        #self.maxSpeeds = buildMaxSpeeds(self.gridHandler.totalExtendedView, self.gridHandler.totalLocalView)
+        #lastValue = self.maxSpeeds[-1]
+        self.maxSpeeds = [self.simArgs.getValue('max-speed')]
+        '''
         self.maxSpeeds = []
-        self.maxSpeeds.append(lastValue)
+        self.maxSpeeds.append(5.0)
+        self.maxSpeeds.append(15.0)
+        self.maxSpeeds.append(0.01)
+        '''
 
         # Lane Change Handle
         self.laneChangeHandler = mobil(self.simArgs.getValue('t-period'), self.idmHandler)
@@ -258,8 +264,9 @@ class V2I(gym.Env):
                 self.num_cars[lane] = 0
         
         self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity, self.num_cars)
+        self.tfLoc = np.random.uniform(0, 350, size=2)
+        self.tfHandler.reset(self.tfLoc)
         
-        '''
         # Data Collection part
         self.agentPos = 0.0
         self.carPos = {}
@@ -272,7 +279,7 @@ class V2I(gym.Env):
                     self.carPos[carID] = carPos
                 self.carPos[carID] = carPos
                 #self.carPos[carID].append(carPos)
-        '''
+        
         ''' 
         Randomly Choose Agent Lane and Agent Car ID
         '''
@@ -371,13 +378,13 @@ class V2I(gym.Env):
     def frame(self, action):
         
         self.num_steps += 1
-
+        
         '''
         # Randomize vehicles max Speed
-        if self.num_steps % 100 == 0:
+        if self.num_steps % 140 == 0:
             self.lane_map = randomizeSpeeds(self.lane_map, self.maxSpeeds)
-        ''' 
-        
+        '''
+
         # Check for turing tf to green or red
         '''
         if self.simArgs.getValue("enable-tf"):
@@ -398,7 +405,8 @@ class V2I(gym.Env):
         
         # Decodes Action -> Plan Action, Query Action
         planAct, queryAct = self.actionEncoderDecoderHandler.decodeAction(action)
-   
+
+        '''
         self.planAct = planAct
         self.queryAct = queryAct
 
@@ -413,21 +421,20 @@ class V2I(gym.Env):
             self.lane_map[laneToChange] = np.append(egoVehicleProp, self.lane_map[laneToChange])
             self.agent_lane = laneToChange
             egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction("do-nothing", self.lane_map, self.agent_lane)
-
-        '''        
+        
         # Data collection part
         #self.agentPos += egodistTravelledInDeg
         agentIDX = getAgentID(self.lane_map, self.agent_lane)
         agentCarID = self.lane_map[self.agent_lane][agentIDX]['id']
         self.carPos[agentCarID] += egodistTravelledInDeg
         #print(self.agentPos)
-        '''
-        
+
         # Update Agent Location and Speed
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
-        
+        '''
+
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
             for lane in range(0, constants.LANES):
@@ -443,6 +450,7 @@ class V2I(gym.Env):
                 if self.isLightRed[lane]:
                     tfIDX = getTfID(self.lane_map, lane)
                     self.lane_map[lane] = np.delete(self.lane_map[lane], tfIDX)
+        
         
         '''
         # Data collection part
@@ -485,7 +493,7 @@ class V2I(gym.Env):
         assert len(followerList) == len(frontList)
         agentID = getAgentID(self.lane_map, self.agent_lane)
         
-        #followerList, frontList = {}, {}
+        followerList, frontList = {}, {}
 
         self.time_elapsed += self.simArgs.getValue("t-period")
 
@@ -500,9 +508,10 @@ class V2I(gym.Env):
         if self.gridHandler.isCommEnabled:
             reward = self.commPenalty(reward, queryAct)
         
-        #collision = False
+        collision = False
         if collision:
             reward = -1 * self.simArgs.getValue("collision-penalty")
+            #print(reward)
         
         self.collision = collision
         #---- Calculate Reward ----#
@@ -517,4 +526,4 @@ class V2I(gym.Env):
         # state, reward, done, info
         obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)
-        return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()
+        return self.obsWrapper.getObs(), reward, False, self.processInfoDict()

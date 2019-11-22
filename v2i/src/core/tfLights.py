@@ -128,6 +128,10 @@ class tfController:
 	def __init__(self, tPeriod):
 		self.tfTrajecDict = self.loadtfTrajecs()
 		self.validateConfig(self.tfTrajecDict, tPeriod)
+		self.tfLoc = None
+	
+	def reset(self, loc):
+		self.tfLoc = loc.copy()
 	
 	def loadtfTrajecs(self):
 		currPath = os.path.realpath(__file__)[:-16]
@@ -169,7 +173,7 @@ class tfController:
 		if laneMap[0].shape[0] == 0:
 			dummyLane = 1
 		vehicleProp = laneMap[dummyLane][0].copy()
-		vehicleProp["pos"] = 0.0
+		vehicleProp["pos"] = self.tfLoc[lane]
 		vehicleProp["speed"] = 0.0
 		vehicleProp["lane"] = lane
 		vehicleProp["agent"] = 2 # Used to identify tf vehicle
