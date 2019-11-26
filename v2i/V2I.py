@@ -454,13 +454,17 @@ class V2I(gym.Env):
                     tfIDX = getTfID(self.lane_map, lane)
                     self.lane_map[lane] = np.delete(self.lane_map[lane], tfIDX)
         
-        
-        '''
         # Data collection part
         for idx, carID in enumerate(carIDslane0):
-            self.carPos[carID] += difflane0[idx]
+            if carID == -1:
+                pass
+            else:
+                self.carPos[carID] += difflane0[idx]
         for idx, carID in enumerate(carIdslane1):
-            self.carPos[carID] += difflane1[idx]
+            if carID == -1:
+                pass
+            else:
+                self.carPos[carID] += difflane1[idx]
 
         self.idmHandler.sortLaneMap(self.lane_map)
         #print(self.lane_map[self.agent_lane])
@@ -484,7 +488,7 @@ class V2I(gym.Env):
         self.front_diff -= constants.CAR_LENGTH
         self.back_diff = (np.deg2rad(backDiff) * constants.LANE_RADIUS[self.agent_lane]) * (1.0/constants.SCALE)
         self.back_diff -= constants.CAR_LENGTH
-        '''
+        
         
         # IDM Acc without lane changes
         tmpLaneMap0 = self.lane_map.copy()
@@ -511,7 +515,7 @@ class V2I(gym.Env):
         if self.gridHandler.isCommEnabled:
             reward = self.commPenalty(reward, queryAct)
         
-        collision = False
+        #collision = False
         if collision:
             reward = -1 * self.simArgs.getValue("collision-penalty")
             #print(reward)
@@ -529,4 +533,4 @@ class V2I(gym.Env):
         # state, reward, done, info
         obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)
-        return self.obsWrapper.getObs(), reward, False, self.processInfoDict()
+        return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()
