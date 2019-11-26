@@ -264,11 +264,12 @@ class V2I(gym.Env):
                 self.num_cars[lane] = 0
         
         self.lane_map = self.buildlaneMap(self.trajecDict, self.trajecIndex, epsiodeDensity, self.num_cars)
-        self.tfLoc = np.random.uniform(0, 350, size=2)
-        if self.simArgs.getValue('tf-points') is not None:
-            self.tfHandler.reset(np.array(self.simArgs.getValue('tf-points')))
-        else:
-            self.tfHandler.reset(self.tfLoc)
+        if self.simArgs.getValue("enable-tf"):
+            self.tfLoc = np.random.uniform(0, 350, size=2)
+            if self.simArgs.getValue('tf-points') is not None:
+                self.tfHandler.reset(np.array(self.simArgs.getValue('tf-points')))
+            else:
+                self.tfHandler.reset(self.tfLoc)
         
         # Data Collection part
         self.agentPos = 0.0
