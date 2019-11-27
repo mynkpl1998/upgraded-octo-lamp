@@ -6,9 +6,9 @@ config:
 
   # IDM settings
   max-speed: 14.0 # in m/s
-  local-view: 40 # in metres (one side)
+  local-view: 10 # in metres (one side)
   extended-view: 40 # in metres (one side)
-  reg-size: 15 # in metres
+  reg-size: 30 # in metres
   cell-size: 1 # in metres
 
   # Reward Function
@@ -35,6 +35,9 @@ config:
 
   # Tf Points:
   tf-points:
+
+  # enable-age
+  enable-age: true
 
 
   

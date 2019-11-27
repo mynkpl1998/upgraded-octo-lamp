@@ -15,6 +15,7 @@ from v2i.src.core.common import getAgentID, arcLength, getTfID, randomizeSpeeds
 from v2i.src.core.tfLights import tfController
 from v2i.src.core.constants import TF_CONSTS
 from v2i.src.core.obsQueue import obsWrapper
+from v2i.src.core.age import age
 
 
 class V2I(gym.Env):
@@ -62,7 +63,7 @@ class V2I(gym.Env):
             self.trajecDict[lane][0.0] = []
         
         self.densities = list(self.trajecDict[0].keys())
-        print(self.densities)
+        #print(self.densities)
 
         # Fix issue2 for densities
         self.trainDensities = self.fixIssue2v2(constants.DENSITIES)
@@ -95,7 +96,7 @@ class V2I(gym.Env):
         self.idmHandler = idm(self.simArgs.getValue('max-speed'), self.simArgs.getValue("t-period"), self.simArgs.getValue("local-view"))
 
         # Intialize Grid Handler here
-        self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), self.simArgs.getValue("k-frames"),2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
+        self.gridHandler = Grid(2 * self.simArgs.getValue("local-view"), self.simArgs.getValue("max-speed"), self.simArgs.getValue("reg-size"), self.simArgs.getValue("k-frames"), self.simArgs.getValue('enable-age'), 2 * self.simArgs.getValue("extended-view"), self.simArgs.getValue("cell-size"))
 
         # Init possible max speed of vehicles
         #self.maxSpeeds = buildMaxSpeeds(self.gridHandler.totalExtendedView, self.gridHandler.totalLocalView)
@@ -125,6 +126,13 @@ class V2I(gym.Env):
 
         # Init Gym Env Properties
         self.initGymProp(self.gridHandler)
+
+        # Initialize only if comm is enable
+        if self.simArgs.getValue('enable-age'):
+            if self.gridHandler.isCommEnabled:
+                self.ageHandler = age(self.gridHandler)
+            else:
+                raiseValueError("age can't be enabled if comm is disabled")
 
         # Init episode densities from config files
         self.epiosdeDensity = self.simArgs.getValue('density')
@@ -305,6 +313,10 @@ class V2I(gym.Env):
         
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
+        self.occTrack = occGrid.copy()
+        self.velTrack = velGrid.copy()
+        self.occGrid = occGrid.copy()
+        self.velGrid = velGrid.copy()
         #---- Get Occupancy & Velocity Grids ----#
 
         # ---- Set Traffic Light ----#
@@ -314,7 +326,14 @@ class V2I(gym.Env):
                 self.tfTogglePts = self.tfHandler.expandPts()
             else:
                 self.tfTogglePts = [[], []]
-
+        
+        # ----- Reset age vectors ------#
+        if self.simArgs.getValue('enable-age'):
+            self.ageHandler.reset() 
+            agentAge = self.ageHandler.agentAge
+        else:
+            agentAge = None
+        # ----- Reset age vectors ------#
         
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
@@ -325,12 +344,18 @@ class V2I(gym.Env):
 
         # Reset Observation Queue
         self.obsWrapper.resetQueue()
-        obs = self.buildObservation(occGrid, velGrid)
+        if self.simArgs.getValue('enable-age'):
+            obs = self.buildObservation(occGrid, velGrid, self.ageHandler.getAgentAge())
+        else:
+            obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs()
     
-    def buildObservation(self, occGrid, velGrid):
-        combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
+    def buildObservation(self, occGrid, velGrid, ageVector=None):
+        if ageVector is not None:
+            combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten(), ageVector.flatten()))
+        else:
+            combinedObs = np.concatenate((occGrid.flatten(), velGrid.flatten()))
         return combinedObs.copy()
     
     def getBum2BumDist(self, laneMap, agentLane, agentIDX):
@@ -382,7 +407,9 @@ class V2I(gym.Env):
     def frame(self, action):
         
         self.num_steps += 1
-        
+        prevOcc = self.occGrid.copy()
+        prevVel = self.velGrid.copy()
+
         '''
         # Randomize vehicles max Speed
         if self.num_steps % 140 == 0:
@@ -438,6 +465,9 @@ class V2I(gym.Env):
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
         
+        #---- Get Occupancy and velocity grids just after agent action execution ----#
+        beforeOcc, beforeVel = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
+        #---- Get Occupancy and velocity grids just after agent action execution ----#
 
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
@@ -490,7 +520,7 @@ class V2I(gym.Env):
         self.back_diff = (np.deg2rad(backDiff) * constants.LANE_RADIUS[self.agent_lane]) * (1.0/constants.SCALE)
         self.back_diff -= constants.CAR_LENGTH
         
-        
+        # ----- Non ego lane change ---- #
         # IDM Acc without lane changes
         tmpLaneMap0 = self.lane_map.copy()
         self.idmHandler.step(tmpLaneMap0, planAct)
@@ -502,13 +532,21 @@ class V2I(gym.Env):
         agentID = getAgentID(self.lane_map, self.agent_lane)
         
         followerList, frontList = {}, {}
+        # ----- Non ego lane change ---- #
 
         self.time_elapsed += self.simArgs.getValue("t-period")
 
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, queryAct)
-        #print(velGrid)
+        self.occGrid = occGrid.copy()
+        self.velGrid = velGrid.copy()
         #---- Get Occupancy & Velocity Grids ----#
+
+        if self.simArgs.getValue('enable-age'):
+            agentAge = self.ageHandler.frame(prevOcc, occGrid, prevVel, velGrid, queryAct)
+            self.occTrack, self.velTrack = self.ageHandler.buildState(self.occTrack.copy(), self.velTrack.copy(), beforeOcc, beforeVel, occGrid, velGrid, queryAct)
+        else:
+            agentAge = None
 
         #---- Calculate Reward ----#
         reward = self.rewardFunc(self.lane_map, self.agent_lane, planAct)
@@ -527,11 +565,15 @@ class V2I(gym.Env):
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
             if self.simArgs.getValue("enable-tf"):
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3), followerList, frontList), self.isLightRed)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, self.occTrack, planAct, queryAct, round(reward, 3), followerList, frontList), self.isLightRed)
             else:
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3), followerList, frontList), None)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, self.occTrack, planAct, queryAct, round(reward, 3), followerList, frontList), None)
         
         # state, reward, done, info
-        obs = self.buildObservation(occGrid, velGrid)
+        if self.simArgs.getValue('enable-age'):
+            obs = self.buildObservation(occGrid.flatten(), velGrid.flatten(), agentAge)
+        else:
+            obs = self.buildObservation(occGrid, velGrid)
+        
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()

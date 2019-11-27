@@ -9,17 +9,17 @@ import random
 np.random.seed(10)
 random.seed(10)
 
-path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/fullComm40m/configFiles/sim-config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/fullComm40mAge/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
-#print(obj.observation_space.low)
-#print(obj.observation_space.high)
-#print(obj.observation_space)
+print(obj.observation_space.low)
+print(obj.observation_space.high)
+print(obj.observation_space)
 print(obj.action_space)
 print(obj.action_map)
 densities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-maxSteps = 3350
+maxSteps = 10
 
 
 simDensities = [0.4]
@@ -68,26 +68,24 @@ for i, r in enumerate(ax):
 plt.show()
 '''
 
+
 #time.sleep(20)
 for episode in range(0, 10):
-    #print("Starting episode : %d"%(i+1))
-    episodeDensity = []
-    for i in range(0, 2):
-        episodeDensity.append(random.choice(densities))
-    print("Episode Density : ", episodeDensity)
+    
     state = obj.reset()
     #time.sleep(100)
     #print(state.shape)
     count = 0
-    #time.sleep(0.5)
+    time.sleep(0.5)
     
+
     for i in range(0, maxSteps):
         act = 2
-        state, reward, done, info = obj.step(0)
+        state, reward, done, info = obj.step(3)
         #print(obj.idmHandler.getAllElementbyKeys('speed', obj.lane_map[0]))
         #time.sleep(100)
         #break
-        #print(state.shape)
+        #print(state)
         if done:
             print("Collision")
             break

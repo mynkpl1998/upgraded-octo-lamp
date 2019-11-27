@@ -8,7 +8,7 @@ from v2i.src.core.common import getAgentID, arcAngle, arcLength, reverseDict
 
 class Grid:
 
-    def __init__(self, localView, maxSpeed, regionWidth,k, extendedView=None, cellSize=1):
+    def __init__(self, localView, maxSpeed, regionWidth,k, enableAge, extendedView=None, cellSize=1):
         self.totalLocalView = localView # in metre
         self.cellSize = cellSize # in metre
         self.totalExtendedView = extendedView
@@ -16,6 +16,7 @@ class Grid:
         self.maxSpeed = maxSpeed
         self.regWidthInMetres = regionWidth
         self.k = k
+        self.isAgeEnabled = enableAge
 
         #---- Checks ----#
         if self.totalExtendedView == None:
@@ -48,6 +49,10 @@ class Grid:
         velGridBoundLow = np.ones((LANES, self.numCols)) * 0.0
         velGridBoundHigh = np.ones((LANES, self.numCols)) * self.maxSpeed
 
+        if self.isAgeEnabled:
+            ageVectorLow = np.zeros((LANES, int(self.totalCommView/self.cellSize)))
+            ageVectorHigh = np.ones((LANES, int(self.totalCommView/self.cellSize)))
+
         mergedBoundlow = []
         mergedBoundHigh = []
 
@@ -63,6 +68,10 @@ class Grid:
         
         obsLowBound = mergedBoundlow.flatten().astype(np.float)
         obsHighBound = mergedBoundHigh.flatten().astype(np.float)
+
+        if self.isAgeEnabled:
+            obsLowBound = np.concatenate((obsLowBound, ageVectorLow.flatten().astype(np.float)))
+            obsHighBound = np.concatenate((obsHighBound, ageVectorHigh.flatten().astype(np.float)))
         
         self.observation_space = Box(low=obsLowBound, high=obsHighBound, dtype=np.float)
         
@@ -326,7 +335,7 @@ class Grid:
         occGrid, velGrid = self.getOccupancyGrid(laneMap, agentLane)
         self.verifyGrids(occGrid, velGrid)
 
-        if self.isCommEnabled:
+        if self.isCommEnabled and self.isAgeEnabled == False:
             for key in self.commMap:
                     if self.commMap[key] == queryAct:
                         pass

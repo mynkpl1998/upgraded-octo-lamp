@@ -33,5 +33,7 @@ DEFAULT_DICT = {
     # Density Config
     'density': None,
 
-    'tf-points': None
+    'tf-points': None,
+
+    'enable-age': False
 }

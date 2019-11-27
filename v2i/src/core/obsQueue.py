@@ -17,6 +17,7 @@ class obsWrapper:
         return np.array(self.obsQueue).flatten().copy()
     
     def addObs(self, obs):
+        #print(obs.shape)
         assert obs.shape[0] == self.obsSize
         self.obsQueue.append(obs.copy())
 
