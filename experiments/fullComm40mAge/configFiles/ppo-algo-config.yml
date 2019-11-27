@@ -8,7 +8,6 @@ EXP_NAME:
   # ---- Checkpoint Frequency ---- #
   checkpoint_freq: 99
   # ---- Checkpoint Frequency ---- #
-  restore: /home/mayank/ray_results/homogeneous-with-tf-LV-40m/fullComm40m_gamma_0.999_vf_shared_part_1/checkpoint_1000/checkpoint-1000
   config:
 
     # ---- Generalized Advantage Estimator Parameters ---- #
