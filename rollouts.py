@@ -79,6 +79,8 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
             dataDict["data"][densityStr][episode]["speed"] = {}
             dataDict["data"][densityStr][episode]['Pos'] = []
             dataDict["data"][densityStr][episode]["rewards"] = []
+            dataDict['data'][densityStr][episode]['agentAge'] = []
+            dataDict['data'][densityStr][episode]['trueAge'] = []
             dataDict["data"][densityStr][episode]["actions"] = []
             dataDict["data"][densityStr][episode]["bum2bumdist"] = []
             dataDict["data"][densityStr][episode]["EgoMaxSpeed"] = -10
@@ -150,7 +152,8 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                 dataDict['data'][densityStr][episode]['Pos'].append(env.carPos.copy())
                 dataDict['data'][densityStr][episode]['frontDiff'].append(env.front_diff)
                 dataDict['data'][densityStr][episode]['backDiff'].append(env.back_diff)
-                
+                dataDict['data'][densityStr][episode]['agentAge'].append(env.ageHandler.agentAge.mean())
+                dataDict['data'][densityStr][episode]['trueAge'].append(env.ageHandler.trueAge.mean())
                  
                 #dataDict["data"][densityStr][episode]["speed"].append(env.lane_map[env.agent_lane][agentIDX]['speed'])
                 dataDict["data"][densityStr][episode]["rewards"].append(reward)
