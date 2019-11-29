@@ -85,7 +85,7 @@ for episode in range(0, 10):
         #print(obj.idmHandler.getAllElementbyKeys('speed', obj.lane_map[0]))
         #time.sleep(100)
         #break
-        #print(state)
+        print(state)
         if done:
             print("Collision")
             break

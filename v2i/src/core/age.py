@@ -89,8 +89,8 @@ class age:
         return agentAgeSensors.flatten().copy()
 
     def frame(self, prevOcc, newOcc, prevVel, newVel, query):
-        self.updateAgentAge(query)
         sensorsChange = self.detectChange(prevOcc, newOcc, prevVel, newVel)
         self.updateTrueAge(sensorsChange)
+        self.updateAgentAge(query)
         age = self.getsensorsAgentAge()
         return age

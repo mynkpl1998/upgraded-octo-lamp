@@ -544,7 +544,7 @@ class V2I(gym.Env):
 
         if self.simArgs.getValue('enable-age'):
             agentAge = self.ageHandler.frame(prevOcc, occGrid, prevVel, velGrid, queryAct)
-            self.occTrack, self.velTrack = self.ageHandler.buildState(self.occTrack.copy(), self.velTrack.copy(), beforeOcc, beforeVel, occGrid, velGrid, queryAct)
+            self.occTrack, self.velTrack = self.ageHandler.buildState(self.occTrack.copy(), self.velTrack.copy(), occGrid, velGrid, occGrid, velGrid, queryAct)
         else:
             agentAge = None
 
