@@ -7,7 +7,6 @@ EXP_NAME:
   # ---- Stopping Condition ----# 
   # ---- Checkpoint Frequency ---- #
   checkpoint_freq: 99
-  restore: /home/mayank/ray_results/homogeneous-with-tf-LV-40m/fullComm40Age-age-v1/checkpoint_1200/checkpoint-1200
   # ---- Checkpoint Frequency ---- #
   config:
 
