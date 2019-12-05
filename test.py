@@ -9,7 +9,7 @@ import random
 np.random.seed(10)
 random.seed(10)
 
-path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/fullComm40mAge/configFiles/sim-config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/fullComm40mAge5Hz/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 print(obj.observation_space.low)
@@ -19,7 +19,7 @@ print(obj.action_space)
 print(obj.action_map)
 densities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-maxSteps = 10
+maxSteps = 1000
 
 
 simDensities = [0.4]

@@ -324,6 +324,7 @@ class V2I(gym.Env):
             self.isLightRed = [False, False]
             if np.random.rand() <= TF_CONSTS['EPISODE_TF_GEN_PROB']:
                 self.tfTogglePts = self.tfHandler.expandPts()
+                print(self.tfTogglePts)
             else:
                 self.tfTogglePts = [[], []]
         
