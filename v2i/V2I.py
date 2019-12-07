@@ -132,6 +132,8 @@ class V2I(gym.Env):
         # Initialze Observation Wrapper if lstm is disabled
         self.obsWrapper = obsWrapper(self.simArgs.getValue('k-frames'), int(self.gridHandler.observation_space.shape[0]/self.simArgs.getValue("k-frames")))
 
+        self.initLocalIndexs()
+
     def initGymProp(self, obsHandler):
         self.observation_space = obsHandler.observation_space
         
@@ -438,6 +440,8 @@ class V2I(gym.Env):
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
         
+        # Get grids
+        beforeOcc, beforeVel = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
 
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
@@ -507,7 +511,6 @@ class V2I(gym.Env):
 
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, queryAct)
-        #print(velGrid)
         #---- Get Occupancy & Velocity Grids ----#
 
         #---- Calculate Reward ----#
@@ -524,14 +527,49 @@ class V2I(gym.Env):
         self.collision = collision
         #---- Calculate Reward ----#
 
+        #---- Final Grid -----#
+        occ, vel = self.buildGrid(beforeOcc, beforeVel, occGrid, velGrid, queryAct)
+        #---- Final Grid -----#
+
         # ---- Init variables ----#
         if self.simArgs.getValue("render"):
             if self.simArgs.getValue("enable-tf"):
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3), followerList, frontList), self.isLightRed)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occ, planAct, queryAct, round(reward, 3), followerList, frontList), self.isLightRed)
             else:
-                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, planAct, queryAct, round(reward, 3), followerList, frontList), None)
+                self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occ, planAct, queryAct, round(reward, 3), followerList, frontList), None)
         
         # state, reward, done, info
-        obs = self.buildObservation(occGrid, velGrid)
+        obs = self.buildObservation(occ, vel)
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()
+    
+    def initLocalIndexs(self):
+        self.localIndexs = []
+        self.commIndexMap = self.gridHandler.commIndexMap
+        allCommIndexs = []
+        for reg in self.commIndexMap.keys():
+            for col in self.commIndexMap[reg]:
+                allCommIndexs.append(col)
+        for i in range(0, self.gridHandler.numCols):
+            if i not in allCommIndexs:
+                self.localIndexs.append(i)
+        
+    def buildGrid(self, occGrids, velGrid, trueOcc, trueVel, query):
+        occ = np.ones_like(occGrids) * constants.OCCGRID_CONSTS['UNKNOWN']
+        vel = np.zeros_like(velGrid)
+        
+        for lane in range(0, constants.LANES):
+            for col in self.localIndexs:
+                occ[lane][col] = trueOcc[lane][col]
+                vel[lane][col] = trueVel[lane][col]
+
+
+        if query == 'null':
+            pass
+        else:
+            for lane in range(0, constants.LANES):
+                for col in self.commIndexMap[query]:
+                    occ[lane][col] = occGrids[lane][col]
+                    vel[lane][col] = velGrid[lane][col]
+        
+        return occ.copy(), vel.copy()

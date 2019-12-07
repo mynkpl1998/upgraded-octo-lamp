@@ -326,6 +326,7 @@ class Grid:
         occGrid, velGrid = self.getOccupancyGrid(laneMap, agentLane)
         self.verifyGrids(occGrid, velGrid)
 
+        '''
         if self.isCommEnabled:
             for key in self.commMap:
                     if self.commMap[key] == queryAct:
@@ -335,5 +336,5 @@ class Grid:
                         for index in indexs:
                             occGrid[:, index] = OCCGRID_CONSTS['UNKNOWN']
                             velGrid[:, index] = 0.0
-        
+        '''
         return occGrid, velGrid
