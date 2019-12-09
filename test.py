@@ -9,7 +9,7 @@ import random
 np.random.seed(10)
 random.seed(10)
 
-path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/fullComm40mAge5Hz/configFiles/sim-config.yml"
+path = "/home/mayank/Documents/upgraded-octo-lamp/experiments/fullComm40mAge/configFiles/sim-config.yml"
 obj = V2I.V2I(path, mode="test")
 obj.seed(10)
 print(obj.observation_space.low)
