@@ -69,9 +69,11 @@ class Grid:
         obsLowBound = mergedBoundlow.flatten().astype(np.float)
         obsHighBound = mergedBoundHigh.flatten().astype(np.float)
 
+        '''
         if self.isAgeEnabled:
             obsLowBound = np.concatenate((obsLowBound, ageVectorLow.flatten().astype(np.float)))
             obsHighBound = np.concatenate((obsHighBound, ageVectorHigh.flatten().astype(np.float)))
+        '''
         
         self.observation_space = Box(low=obsLowBound, high=obsHighBound, dtype=np.float)
         

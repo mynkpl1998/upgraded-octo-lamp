@@ -345,10 +345,7 @@ class V2I(gym.Env):
 
         # Reset Observation Queue
         self.obsWrapper.resetQueue()
-        if self.simArgs.getValue('enable-age'):
-            obs = self.buildObservation(occGrid, velGrid, self.ageHandler.getAgentAge())
-        else:
-            obs = self.buildObservation(occGrid, velGrid)
+        obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs()
     
@@ -572,10 +569,6 @@ class V2I(gym.Env):
         
         # state, reward, done, info
         #print(occGrid == self.occTrack)
-        if self.simArgs.getValue('enable-age'):
-            obs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten(), agentAge)
-        else:
-            obs = self.buildObservation(occGrid, velGrid)
-        
+        obs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten())
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()
