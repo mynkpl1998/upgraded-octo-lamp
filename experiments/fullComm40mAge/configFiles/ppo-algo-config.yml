@@ -7,7 +7,6 @@ EXP_NAME:
   # ---- Stopping Condition ----# 
   # ---- Checkpoint Frequency ---- #
   checkpoint_freq: 99
-  restore: /home/mayank/ray_results/compare/PPO_v2i-v0_0_2019-12-09_15-50-10i5vnt41s/checkpoint_2500/checkpoint-2500
   # ---- Checkpoint Frequency ---- #
   config:
 
