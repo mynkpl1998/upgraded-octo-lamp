@@ -19,7 +19,7 @@ print(obj.action_space)
 print(obj.action_map)
 densities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-maxSteps = 10
+maxSteps = 10000
 
 
 simDensities = [0.4]
@@ -85,7 +85,7 @@ for episode in range(0, 10):
         #print(obj.idmHandler.getAllElementbyKeys('speed', obj.lane_map[0]))
         #time.sleep(100)
         #break
-        print(state)
+        #print(state)
         if done:
             print("Collision")
             break

@@ -344,10 +344,7 @@ class V2I(gym.Env):
 
         # Reset Observation Queue
         self.obsWrapper.resetQueue()
-        if self.simArgs.getValue('enable-age'):
-            obs = self.buildObservation(occGrid, velGrid, self.ageHandler.getAgentAge())
-        else:
-            obs = self.buildObservation(occGrid, velGrid)
+        obs = self.buildObservation(occGrid, velGrid)
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs()
     
@@ -570,10 +567,6 @@ class V2I(gym.Env):
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, self.occTrack, planAct, queryAct, round(reward, 3), followerList, frontList), None)
         
         # state, reward, done, info
-        if self.simArgs.getValue('enable-age'):
-            obs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten(), agentAge)
-        else:
-            obs = self.buildObservation(occGrid, velGrid)
-        
+        obs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten())
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()
