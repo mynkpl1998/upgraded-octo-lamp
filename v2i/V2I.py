@@ -571,7 +571,7 @@ class V2I(gym.Env):
         
         # state, reward, done, info
         if self.simArgs.getValue('enable-age'):
-            obs = self.buildObservation(occGrid.flatten(), velGrid.flatten(), agentAge)
+            obs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten(), agentAge)
         else:
             obs = self.buildObservation(occGrid, velGrid)
         
