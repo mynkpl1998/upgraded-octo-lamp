@@ -13,7 +13,7 @@ config:
 
   # Reward Function
   collision-penalty: 200
-  nocomm-incentive: 0.20
+  nocomm-incentive: 0.00
 
   # UI settings
   render: true
