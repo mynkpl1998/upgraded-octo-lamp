@@ -572,3 +572,4 @@ class V2I(gym.Env):
         obs = self.buildObservation(self.occTrack.flatten(), self.velTrack.flatten())
         self.obsWrapper.addObs(obs)
         return self.obsWrapper.getObs(), reward, collision, self.processInfoDict()
+    
