@@ -514,8 +514,10 @@ class V2I(gym.Env):
         reward = self.rewardFunc(self.lane_map, self.agent_lane, planAct)
 
         if self.gridHandler.isCommEnabled:
+            print("Before : ", reward)
             reward = self.commPenalty(reward, queryAct)
-        
+            print("After : ", reward)
+            
         #collision = False
         if collision:
             reward = -1 * self.simArgs.getValue("collision-penalty")
