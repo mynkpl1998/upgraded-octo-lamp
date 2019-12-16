@@ -48,6 +48,7 @@ class ppoController:
             out = self.agent.get_policy(DEFAULT_POLICY_ID).compute_single_action(state, [])
         
         actionProbs = softmax(out[2]['behaviour_logits'])
+        #print(actionProbs)
         action = out[0]
         lstm_state = out[1]
         vf_preds = out[2]["vf_preds"]
