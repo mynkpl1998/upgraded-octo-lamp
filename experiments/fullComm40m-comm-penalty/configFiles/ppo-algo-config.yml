@@ -2,8 +2,8 @@
 
 EXP_NAME:
   # ---- Stopping Condition ----#
-  stop:
-    training_iteration: 2000 
+  #stop:
+  #  training_iteration: 2000 
   # ---- Stopping Condition ----# 
   # ---- Checkpoint Frequency ---- #
   checkpoint_freq: 99
@@ -36,19 +36,19 @@ EXP_NAME:
     # Size of batches collected from each worker
     sample_batch_size : 100
     # Total SGD batch size across all devices for SGD
-    sgd_minibatch_size: 4086
+    sgd_minibatch_size: 800
     # Number of timesteps collected for each SGD round (leave this, script will autofill this according to best value)
-    train_batch_size:
+    train_batch_size: 8000
     # Whether to shuffle sequences in the batch when training (recommended)
     # shuffle_sequences: true (not implemented in release 0.7.2)
     # Number of SGD iterations in each outer loop
-    num_sgd_iter: 30
+    num_sgd_iter: 10
     # ---- SGD Configs ---- #
 
 
     # ---- Optimizer Configs ---- #
     # Stepsize of SGD
-    lr: 0.00005
+    lr: 0.0001
     # Learning rate schedule
     lr_schedule:
     # Uses the sync samples optimizer instead of the multi-gpu one. This does
@@ -90,11 +90,11 @@ EXP_NAME:
 
     # ---- Compute Resources ---- #
     # Set number of workers to spawn
-    num_workers: 10
+    num_workers: 16
     # Set number of gpus to use
     num_gpus : 1
     # Number of envs per worker
-    num_envs_per_worker: 3
+    num_envs_per_worker: 5
     # ---- Compute Resources ---- #
     
     
@@ -102,7 +102,7 @@ EXP_NAME:
     model:
       max_seq_len: 8
       lstm_cell_size: 128
-      fcnet_hiddens: [128, 128, 128]
+      fcnet_hiddens: [128, 256, 256]
       fcnet_activation: "relu"
       lstm_use_prev_action_reward: false
       framestack: false
