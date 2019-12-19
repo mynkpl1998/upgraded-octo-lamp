@@ -81,7 +81,7 @@ for episode in range(0, 10):
 
     for i in range(0, maxSteps):
         act = 2
-        state, reward, done, info = obj.step(3)
+        state, reward, done, info = obj.step(obj.action_space.sample())
         #print(obj.idmHandler.getAllElementbyKeys('speed', obj.lane_map[0]))
         #time.sleep(100)
         #break
