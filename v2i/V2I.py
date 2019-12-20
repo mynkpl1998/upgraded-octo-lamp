@@ -437,7 +437,7 @@ class V2I(gym.Env):
         
         self.planAct = planAct
         self.queryAct = queryAct
-        print(self.queryAct)
+        #print(self.queryAct)
         # Perform the required planing action
         egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(planAct, self.lane_map, self.agent_lane)
         
