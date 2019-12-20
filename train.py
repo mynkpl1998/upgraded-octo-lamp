@@ -38,10 +38,10 @@ def doPPOEssentials(algoConfig, simConfig, args):
     # Set Experiment Name
     algoConfig[args.name] = algoConfig.pop("EXP_NAME")
     # Set Number of Workers
-    #algoConfig[args.name]["config"]["num_workers"] = int(args.num_workers)
+    algoConfig[args.name]["config"]["num_workers"] = int(args.num_workers)
     # Set batch size
-    #if algoConfig[args.name]["config"]["train_batch_size"] == None:
-    #    algoConfig[args.name]["config"]["train_batch_size"] = int(args.num_workers) * algoConfig[args.name]["config"]["sgd_minibatch_size"]
+    if algoConfig[args.name]["config"]["train_batch_size"] == None:
+        algoConfig[args.name]["config"]["train_batch_size"] = int(args.num_workers) * algoConfig[args.name]["config"]["sgd_minibatch_size"]
     # Set Environment Name
     algoConfig[args.name]["env"] = "v2i-v0"
     # Set Algorithm Here
