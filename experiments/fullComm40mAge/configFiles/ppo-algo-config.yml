@@ -36,19 +36,19 @@ EXP_NAME:
     # Size of batches collected from each worker
     sample_batch_size : 100
     # Total SGD batch size across all devices for SGD
-    sgd_minibatch_size: 800
+    sgd_minibatch_size: 4086
     # Number of timesteps collected for each SGD round (leave this, script will autofill this according to best value)
-    train_batch_size: 8000
+    train_batch_size: 65376
     # Whether to shuffle sequences in the batch when training (recommended)
     # shuffle_sequences: true (not implemented in release 0.7.2)
     # Number of SGD iterations in each outer loop
-    num_sgd_iter: 10
+    num_sgd_iter: 30
     # ---- SGD Configs ---- #
 
 
     # ---- Optimizer Configs ---- #
     # Stepsize of SGD
-    lr: 0.0001
+    lr: 5e-05
     # Learning rate schedule
     lr_schedule:
     # Uses the sync samples optimizer instead of the multi-gpu one. This does
@@ -94,7 +94,7 @@ EXP_NAME:
     # Set number of gpus to use
     num_gpus : 1
     # Number of envs per worker
-    num_envs_per_worker: 5
+    num_envs_per_worker: 3
     # ---- Compute Resources ---- #
     
     
