@@ -102,7 +102,7 @@ EXP_NAME:
     model:
       max_seq_len: 8
       lstm_cell_size: 128
-      fcnet_hiddens: [128, 128]
+      fcnet_hiddens: [128, 256, 256]
       fcnet_activation: "relu"
       lstm_use_prev_action_reward: false
       framestack: false
