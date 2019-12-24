@@ -102,8 +102,13 @@ class Grid:
         #---- Region to Index Map ----#
 
         #---- Add Null Query ----#
-        #self.commMap[numRegs] = "null"
-        #self.commIndexMap[self.commMap[numRegs]] = []
+        self.commMap[numRegs] = "null"
+        self.commIndexMap[self.commMap[numRegs]] = []
+
+        # Remove rear region
+        #print(self.commMap)
+        del self.commMap[0]
+        #print(self.commMap)
         #---- Add Null Query ----#
 
     def init(self):
