@@ -1,11 +1,11 @@
 config:
 
   # Simulation Parameters
-  t-period: 0.1 # in secs
+  t-period: 0.01 # in secs
   seed: 1
 
   # IDM settings
-  max-speed: 14.0 # in m/s
+  max-speed: 15.0 # in m/s
   local-view: 10 # in metres (one side)
   extended-view: 40 # in metres (one side)
   reg-size: 30 # in metres
@@ -13,10 +13,10 @@ config:
 
   # Reward Function
   collision-penalty: 200
-  nocomm-incentive: 0.0
+  nocomm-incentive: 0.00
 
   # UI settings
-  render: false
+  render: true
   render_car_details: false
   fps: 20
 
@@ -36,4 +36,8 @@ config:
   # Tf Points:
   tf-points:
 
-  sensors-range: 2
+  # enable-age
+  enable-age: true
+
+
+  

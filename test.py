@@ -21,12 +21,12 @@ densities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
 maxSteps = 3350
 
-
+'''
 simDensities = [0.4]
 fig, ax = plt.subplots(nrows=2, ncols=3)
 finalSpeedList = []
 
-'''
+
 for density in simDensities:
     print("Running for density : ", density)
     speedDict = {}
@@ -68,26 +68,74 @@ for i, r in enumerate(ax):
 plt.show()
 '''
 
+maxSteps = 10000
+numEpisodes = 1
+ageData = np.zeros((numEpisodes, maxSteps))
+
+def avgVehSpeed(laneMap):
+    speeds = []
+    for lane in range(0, 2):
+        for veh in laneMap[lane]:
+            speeds.append(veh['speed'])
+    return np.array(speeds).mean()
+
+def appendAge(trueAgeRegister, ageValuesTrack):
+    for sensorID in trueAgeRegister.keys():
+        ageValuesTrack[sensorID].append(trueAgeRegister[sensorID])
+    return ageValuesTrack
+
 #time.sleep(20)
-for episode in range(0, 10):
+epSpeed = []
+ageValuesTrack = {}
+
+for episode in range(0, numEpisodes):
+    carSpeeds = []
+    print(episode)
     #print("Starting episode : %d"%(i+1))
-    episodeDensity = []
-    for i in range(0, 2):
-        episodeDensity.append(random.choice(densities))
-    print("Episode Density : ", episodeDensity)
-    state = obj.reset()
-    #time.sleep(100)
-    #print(state.shape)
-    count = 0
-    #time.sleep(0.5)
+    for sensorID in obj.trueAgeHandler.trueAgeRegister:
+        ageValuesTrack[sensorID] = []
     
+    state = obj.reset()
+    carSpeeds.append(avgVehSpeed(obj.lane_map))
+    ageValuesTrack = appendAge(obj.trueAgeHandler.trueAgeRegister, ageValuesTrack)
+
+    obj.trueAgeHandler.getMeanAge()
+
     for i in range(0, maxSteps):
-        act = 2
-        state, reward, done, info = obj.step(2)
-        #print(obj.idmHandler.getAllElementbyKeys('speed', obj.lane_map[0]))
-        #time.sleep(100)
-        #break
-        #print(state.shape)
+        state, reward, done, info = obj.step(8)
+        carSpeeds.append(avgVehSpeed(obj.lane_map))
+        ageData[episode][i] = obj.trueAgeHandler.getMeanAge()
+        ageValuesTrack = appendAge(obj.trueAgeHandler.trueAgeRegister, ageValuesTrack)
+
         if done:
             print("Collision")
             break
+    carSpeeds = np.array(carSpeeds)
+    epSpeed.append(carSpeeds.mean())
+
+epSpeed = np.array(epSpeed)
+
+print("True Age mean : ", ageData.mean(axis=1).mean(), "Speed : ", epSpeed.mean())
+
+zoomSteps = 10000
+
+sampleSensors = random.sample(list(obj.trueAgeHandler.trueAgeRegister.keys()), 10)
+
+for sensorID in sampleSensors:
+    plt.step(np.arange(0, len(ageValuesTrack[sensorID]))[0:zoomSteps], ageValuesTrack[sensorID][0:zoomSteps], label="sen. %d"%(sensorID))
+    plt.xlabel("time")
+    plt.ylabel("avg. age of sensors")
+
+unwantedSensorsID = []
+newRegister = {}
+
+for sensorID in obj.trueAgeHandler.trueAgeRegister:
+    age = obj.trueAgeHandler.trueAgeRegister[sensorID]
+    if age > 300:
+        unwantedSensorsID.append(sensorID)
+
+
+
+plt.title("Num. Sensors %d"%(len(obj.trueAgeHandler.trueAgeRegister.keys())))
+plt.legend()
+plt.savefig("sensors.png")

@@ -15,6 +15,7 @@ from v2i.src.core.common import getAgentID, arcLength, getTfID, randomizeSpeeds
 from v2i.src.core.tfLights import tfController
 from v2i.src.core.constants import TF_CONSTS
 from v2i.src.core.obsQueue import obsWrapper
+from v2i.src.core.trueAge import trueAge
 
 
 class V2I(gym.Env):
@@ -107,6 +108,9 @@ class V2I(gym.Env):
         self.maxSpeeds.append(15.0)
         self.maxSpeeds.append(0.01)
         '''
+
+        # True Age handler
+        self.trueAgeHandler = trueAge(self.simArgs.getValue('sensors-range'))
 
         # Lane Change Handle
         self.laneChangeHandler = mobil(self.simArgs.getValue('t-period'), self.idmHandler)
@@ -306,6 +310,7 @@ class V2I(gym.Env):
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
         #---- Get Occupancy & Velocity Grids ----#
+        self.trueAgeHandler.resetSensors(self.lane_map)
 
         # ---- Set Traffic Light ----#
         if self.simArgs.getValue("enable-tf"):
@@ -413,7 +418,7 @@ class V2I(gym.Env):
         
         self.planAct = planAct
         self.queryAct = queryAct
-
+        '''
         # Perform the required planing action
         egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(planAct, self.lane_map, self.agent_lane)
         
@@ -433,11 +438,12 @@ class V2I(gym.Env):
         self.carPos[agentCarID] += egodistTravelledInDeg
         #print(self.agentPos)
 
+        
         # Update Agent Location and Speed
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
-        
+        '''
 
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
@@ -507,8 +513,11 @@ class V2I(gym.Env):
 
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, queryAct)
+        
         #print(velGrid)
         #---- Get Occupancy & Velocity Grids ----#
+        self.trueAgeHandler.step(self.lane_map)
+        #print(self.trueAgeHandler.getMeanAge())
 
         #---- Calculate Reward ----#
         reward = self.rewardFunc(self.lane_map, self.agent_lane, planAct)
@@ -518,7 +527,8 @@ class V2I(gym.Env):
             reward = self.commPenalty(reward, queryAct)
             #print("After : ", reward)
 
-        #collision = False
+        
+        collision = False
         if collision:
             reward = -1 * self.simArgs.getValue("collision-penalty")
             #print(reward)

@@ -138,9 +138,12 @@ class tfController:
 		return loadPKL(currPath + "/data/tftrajec.pkl")
 	
 	def validateConfig(self, tfTrajecDict, tPeriod):
+		pass
+		'''
 		if tfTrajecDict["metadata"]["time-period"] != tPeriod:
 			raiseValueError("time-period doesn't match")
-	
+		'''
+		
 	def sample(self):
 		sampleTrajecs = list(np.random.randint(0, self.tfTrajecDict["numTrajecs"], size=2))
 		#sampleTrajecs.append(sampleTrajecs[0])

@@ -33,5 +33,8 @@ DEFAULT_DICT = {
     # Density Config
     'density': None,
 
-    'tf-points': None
+    'tf-points': None,
+
+    # Underlying sensors config
+    'sensors-range': 2 # in metre
 }
