@@ -115,16 +115,12 @@ for episode in range(0, numEpisodes):
 
 epSpeed = np.array(epSpeed)
 
+
 print("True Age mean : ", ageData.mean(axis=1).mean(), "Speed : ", epSpeed.mean())
 
-zoomSteps = 10000
+zoomSteps = 1000
 
-sampleSensors = random.sample(list(obj.trueAgeHandler.trueAgeRegister.keys()), 10)
-
-for sensorID in sampleSensors:
-    plt.step(np.arange(0, len(ageValuesTrack[sensorID]))[0:zoomSteps], ageValuesTrack[sensorID][0:zoomSteps], label="sen. %d"%(sensorID))
-    plt.xlabel("time")
-    plt.ylabel("avg. age of sensors")
+sampleSensors = random.sample(list(obj.trueAgeHandler.trueAgeRegister.keys()), 1)
 
 unwantedSensorsID = []
 newRegister = {}
@@ -134,7 +130,23 @@ for sensorID in obj.trueAgeHandler.trueAgeRegister:
     if age > 300:
         unwantedSensorsID.append(sensorID)
 
+for sensorID in sampleSensors:
+    if sensorID in unwantedSensorsID:
+        pass
+    else:
+        plt.step(np.arange(0, len(ageValuesTrack[sensorID]))[0:zoomSteps], ageValuesTrack[sensorID][0:zoomSteps], label="sen. %d"%(sensorID))
+        plt.xlabel("time")
+        plt.ylabel("avg. age of sensors")
 
+ageCumSum = 0.0
+validSensorCount = 0
+for key in ageValuesTrack.keys():
+    if key in unwantedSensorsID:
+        pass
+    else:
+        validSensorCount += 1
+        ageCumSum += np.array(ageValuesTrack[key]).mean()
+print(ageCumSum/validSensorCount)
 
 plt.title("Num. Sensors %d"%(len(obj.trueAgeHandler.trueAgeRegister.keys())))
 plt.legend()
