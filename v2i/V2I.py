@@ -67,6 +67,9 @@ class V2I(gym.Env):
 
         # Fix issue2 for densities
         self.trainDensities = self.fixIssue2v2(constants.DENSITIES)
+        
+        # Underlying true sensor size
+        self.true_age_sensors_size = 3.0 # in meteres
 
         # Initializes the required variables
         self.init()
@@ -110,7 +113,7 @@ class V2I(gym.Env):
         '''
 
         # True Age handler
-        self.trueAgeHandler = trueAge(self.simArgs.getValue('sensors-range'))
+        self.trueAgeHandler = trueAge(self.true_age_sensors_size, self.simArgs.getValue('local-view'), self.simArgs.getValue("extended-view") - self.simArgs.getValue('local-view'))
 
         # Lane Change Handle
         self.laneChangeHandler = mobil(self.simArgs.getValue('t-period'), self.idmHandler)
@@ -310,7 +313,6 @@ class V2I(gym.Env):
         #---- Get Occupancy & Velocity Grids ----#
         occGrid, velGrid = self.gridHandler.getGrids(self.lane_map, self.agent_lane, 'null')
         #---- Get Occupancy & Velocity Grids ----#
-        self.trueAgeHandler.resetSensors(self.lane_map)
 
         # ---- Set Traffic Light ----#
         if self.simArgs.getValue("enable-tf"):
@@ -328,6 +330,9 @@ class V2I(gym.Env):
             else:
                 self.uiHandler.updateScreen(self.packRenderData(self.lane_map, self.time_elapsed, self.agent_lane, self.simArgs.getValue("max-speed"), self.gridHandler.totalLocalView, self.gridHandler.totalExtendedView, occGrid, "none", "null", "none", "none", "none"), None)
 
+        # Reset Tracking queue
+        self.trueAgeHandler.initTracking()
+        
         # Reset Observation Queue
         self.obsWrapper.resetQueue()
         obs = self.buildObservation(occGrid, velGrid)
@@ -414,11 +419,10 @@ class V2I(gym.Env):
         
         # Decodes Action -> Plan Action, Query Action
         planAct, queryAct = self.actionEncoderDecoderHandler.decodeAction(action)
-
         
         self.planAct = planAct
         self.queryAct = queryAct
-        '''
+        
         # Perform the required planing action
         egodistTravelledInDeg, egoSpeed, collision, laneToChange = self.egoControllerHandler.executeAction(planAct, self.lane_map, self.agent_lane)
         
@@ -437,13 +441,15 @@ class V2I(gym.Env):
         agentCarID = self.lane_map[self.agent_lane][agentIDX]['id']
         self.carPos[agentCarID] += egodistTravelledInDeg
         #print(self.agentPos)
-
         
         # Update Agent Location and Speed
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] += egodistTravelledInDeg
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos'] %= 360
         self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['speed'] = egoSpeed        
-        '''
+        
+        # Inst Tracking update
+        agentPos = self.lane_map[self.agent_lane][getAgentID(self.lane_map, self.agent_lane)]['pos']
+        self.trueAgeHandler.updateTracker(agentPos, self.agent_lane, queryAct, self.time_elapsed)
 
         # Add a vehicle if tf light is Red
         if self.simArgs.getValue("enable-tf"):
@@ -516,7 +522,7 @@ class V2I(gym.Env):
         
         #print(velGrid)
         #---- Get Occupancy & Velocity Grids ----#
-        self.trueAgeHandler.step(self.lane_map)
+        #self.trueAgeHandler.step(self.lane_map)
         #print(self.trueAgeHandler.getMeanAge())
 
         #---- Calculate Reward ----#

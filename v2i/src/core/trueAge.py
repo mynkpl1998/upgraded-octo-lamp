@@ -3,20 +3,95 @@ from v2i.src.core.constants import LANE_RADIUS, SCALE, LANES, CAR_LENGTH
 
 class trueAge:
 
-    def __init__(self, sensors_range):
+    def __init__(self, sensors_range, lv, cv):
         self.sensors_range = sensors_range
+        self.lv = lv
+        self.cv = cv
+        self.lv_pixels = self.lv * SCALE
+        self.cv_pixels = self.cv * SCALE
+        
         self.sensors_range_pixels = self.sensors_range * SCALE
         self.sensors_range_deg = [self.getAngle(self.sensors_range_pixels, LANE_RADIUS[0]), self.getAngle(self.sensors_range_pixels, LANE_RADIUS[1])]
+        self.lv_deg = [self.getAngle(self.lv_pixels, LANE_RADIUS[0]), self.getAngle(self.lv_pixels, LANE_RADIUS[1])]
+        self.cv_deg = [self.getAngle(self.cv_pixels, LANE_RADIUS[0]), self.getAngle(self.cv_pixels, LANE_RADIUS[1])]
 
         self.mapSensors()
+        '''
         self.initSensorsAge()
         self.gap = {}
         self.gap[0] = self.getAngle(CAR_LENGTH, LANE_RADIUS[0])
         self.gap[1] = self.getAngle(CAR_LENGTH, LANE_RADIUS[1])
-
+        '''
+    
     
     def getAngle(self, arcLength, radius):
         return np.rad2deg(arcLength / float(radius))
+    
+    def initTracking(self):
+        self.tracker = {}
+        self.lanesWiseMapping = {}
+        self.lanesWiseMapping[0] = []
+        self.lanesWiseMapping[1] = []
+
+        for lane in range(0, LANES):
+            for sensorID in self.sensorsMapping[lane]:
+                self.tracker[self.sensorsMapping[lane][sensorID]] = []
+                self.lanesWiseMapping[lane].append(self.sensorsMapping[lane][sensorID])
+        print(self.lanesWiseMapping)
+
+    def getRearOverlappingSensors(self, startRange, endRange):
+        overlappingSensors = []
+        for lane in range(0, LANES):
+            for low, high in self.sensorsMapping[lane]:
+                if startRange[lane] > endRange[lane]:
+                    if(startRange[lane] >= low and low >= endRange[lane]) or (startRange[lane] >= high and high >= endRange[lane]):
+                        overlappingSensors.append(self.sensorsMapping[lane][(low, high)])
+                elif startRange[lane] < endRange[lane]:
+                    if((low <= startRange[lane] and low >= 0) or (low >= endRange[lane] and low <= 360) or (high <= startRange[lane] and high >= 0) or (high >= endRange[lane] and high <= 360)):
+                        overlappingSensors.append(self.sensorsMapping[lane][(low, high)])
+                else:
+                    raise ValueError("Invalid...")
+        return overlappingSensors
+
+    def getFrontOverlappingSensors(self, startRange, endRange):
+        overlappingSensors = []
+        for lane in range(0, LANES):
+            for low, high in self.sensorsMapping[lane]:
+                if startRange[lane] > endRange[lane]:
+                    if (startRange[lane] >= low and low >= endRange[lane]) or (startRange[lane] >= high and high >= endRange[lane]):
+                        overlappingSensors.append(self.sensorsMapping[lane][(low, high)])
+                elif startRange[lane] < endRange[lane]:
+                    if((low <= startRange[lane] and low >= 0) or (low >= endRange[lane] and low <= 360) or (high <= startRange[lane] and high >= 0) or (high >= endRange[lane] and high <= 360)):
+                        overlappingSensors.append(self.sensorsMapping[lane][(low, high)])
+                else:
+                    raise ValueError("Invalid...")
+        return overlappingSensors            
+
+    def updateTracker(self, agentLoc, agentLane, agentQuery, time):
+        assert agentQuery == 'reg_0' or agentQuery == 'reg_1' or agentQuery == 'null'
+        if agentQuery == 'null':
+            pass
+        else:
+            if agentQuery == "reg_0":
+                startRange = agentLoc - self.lv_deg
+                startRange %= 360
+                endRange = agentLoc - self.lv_deg - self.cv_deg
+                endRange %= 360
+                overlappingSensors = self.getRearOverlappingSensors(startRange, endRange)
+            
+            elif agentQuery == "reg_1":
+                endRange = agentLoc + self.lv_deg
+                endRange %= 360
+                startRange = agentLoc + self.lv_deg + self.cv_deg
+                startRange %= 360
+                overlappingSensors = self.getFrontOverlappingSensors(startRange, endRange)
+            
+            else:
+                overlappingSensors = []
+            
+            for sensor in overlappingSensors:
+                self.tracker[sensor].append(time)
+
     
     def mapSensors(self):
         self.sensorsMapping = {}

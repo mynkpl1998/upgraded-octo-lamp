@@ -85,6 +85,7 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
             dataDict['data'][densityStr][episode]['agentCarID'] = None
             dataDict['data'][densityStr][episode]['frontDiff'] = []
             dataDict['data'][densityStr][episode]['backDiff'] = []
+            dataDict['data'][densityStr][episode]['sensorQueries'] = None
 
             
             prev_state = env.reset(density)
@@ -163,6 +164,8 @@ def run_rollouts(args, env, fig, ax1, ax2, useLstm):
                 prev_state = next_state
                 if done:
                     break
+            dataDict['data'][densityStr][episode]['sensorQueries'] = env.trueAgeHandler.tracker
+
     return dataDict
 
 def initRender():
