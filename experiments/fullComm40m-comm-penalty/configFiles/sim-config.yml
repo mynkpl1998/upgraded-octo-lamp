@@ -10,6 +10,7 @@ config:
   extended-view: 40 # in metres (one side)
   reg-size: 30 # in metres
   cell-size: 1 # in metres
+  query-cells: 20
 
   # Reward Function
   collision-penalty: 200

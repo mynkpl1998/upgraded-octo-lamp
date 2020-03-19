@@ -49,6 +49,8 @@ class V2I(gym.Env):
         # Set the observation size based on memory
         if self.simArgs.getValue("enable-lstm"):
             self.simArgs.setValue("k-frames", 1)
+        
+        #print(self.simArgs.getValue('query-cells'))
 
         # Load Trajectories
         currPath = os.path.realpath(__file__)[:-6]

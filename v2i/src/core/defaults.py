@@ -7,6 +7,7 @@ DEFAULT_DICT = {
     'extended-view': 20, # in metres
     'cell-size' : 1, # in metres
     'reg-size': 5, # size of 1 comm region in metres
+    'query-cells': 20,
 
     # Reward Function
     'collision-penalty': 0.0,
