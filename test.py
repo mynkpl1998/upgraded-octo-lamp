@@ -92,8 +92,10 @@ for episode in range(0, numEpisodes):
     carSpeeds = []
     print(episode)
     #print("Starting episode : %d"%(i+1))
+    '''
     for sensorID in obj.trueAgeHandler.trueAgeRegister:
         ageValuesTrack[sensorID] = []
+    '''
     
     state = obj.reset()
     carSpeeds.append(avgVehSpeed(obj.lane_map))
