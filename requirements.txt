@@ -1,5 +1,5 @@
 gym==0.13.1
-pyyaml==5.1.1
+pyyaml==5.4
 pygame==1.9.6
 sympy==1.4
 psutil==5.6.3
