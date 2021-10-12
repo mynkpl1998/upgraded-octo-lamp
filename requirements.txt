@@ -6,7 +6,7 @@ psutil==5.6.3
 ray==0.7.2
 pandas==0.25.0
 requests==2.22.0
-opencv-python==4.1.0.25
+opencv-python==4.1.1.26
 lz4==2.1.10
 setproctitle==1.1.10
 pygal==2.4.0
